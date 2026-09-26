@@ -84,6 +84,10 @@ function AssessmentContent() {
       remote_posting: remotePosting,
       mood_score: moodScore,
       burnout_symptoms: finalBurnout,
+      physical_fatigue: physicalFatigue,
+      interest_score: interestScore,
+      discouraged_score: discouragedScore,
+      concentration_score: concentrationScore,
     };
 
     const targetPersonnelId = user?.personnel_id || 1;
@@ -177,10 +181,12 @@ function AssessmentContent() {
 
             <div className="text-right">
               <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400 block">
-                Unified Risk Score
+                Continuous Risk Score
               </span>
               <span className="text-3xl font-black font-mono text-slate-100">
-                {Math.round(assessmentResult.risk_score)}
+                {typeof assessmentResult.risk_score === 'number'
+                  ? assessmentResult.risk_score.toFixed(1)
+                  : assessmentResult.risk_score}
                 <span className="text-xs text-slate-400 font-normal"> / 100</span>
               </span>
             </div>
@@ -200,6 +206,29 @@ function AssessmentContent() {
               {assessmentResult.risk_priority}
             </span>
           </div>
+
+          {/* Model Confidence & Longitudinal Trend */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="p-2 bg-slate-900/60 rounded-lg flex items-center justify-between">
+              <span className="text-slate-400">Confidence:</span>
+              <span className="font-mono font-semibold text-slate-200">
+                {assessmentResult.confidence || "High"}
+              </span>
+            </div>
+            <div className="p-2 bg-slate-900/60 rounded-lg flex items-center justify-between">
+              <span className="text-slate-400">Trend:</span>
+              <span className={`font-mono font-semibold ${
+                assessmentResult.risk_trend === 'Worsening'
+                  ? 'text-rose-400'
+                  : assessmentResult.risk_trend === 'Improving'
+                  ? 'text-emerald-400'
+                  : 'text-slate-200'
+              }`}>
+                {assessmentResult.risk_trend || "Stable"}
+              </span>
+            </div>
+          </div>
+
 
           {/* Model Class Probabilities */}
           <div className="pt-2 border-t border-slate-700/60 space-y-1.5">

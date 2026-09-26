@@ -48,9 +48,10 @@ class PersonnelOut(PersonnelBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    latest_risk_score: Optional[int] = None
+    latest_risk_score: Optional[float] = None
     latest_stress_level: Optional[str] = None
     latest_priority: Optional[str] = None
+
 
     class Config:
         from_attributes = True

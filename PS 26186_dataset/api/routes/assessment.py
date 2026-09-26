@@ -24,7 +24,11 @@ from services.prediction_service import get_prediction_service
 
 router = APIRouter(tags=["Stress Assessments & Welfare Recommendations"])
 
-def _format_assessment_out(a: StressAssessment, personnel: Optional[Personnel] = None) -> StressAssessmentOut:
+def _format_assessment_out(
+    a: StressAssessment,
+    personnel: Optional[Personnel] = None,
+    meta: Optional[dict] = None
+) -> StressAssessmentOut:
     """Helper to convert StressAssessment ORM to Pydantic schema with parsed factors and recommendations."""
     key_factors_parsed = []
     if a.key_factors:
@@ -49,6 +53,23 @@ def _format_assessment_out(a: StressAssessment, personnel: Optional[Personnel] =
     p_code = personnel.personnel_code if personnel else (a.personnel.personnel_code if a.personnel else None)
     p_name = personnel.name if personnel else (a.personnel.name if a.personnel else None)
 
+    score_val = float(a.risk_score)
+    conf_val = "Moderate"
+    uncert_val = 0.0
+    trend_val = "Stable"
+    change_val = 0.0
+    consec_val = 0
+    prob_val = round(score_val / 100.0, 3)
+
+    if meta:
+        score_val = float(meta.get("risk_score", score_val))
+        conf_val = meta.get("confidence", conf_val)
+        uncert_val = float(meta.get("uncertainty", uncert_val))
+        trend_val = meta.get("risk_trend", trend_val)
+        change_val = float(meta.get("risk_change", change_val))
+        consec_val = int(meta.get("consecutive_high_risk", consec_val))
+        prob_val = float(meta.get("risk_probability", prob_val))
+
     return StressAssessmentOut(
         id=a.id,
         personnel_id=a.personnel_id,
@@ -58,13 +79,20 @@ def _format_assessment_out(a: StressAssessment, personnel: Optional[Personnel] =
         low_probability=a.low_probability,
         medium_probability=a.medium_probability,
         high_probability=a.high_probability,
-        risk_score=a.risk_score,
+        risk_score=score_val,
         risk_priority=a.risk_priority,
+        confidence=conf_val,
+        uncertainty=uncert_val,
+        risk_trend=trend_val,
+        risk_change=change_val,
+        consecutive_high_risk=consec_val,
+        risk_probability=prob_val,
         key_factors=key_factors_parsed,
         model_version=a.model_version,
         assessment_timestamp=a.assessment_timestamp,
         recommendations=recs_out
     )
+
 
 
 @router.post(
@@ -199,13 +227,35 @@ def run_personnel_assessment(
         'Training_Load': personnel.training_load,
         'Leave_Gap_Days': leave_gap,
         'Remote_Posting': remote,
-        'Operational_Exposure': op_exposure
+        'Operational_Exposure': op_exposure,
+        'physical_fatigue': override_telemetry.physical_fatigue if override_telemetry else None,
+        'interest_score': override_telemetry.interest_score if override_telemetry else None,
+        'discouraged_score': override_telemetry.discouraged_score if override_telemetry else None,
+        'concentration_score': override_telemetry.concentration_score if override_telemetry else None,
+        'mood_score': satisfaction_val
     }
 
     # 2. Invoke the in-memory ML inference service
     try:
         service = get_prediction_service()
-        result = service.predictor.assess_personnel(feature_dict)
+        # Query preceding historical assessments for temporal signals without future leakage
+        past_records = (
+            db.query(StressAssessment)
+            .filter(StressAssessment.personnel_id == personnel.id)
+            .order_by(desc(StressAssessment.assessment_timestamp))
+            .limit(10)
+            .all()
+        )
+        past_list = [
+            {
+                "risk_score": p.risk_score,
+                "stress_level": p.stress_level,
+                "risk_priority": p.risk_priority,
+                "assessment_timestamp": p.assessment_timestamp,
+            }
+            for p in past_records
+        ]
+        result = service.predictor.assess_personnel(feature_dict, past_assessments=past_list)
     except Exception as e:
         logger.error(f"Inference failure during assessment of personnel {personnel_id}: {e}", exc_info=True)
         raise HTTPException(
@@ -221,7 +271,8 @@ def run_personnel_assessment(
         low_probability=probas.get("Low", 0.0),
         medium_probability=probas.get("Medium", 0.0),
         high_probability=probas.get("High", 0.0),
-        risk_score=result["risk_score"],
+        risk_score=float(result["risk_score"]),
+
         risk_priority=result["risk_priority"],
         key_factors=json.dumps(result["key_factors"]),
         model_version="1.0.0-LightGBM",
@@ -269,10 +320,10 @@ def run_personnel_assessment(
 
     logger.info(
         f"Assessment recorded for {personnel.personnel_code}: Level={new_assessment.stress_level}, "
-        f"Risk Score={new_assessment.risk_score} ({new_assessment.risk_priority})"
+        f"Continuous Risk Score={result['risk_score']} ({new_assessment.risk_priority})"
     )
 
-    assessment_out = _format_assessment_out(new_assessment, personnel)
+    assessment_out = _format_assessment_out(new_assessment, personnel, meta=result)
     return AssessmentResponse(
         message="Stress risk assessment and welfare recommendations successfully generated and persisted.",
         assessment=assessment_out
@@ -340,10 +391,11 @@ def get_assessment_schedule_status(
         hours_since_last_assessment=round(hours_elapsed, 2),
         next_assessment_due_at=next_due_at,
         latest_stress_level=latest_assessment.stress_level,
-        latest_risk_score=latest_assessment.risk_score,
+        latest_risk_score=float(latest_assessment.risk_score) if latest_assessment.risk_score is not None else None,
         latest_priority=latest_assessment.risk_priority,
         message=msg
     )
+
 
 
 @router.get(

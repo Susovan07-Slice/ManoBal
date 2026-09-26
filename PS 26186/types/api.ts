@@ -91,11 +91,18 @@ export interface StressAssessmentOut {
   high_probability: number;
   risk_score: number;
   risk_priority: 'Routine' | 'Preventive' | 'Priority';
+  confidence?: 'High' | 'Moderate' | 'Low' | string;
+  uncertainty?: number;
+  risk_trend?: 'Improving' | 'Worsening' | 'Stable' | string;
+  risk_change?: number;
+  consecutive_high_risk?: number;
+  risk_probability?: number;
   key_factors: string[];
   model_version: string;
   assessment_timestamp: string;
   recommendations: RecommendationOut[];
 }
+
 
 export interface AssessmentResponse {
   status: string;

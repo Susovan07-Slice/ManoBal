@@ -2,7 +2,8 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, Optional, List
+
 
 from src.risk_scoring import calculate_risk_score
 from src.explain import StressModelExplainer
@@ -29,11 +30,12 @@ class PersonnelWelfarePredictor:
 
     def assess_personnel(
         self,
-        record: Union[Dict[str, Any], pd.DataFrame, pd.Series]
+        record: Union[Dict[str, Any], pd.DataFrame, pd.Series],
+        past_assessments: Optional[list] = None
     ) -> Dict[str, Any]:
         """
         Processes a single raw personnel record and produces the complete
-        welfare risk assessment.
+        welfare risk assessment with continuous probabilistic calibration.
         """
         # Format input as a 1-row DataFrame
         if isinstance(record, dict):
@@ -50,8 +52,12 @@ class PersonnelWelfarePredictor:
         probas = self.predictor.predict_proba(df_input).iloc[0].to_dict()
         probas_clean = {k: round(float(v), 3) for k, v in probas.items()}
 
-        # 2. Compute Calibrated 0-100 Risk Score and Priority
-        risk_score, risk_level, risk_priority = calculate_risk_score(probas_clean, pred_label)
+        # 2. Compute Unified 0-100 Continuous Probabilistic Risk Score & Metadata
+        risk_score, risk_level, risk_priority, meta = calculate_risk_score(
+            probas_clean, pred_label, df_input,
+            past_assessments=past_assessments,
+            return_metadata=True
+        )
 
         # 3. Extract Model-Identified Key Contributing Factors
         key_factors = extract_key_factors(self.explainer, df_input, top_k=4)
@@ -68,6 +74,12 @@ class PersonnelWelfarePredictor:
             "stress_level": risk_level,
             "risk_score": risk_score,
             "risk_priority": risk_priority,
+            "risk_probability": meta.get("risk_probability", round(risk_score / 100.0, 3)),
+            "confidence": meta.get("confidence", "Moderate"),
+            "uncertainty": meta.get("uncertainty", 0.0),
+            "risk_trend": meta.get("risk_trend", "Stable"),
+            "risk_change": meta.get("risk_change", 0.0),
+            "consecutive_high_risk": meta.get("consecutive_high_risk", 0),
             "probabilities": probas_clean,
             "key_factors": key_factors,
             "recommendations": recommendations,
@@ -87,6 +99,10 @@ def get_welfare_service():
         _global_service = PersonnelWelfarePredictor()
     return _global_service
 
-def predict_welfare(record: Union[Dict[str, Any], pd.DataFrame, pd.Series]) -> Dict[str, Any]:
+def predict_welfare(
+    record: Union[Dict[str, Any], pd.DataFrame, pd.Series],
+    past_assessments: Optional[list] = None
+) -> Dict[str, Any]:
     service = get_welfare_service()
-    return service.assess_personnel(record)
+    return service.assess_personnel(record, past_assessments=past_assessments)
+

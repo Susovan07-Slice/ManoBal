@@ -4,6 +4,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pkl
+!PS 26186_dataset/models/final_stress_prediction_pipeline.pkl
+
+
 .env
 .env.local
 .env.*.local

@@ -14,6 +14,10 @@ class AssessmentOverride(BaseModel):
     remote_posting: Optional[Literal["Yes", "No"]] = Field(None, description="Remote posting status")
     mood_score: Optional[int] = Field(None, ge=1, le=5, description="Self-reported mood index (1-5)")
     burnout_symptoms: Optional[Literal["Rarely", "Sometimes", "Often"]] = Field(None, description="Self-reported burnout frequency")
+    physical_fatigue: Optional[int] = Field(None, ge=1, le=5, description="Self-reported physical fatigue rating (1-5)")
+    interest_score: Optional[int] = Field(None, ge=0, le=3, description="Interest in daily tasks (0=Very interested, 1=Moderately, 2=Low, 3=Very low)")
+    discouraged_score: Optional[int] = Field(None, ge=0, le=3, description="Feeling down or discouraged (0=Never, 1=Several days, 2=More than half, 3=Nearly every day)")
+    concentration_score: Optional[int] = Field(None, ge=0, le=3, description="Trouble concentrating (0=Never, 1=Several days, 2=More than half, 3=Nearly every day)")
 
 class AssessmentScheduleStatus(BaseModel):
     personnel_id: int
@@ -23,7 +27,7 @@ class AssessmentScheduleStatus(BaseModel):
     hours_since_last_assessment: Optional[float] = None
     next_assessment_due_at: Optional[datetime] = None
     latest_stress_level: Optional[str] = None
-    latest_risk_score: Optional[int] = None
+    latest_risk_score: Optional[float] = None
     latest_priority: Optional[str] = None
     message: str
 
@@ -54,12 +58,19 @@ class StressAssessmentOut(BaseModel):
     low_probability: float
     medium_probability: float
     high_probability: float
-    risk_score: int
+    risk_score: float
     risk_priority: str
+    confidence: Optional[str] = "Moderate"
+    uncertainty: Optional[float] = 0.0
+    risk_trend: Optional[str] = "Stable"
+    risk_change: Optional[float] = 0.0
+    consecutive_high_risk: Optional[int] = 0
+    risk_probability: Optional[float] = None
     key_factors: List[str] = []
     model_version: str
     assessment_timestamp: datetime
     recommendations: List[RecommendationOut] = []
+
 
     class Config:
         from_attributes = True

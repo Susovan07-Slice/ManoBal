@@ -33,7 +33,7 @@ class RecentAssessmentItem(BaseModel):
     battalion: Optional[str] = None
     location: str
     stress_level: str
-    risk_score: int
+    risk_score: float
     risk_priority: str
     assessment_timestamp: datetime
 
@@ -49,7 +49,7 @@ class HighRiskPersonnelItem(BaseModel):
     battalion: Optional[str] = None
     job_role: str
     location: str
-    risk_score: int
+    risk_score: float
     stress_level: str
     risk_priority: str
     duty_hours_per_week: float
@@ -62,3 +62,4 @@ class HighRiskPersonnelItem(BaseModel):
 
     class Config:
         from_attributes = True
+

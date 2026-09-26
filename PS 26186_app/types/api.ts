@@ -25,6 +25,12 @@ export interface PredictionResponse {
   stress_level: 'Low' | 'Medium' | 'High';
   risk_score: number;
   risk_priority: 'Routine' | 'Preventive' | 'Priority';
+  risk_probability?: number;
+  confidence?: 'High' | 'Moderate' | 'Low' | string;
+  uncertainty?: number;
+  risk_trend?: 'Improving' | 'Worsening' | 'Stable' | string;
+  risk_change?: number;
+  consecutive_high_risk?: number;
   probabilities: Record<string, number>;
   key_factors: string[];
   recommendations: string[];
@@ -53,11 +59,18 @@ export interface StressAssessmentOut {
   high_probability: number;
   risk_score: number;
   risk_priority: 'Routine' | 'Preventive' | 'Priority';
+  confidence?: 'High' | 'Moderate' | 'Low' | string;
+  uncertainty?: number;
+  risk_trend?: 'Improving' | 'Worsening' | 'Stable' | string;
+  risk_change?: number;
+  consecutive_high_risk?: number;
+  risk_probability?: number;
   key_factors: string[];
   model_version: string;
   assessment_timestamp: string;
   recommendations: RecommendationOut[];
 }
+
 
 export interface AssessmentResponse {
   status: string;
@@ -77,6 +90,10 @@ export interface AssessmentOverride {
   remote_posting?: 'Yes' | 'No';
   mood_score?: number;
   burnout_symptoms?: 'Rarely' | 'Sometimes' | 'Often';
+  physical_fatigue?: number;
+  interest_score?: number;
+  discouraged_score?: number;
+  concentration_score?: number;
 }
 
 export interface AssessmentScheduleStatus {
