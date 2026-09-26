@@ -3,12 +3,16 @@ from db.models.personnel import Personnel
 from db.models.assessment import StressAssessment
 from db.models.recommendation import WelfareRecommendation
 from db.models.welfare_request import WelfareRequest
+from db.models.hrms import HrmsServiceRecord
+from db.models.telemetry import WearableTelemetry
 
 __all__ = [
     "User",
     "Personnel",
     "StressAssessment",
     "WelfareRecommendation",
-    "WelfareRequest"
+    "WelfareRequest",
+    "HrmsServiceRecord",
+    "WearableTelemetry"
 ]
 

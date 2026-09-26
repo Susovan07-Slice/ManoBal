@@ -386,12 +386,22 @@ def calculate_risk_score(
 
         i_ops_psy = ((duty_strain + consec_strain) / 2.0) * psy_strain
 
+        # Physical Fatigue Strain
+        fatigue_val = record_dict.get('physical_fatigue', None)
+        fatigue_strain = 0.0
+        if fatigue_val is not None:
+            try:
+                fatigue_strain = float(max(0, int(fatigue_val) - 1)) / 4.0
+            except Exception:
+                fatigue_strain = 0.0
+
         # 3. Continuous Latent Severity Synthesis (Section 7)
         delta_z = (
             (1.20 * duty_strain) +
             (1.40 * sleep_strain) +
             (0.90 * consec_strain) +
             (0.85 * night_strain) +
+            (0.60 * fatigue_strain) +
             (0.40 * exp_strain) +
             (0.15 * remote_strain) +
             (0.20 * act_strain) +

@@ -132,4 +132,13 @@ class PredictionResponse(BaseModel):
     key_factors: List[str] = Field(..., description="Top model-identified contributing operational factors")
     recommendations: List[str] = Field(..., description="Actionable, non-punitive welfare decision-support recommendations")
     disclaimer: str = Field(..., description="Standard medical and operational safety notice")
+    model_version: Optional[str] = Field("stress_risk_ensemble_v2", description="Model architecture identifier")
+    prediction_target: Optional[str] = Field("P(Stress_Level >= Medium / Continuous Severity)", description="Modeled prediction target")
+    top_factors: Optional[List[str]] = Field(None, description="Top model-identified contributing operational factors")
+    feature_contributions: Optional[Dict[str, float]] = Field(None, description="Feature contribution weights")
+    assessment_features_used: Optional[bool] = Field(True, description="Whether assessment questionnaire inputs were integrated")
+    hrms_features_used: Optional[bool] = Field(False, description="Whether HRMS service indicators were integrated")
+    wearable_7d_features_used: Optional[bool] = Field(False, description="Whether 7-day wearable telemetry was integrated")
+    wearable_30d_features_used: Optional[bool] = Field(False, description="Whether 30-day wearable telemetry was integrated")
+    is_simulated: Optional[bool] = Field(True, description="Prototype simulation indicator")
 

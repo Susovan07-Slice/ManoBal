@@ -11,7 +11,11 @@ class WelfarePredictionService:
     """
     def __init__(self, model_path: Optional[str] = None):
         if model_path is None:
-            model_path = settings.MODEL_PATH
+            v2_path = os.path.join(settings.BASE_DIR, "models", "stress_risk_ensemble_v2.pkl")
+            if os.path.exists(v2_path):
+                model_path = v2_path
+            else:
+                model_path = settings.MODEL_PATH
             
         if not os.path.exists(model_path):
             logger.error(f"Critical error: ML Model artifact not found at: {model_path}")

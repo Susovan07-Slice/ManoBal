@@ -39,6 +39,32 @@ def predict_personnel_stress(
             detail="An error occurred while evaluating stress risk. Please try again later."
         )
 
+@router.post(
+    "/predict/sensitivity",
+    status_code=status.HTTP_200_OK,
+    summary="Evaluate Counterfactual Feature Sensitivity (Internal / Model Validation)",
+    description="Allows controlled sensitivity evaluation of feature perturbations against a baseline feature vector."
+)
+def evaluate_sensitivity(
+    baseline: PredictionRequest,
+    current_user: User = Depends(get_current_user),
+    service: WelfarePredictionService = Depends(get_prediction_service)
+):
+    from src.ensemble_v2 import evaluate_counterfactual_sensitivity
+    if not hasattr(service.predictor.predictor, 'assess'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Active model artifact does not support ensemble sensitivity evaluation."
+        )
+    b_dict = baseline.to_dataframe_dict()
+    perturbations = {
+        'physical_fatigue': [1, 2, 3, 4, 5],
+        'Sleep_Hours': [8.0, 6.5, 5.0, 3.5],
+        'Duty_Hours_Per_Week': [40.0, 50.0, 60.0, 75.0]
+    }
+    res = evaluate_counterfactual_sensitivity(service.predictor.predictor, b_dict, perturbations)
+    return res
+
 from sqlalchemy import text
 from db.session import engine
 

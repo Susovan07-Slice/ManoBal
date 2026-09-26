@@ -5,6 +5,7 @@ __pycache__/
 *$py.class
 *.pkl
 !PS 26186_dataset/models/final_stress_prediction_pipeline.pkl
+!PS 26186_dataset/models/stress_risk_ensemble_v2.pkl
 
 
 .env

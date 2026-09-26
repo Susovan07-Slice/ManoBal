@@ -19,6 +19,9 @@ from api.routes.assessment import router as assessment_router
 from api.routes.dashboard import router as dashboard_router
 from api.routes.welfare_request import router as welfare_request_router
 from api.routes.organization import router as organization_router
+from api.routes.hrms import router as hrms_router
+from api.routes.telemetry import router as telemetry_router
+from api.routes.analytics import router as analytics_router
 from schemas.prediction import PredictionRequest, PredictionResponse
 
 @asynccontextmanager
@@ -89,6 +92,9 @@ app.include_router(dashboard_router, prefix="/api")
 app.include_router(prediction_router, prefix="/api")
 app.include_router(welfare_request_router, prefix="/api")
 app.include_router(organization_router, prefix="/api")
+app.include_router(hrms_router, prefix="/api")
+app.include_router(telemetry_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def root_dashboard():
