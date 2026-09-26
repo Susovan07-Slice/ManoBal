@@ -29,7 +29,9 @@ export function TrendSummaryCard({ trend }: { trend: PersonalTrend }) {
         <div className="text-right">
           <span className="text-slate-400 text-xs uppercase tracking-wider block mb-1">Last Entry</span>
           <p className="text-lg font-medium text-slate-200">
-            {trend.last7Days[trend.last7Days.length - 1].date.split('-').slice(1).join('/')}
+            {trend.last7Days && trend.last7Days.length > 0
+              ? trend.last7Days[trend.last7Days.length - 1].date.split('-').slice(1).join('/')
+              : 'No records'}
           </p>
         </div>
       </div>

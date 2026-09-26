@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. PostgreSQL Relational Database Service
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: manobal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: stress_monitoring
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_secret_2026}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - manobal-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d stress_monitoring"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ---------------------------------------------------------------------------
+  # 2. FastAPI ML Backend & Recommendation Engine
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./PS 26186_dataset
+      dockerfile: Dockerfile
+    container_name: manobal-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD:-postgres_dev_secret_2026}@postgres:5432/stress_monitoring
+      SECRET_KEY: ${SECRET_KEY:-sih_personnel_stress_monitoring_secret_key_2026_secure}
+      ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:3002
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - manobal-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # 3. Commander & Welfare Officer Dashboard (Next.js)
+  # ---------------------------------------------------------------------------
+  dashboard:
+    build:
+      context: ./PS 26186
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000/api
+    container_name: manobal-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - manobal-net
+
+  # ---------------------------------------------------------------------------
+  # 4. Jawan Mobile Web App (Next.js)
+  # ---------------------------------------------------------------------------
+  jawan-app:
+    build:
+      context: ./PS 26186_app
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000/api
+    container_name: manobal-jawan-app
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - manobal-net
+
+# -----------------------------------------------------------------------------
+# Persistent Volumes & Network Topology
+# -----------------------------------------------------------------------------
+volumes:
+  postgres_data:
+    name: manobal_postgres_data
+
+networks:
+  manobal-net:
+    name: manobal-network
+    driver: bridge

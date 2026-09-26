@@ -1,4 +1,13 @@
 node_modules/
 .next/
 __pycache__/
+*.py[cod]
+*$py.class
 *.pkl
+.env
+.env.local
+.env.*.local
+catboost_info/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db

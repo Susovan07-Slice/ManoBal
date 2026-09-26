@@ -1,9 +1,11 @@
-export type UserRole = 'commander' | 'welfare_officer';
+export type UserRole = 'admin' | 'officer' | 'welfare' | 'personnel';
 
 export interface RoleConfig {
   role: UserRole;
   label: string;
-  canViewFullExplanation: boolean;   // welfare_officer only
-  canViewServiceIdentity: boolean;   // welfare_officer only
-  canEditStatus: boolean;            // both, but scoped differently
+  canViewFullExplanation: boolean;
+  canViewServiceIdentity: boolean;
+  canEditStatus: boolean;
+  canManagePersonnel: boolean;
+  canAccessAnalytics: boolean;
 }

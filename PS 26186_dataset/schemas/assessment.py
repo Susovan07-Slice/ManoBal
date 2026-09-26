@@ -1,0 +1,75 @@
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Literal
+from datetime import datetime
+
+class AssessmentOverride(BaseModel):
+    """Combined daily assessment inputs submitted by personnel."""
+    duty_hours_per_week: Optional[float] = Field(None, ge=0.0, le=120.0, description="Weekly operational duty hours")
+    night_shifts_per_month: Optional[int] = Field(None, ge=0, le=31, description="Night shifts assigned in trailing 30 days")
+    consecutive_duty_days: Optional[int] = Field(None, ge=0, le=60, description="Continuous consecutive duty days without rest")
+    leave_gap_days: Optional[int] = Field(None, ge=0, description="Days elapsed since last sanctioned leave")
+    sleep_hours: Optional[float] = Field(None, ge=0.0, le=24.0, description="Average restorative sleep hours per day")
+    physical_activity_hours_per_week: Optional[float] = Field(None, ge=0.0, le=50.0, description="Weekly physical conditioning hours")
+    operational_exposure: Optional[Literal["Low", "Medium", "High"]] = Field(None, description="Current operational hazard exposure")
+    remote_posting: Optional[Literal["Yes", "No"]] = Field(None, description="Remote posting status")
+    mood_score: Optional[int] = Field(None, ge=1, le=5, description="Self-reported mood index (1-5)")
+    burnout_symptoms: Optional[Literal["Rarely", "Sometimes", "Often"]] = Field(None, description="Self-reported burnout frequency")
+
+class AssessmentScheduleStatus(BaseModel):
+    personnel_id: int
+    has_assessment: bool
+    last_assessment_at: Optional[datetime] = None
+    assessment_due: bool
+    hours_since_last_assessment: Optional[float] = None
+    next_assessment_due_at: Optional[datetime] = None
+    latest_stress_level: Optional[str] = None
+    latest_risk_score: Optional[int] = None
+    latest_priority: Optional[str] = None
+    message: str
+
+class RecommendationOut(BaseModel):
+    id: int
+    personnel_id: int
+    assessment_id: int
+    recommendation_type: str
+    recommendation_text: str
+    priority: str
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class RecommendationStatusUpdate(BaseModel):
+    status: Literal["pending", "acknowledged", "completed", "dismissed"] = Field(
+        ..., description="New welfare recommendation status"
+    )
+
+class StressAssessmentOut(BaseModel):
+    id: int
+    personnel_id: int
+    personnel_code: Optional[str] = None
+    personnel_name: Optional[str] = None
+    stress_level: str
+    low_probability: float
+    medium_probability: float
+    high_probability: float
+    risk_score: int
+    risk_priority: str
+    key_factors: List[str] = []
+    model_version: str
+    assessment_timestamp: datetime
+    recommendations: List[RecommendationOut] = []
+
+    class Config:
+        from_attributes = True
+
+class AssessmentResponse(BaseModel):
+    status: str = "success"
+    message: str
+    assessment: StressAssessmentOut
+    disclaimer: str = (
+        "AI-assisted early-warning decision-support prototype. "
+        "Assessments indicate statistical model associations and are strictly intended "
+        "for supportive welfare intervention, not disciplinary action or clinical diagnosis."
+    )

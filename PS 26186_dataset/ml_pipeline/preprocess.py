@@ -1,69 +1,43 @@
+import os
+import sys
 import pandas as pd
-from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.impute import SimpleImputer
 
-# Define the standard features common to both datasets
-# These ensure compatibility between training and validation datasets
-NUMERICAL_FEATURES = [
-    'age',
-    'sleep_hours',
-    'duty_hours',
-    'heart_rate_bpm',
-    'fatigue_level'
-]
+# Add parent directory to path so src can be resolved
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-CATEGORICAL_FEATURES = [
-    'gender',
-    'role',
-    'location'
-]
+from src.feature_engineering import engineer_features
+from src.data_processing import separate_features_and_target, PROVENANCE_COLUMNS, TARGET_COLUMN
+from src.preprocessing import identify_feature_types, build_preprocessor
 
-def get_preprocessor() -> ColumnTransformer:
+def get_preprocessor(numerical_features=None, categorical_features=None) -> ColumnTransformer:
     """
-    Returns a scikit-learn ColumnTransformer that preprocesses 
-    numerical and categorical features.
+    Returns an sklearn ColumnTransformer that preprocesses numerical and categorical features.
     """
-    # Preprocessing for numerical data: 
-    # Impute missing values with median, then standardize
-    numerical_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='median')),
-        ('scaler', StandardScaler())
-    ])
-
-    # Preprocessing for categorical data: 
-    # Impute missing values with most frequent, then one-hot encode
-    categorical_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='most_frequent')),
-        ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
-    ])
-
-    # Bundle preprocessing for numerical and categorical data
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('num', numerical_transformer, NUMERICAL_FEATURES),
-            ('cat', categorical_transformer, CATEGORICAL_FEATURES)
-        ],
-        remainder='drop' # Drop columns not explicitly specified in features
-    )
-
-    return preprocessor
+    if numerical_features is None or categorical_features is None:
+        # If not supplied, construct using default training feature set
+        data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'FINAL_MAIN_STRESS_DATASET.csv')
+        if not os.path.exists(data_path):
+            data_path = os.path.join(os.path.dirname(__file__), '..', 'final_dataset.csv')
+        sample_df = pd.read_csv(data_path)
+        X, _ = separate_features_and_target(sample_df)
+        X_fe = engineer_features(X)
+        numerical_features, categorical_features = identify_feature_types(X_fe)
+        
+    return build_preprocessor(numerical_features, categorical_features)
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Perform basic data cleaning on the dataframe (e.g. dropping complete duplicates)
-    before it goes into the scikit-learn pipeline.
+    Cleans data, removes provenance indicators, and executes domain feature engineering.
     """
     df_cleaned = df.copy()
-    
-    # Drop completely duplicated rows
     df_cleaned.drop_duplicates(inplace=True)
     
-    # Ensure expected columns are present to avoid pipeline errors
-    # If a feature is completely missing from a dataset, it will be imputed
-    for col in NUMERICAL_FEATURES + CATEGORICAL_FEATURES:
-        if col not in df_cleaned.columns:
-            df_cleaned[col] = pd.NA
+    # Drop provenance columns if present
+    for prov_col in PROVENANCE_COLUMNS:
+        if prov_col in df_cleaned.columns:
+            df_cleaned.drop(columns=[prov_col], inplace=True)
             
+    # Apply feature engineering
+    df_cleaned = engineer_features(df_cleaned)
     return df_cleaned

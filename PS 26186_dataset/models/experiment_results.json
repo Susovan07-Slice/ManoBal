@@ -1,0 +1,75 @@
+{
+  "all_models_cv": [
+    {
+      "model": "XGBoost",
+      "accuracy_mean": 0.6056250000000001,
+      "accuracy_std": 0.02195521008781288,
+      "macro_f1_mean": 0.6640108469085514,
+      "macro_f1_std": 0.018107307525845488,
+      "weighted_f1_mean": 0.6026361550475368,
+      "high_stress_recall_mean": 1.0
+    },
+    {
+      "model": "LightGBM",
+      "accuracy_mean": 0.5912499999999999,
+      "accuracy_std": 0.016105123408406412,
+      "macro_f1_mean": 0.6550469073168597,
+      "macro_f1_std": 0.013380113472038671,
+      "weighted_f1_mean": 0.5908271578833956,
+      "high_stress_recall_mean": 1.0
+    },
+    {
+      "model": "Decision Tree",
+      "accuracy_mean": 0.590625,
+      "accuracy_std": 0.028298078556679443,
+      "macro_f1_mean": 0.6496897896351876,
+      "macro_f1_std": 0.019672099591711376,
+      "weighted_f1_mean": 0.5829505903365195,
+      "high_stress_recall_mean": 1.0
+    },
+    {
+      "model": "Logistic Regression",
+      "accuracy_mean": 0.584375,
+      "accuracy_std": 0.021919597395937743,
+      "macro_f1_mean": 0.6490360008675271,
+      "macro_f1_std": 0.01816931006814184,
+      "weighted_f1_mean": 0.583712370067114,
+      "high_stress_recall_mean": 1.0
+    },
+    {
+      "model": "Random Forest",
+      "accuracy_mean": 0.5850000000000001,
+      "accuracy_std": 0.013891319231808056,
+      "macro_f1_mean": 0.6489493877350061,
+      "macro_f1_std": 0.010044538207430976,
+      "weighted_f1_mean": 0.5840422011982003,
+      "high_stress_recall_mean": 1.0
+    },
+    {
+      "model": "CatBoost",
+      "accuracy_mean": 0.575,
+      "accuracy_std": 0.009882117688026179,
+      "macro_f1_mean": 0.6399650213543779,
+      "macro_f1_std": 0.00977450065418642,
+      "weighted_f1_mean": 0.5738944825943063,
+      "high_stress_recall_mean": 1.0
+    },
+    {
+      "model": "SVM (RBF Kernel)",
+      "accuracy_mean": 0.568125,
+      "accuracy_std": 0.015860721925561892,
+      "macro_f1_mean": 0.6315661503817421,
+      "macro_f1_std": 0.011751290896092035,
+      "weighted_f1_mean": 0.5656717271969484,
+      "high_stress_recall_mean": 1.0
+    }
+  ],
+  "selected_model": "XGBoost",
+  "test_metrics": {
+    "accuracy": 0.59,
+    "macro_f1": 0.6512038523274478,
+    "weighted_f1": 0.5871865971107544,
+    "macro_precision": 0.6520390251867576,
+    "macro_recall": 0.6524363607481831
+  }
+}
