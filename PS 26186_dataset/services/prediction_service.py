@@ -22,7 +22,11 @@ class WelfarePredictionService:
             raise FileNotFoundError(f"Model file not found at {model_path}. Run training pipeline first.")
             
         logger.info(f"Loading ML Welfare Pipeline from: {model_path}")
-        self.predictor = PersonnelWelfarePredictor(model_path=model_path)
+        try:
+            self.predictor = PersonnelWelfarePredictor(model_path=model_path)
+        except Exception as e:
+            logger.warning(f"Failed loading {model_path} ({e}); falling back to default model: {settings.MODEL_PATH}")
+            self.predictor = PersonnelWelfarePredictor(model_path=settings.MODEL_PATH)
         logger.info("ML Welfare Pipeline successfully loaded into memory and ready for inference.")
 
     def predict(self, request: PredictionRequest) -> PredictionResponse:
