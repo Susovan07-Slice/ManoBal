@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { SurveyQuestion as SurveyQuestionType, SurveyAnswer } from "@/types/survey";
@@ -47,8 +47,8 @@ export function SurveyCard({
           <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-6">
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
-          <h2 className="text-xl font-semibold text-slate-100 mb-4">Support is Available</h2>
-          <p className="text-slate-300 mb-8 leading-relaxed">
+          <h2 className="text-xl font-semibold text-mb-text-primary mb-4">Support is Available</h2>
+          <p className="text-mb-text-secondary mb-8 leading-relaxed">
             Based on your response, we want to make sure you have immediate support. You can connect with the Welfare Officer right now.
           </p>
           <div className="flex flex-col w-full gap-4">
@@ -114,3 +114,5 @@ export function SurveyCard({
     </div>
   );
 }
+
+

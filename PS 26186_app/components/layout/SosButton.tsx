@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { LifeBuoy, CheckCircle2, AlertTriangle, ShieldAlert, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
@@ -85,14 +85,14 @@ export default function SosButton() {
         className={cn(
           "absolute bottom-20 right-4 z-40 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300",
           sent 
-            ? "bg-[#1C2530] border-2 border-teal-500 text-teal-400 w-auto px-4 gap-2" 
-            : "bg-red-600/90 text-white hover:bg-red-500 w-14 active:scale-95"
+            ? "bg-[#1C2530] border-2 border-mb-accent text-mb-accent w-auto px-4 gap-2" 
+            : "bg-red-600/90 text-mb-text-primary hover:bg-red-500 w-14 active:scale-95"
         )}
         aria-label={sent ? "SOS Sent" : "SOS"}
       >
         {sent ? (
           <>
-            <CheckCircle2 className="w-5 h-5 text-teal-400" />
+            <CheckCircle2 className="w-5 h-5 text-mb-accent" />
             <span className="font-medium text-sm mr-1 text-teal-300">Alert Sent</span>
           </>
         ) : (
@@ -105,7 +105,7 @@ export default function SosButton() {
         <div
           role="alert"
           className={cn(
-            "absolute top-24 left-4 right-4 z-40 p-3 rounded-lg text-center backdrop-blur-md animate-in slide-in-from-top-4 shadow-xl border",
+            "absolute top-24 left-4 right-4 z-40 p-3 rounded-lg text-center backdrop-blur-md animate-in slide-in-from-top-4 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border",
             feedback.type === 'success' && "bg-emerald-500/20 border-emerald-500/60 text-emerald-200",
             feedback.type === 'active' && "bg-amber-500/20 border-amber-500/60 text-amber-200",
             feedback.type === 'unauthorized' && "bg-rose-500/20 border-rose-500/60 text-rose-200",
@@ -113,13 +113,13 @@ export default function SosButton() {
           )}
         >
           <div className="flex items-center justify-center gap-1.5 font-bold text-xs">
-            {feedback.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-            {feedback.type === 'active' && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />}
+            {feedback.type === 'success' && <CheckCircle2 className="w-4 h-4 text-mb-green shrink-0" />}
+            {feedback.type === 'active' && <AlertTriangle className="w-4 h-4 text-mb-saffron shrink-0" />}
             {feedback.type === 'unauthorized' && <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />}
-            {feedback.type === 'error' && <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />}
+            {feedback.type === 'error' && <AlertCircle className="w-4 h-4 text-mb-danger shrink-0" />}
             <span
               className={cn(
-                feedback.type === 'success' && "text-emerald-300",
+                feedback.type === 'success' && "text-mb-text-primary",
                 feedback.type === 'active' && "text-amber-300",
                 feedback.type === 'unauthorized' && "text-rose-300",
                 feedback.type === 'error' && "text-red-300"
@@ -147,3 +147,5 @@ export default function SosButton() {
     </>
   );
 }
+
+

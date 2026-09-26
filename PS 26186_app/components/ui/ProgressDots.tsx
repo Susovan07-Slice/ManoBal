@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 export function ProgressDots({ current, total }: { current: number; total: number }) {
   return (
@@ -8,10 +8,12 @@ export function ProgressDots({ current, total }: { current: number; total: numbe
           key={i}
           className={cn(
             "h-2 rounded-full transition-all duration-300",
-            i === current ? "w-6 bg-teal-400" : i < current ? "w-2 bg-teal-800" : "w-2 bg-slate-800"
+            i === current ? "w-6 bg-mb-accent" : i < current ? "w-2 bg-teal-800" : "w-2 bg-slate-800"
           )}
         />
       ))}
     </div>
   );
 }
+
+
