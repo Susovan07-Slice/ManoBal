@@ -14,3 +14,6 @@ python-jose[cryptography]
 python-multipart
 httpx
 pydantic
+xgboost==2.1.4
+catboost==1.2.7
+pytest
