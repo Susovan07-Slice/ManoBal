@@ -1,57 +1,53 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { submitAssessment } from "@/lib/assessment";
 import { StressAssessmentOut, AssessmentOverride } from "@/types/api";
 import { useAuth } from "@/lib/AuthContext";
 import { RatingSlider } from "@/components/ui/RatingSlider";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import {
-  Activity,
-  HeartPulse,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  ShieldCheck,
-  ChevronRight,
-  ChevronLeft,
-  ArrowRight,
-  ShieldAlert,
-  Info,
-  Sliders,
-  Sparkles,
-} from "lucide-react";
+import { CheckCircle2, ChevronLeft, ArrowRight, HeartPulse, AlertTriangle, Sparkles, Clock } from "lucide-react";
 import Link from "next/link";
 import { apiClient } from "@/lib/api";
+
+const SCREENS = [
+  { id: "intro", type: "intro", bg: "/assessment_pics/1.png", cardTopColor: "#d3d8cd", title: "Daily Assessment", subtitle: "Single unified operational duty, recovery, and wellness reporting." },
+  { id: "dutyHours", section: "Operational Duty", type: "slider", min: 20, max: 90, step: 2, unit: "hrs/week", bg: "/assessment_pics/2.png", cardTopColor: "#cfd6c9", title: "Weekly Duty Hours", subtitle: "Standard military pacing ~44-52 hrs" },
+  { id: "consecDays", section: "Operational Duty", type: "slider", min: 0, max: 30, step: 1, unit: "days", bg: "/assessment_pics/3.png", cardTopColor: "#b8c3b6", title: "Consecutive Duty Days", subtitle: "Without 24h rest" },
+  { id: "nightShifts", section: "Operational Duty", type: "slider", min: 0, max: 20, step: 1, unit: "shifts", bg: "/assessment_pics/4.png", cardTopColor: "#93a8a8", title: "Night Shifts (Last 30 Days)", subtitle: "Total number of night shifts" },
+  { id: "opExposure", section: "Operational Duty", type: "choice", options: ["Low", "Medium", "High"], bg: "/assessment_pics/5.png", cardTopColor: "#b8c2b7", title: "Operational Exposure Level", subtitle: "Select your perceived exposure" },
+  { id: "sleepHours", section: "Recovery & Rest", type: "slider", min: 2.0, max: 12.0, step: 0.5, unit: "hrs", bg: "/assessment_pics/6.jpg", cardTopColor: "#99b0ac", title: "Restorative Sleep", subtitle: "Average sleep duration per 24h" },
+  { id: "physicalFatigue", section: "Recovery & Rest", type: "rating", min: 1, max: 5, bg: "/assessment_pics/7.jpg", cardTopColor: "#bac5c0", title: "Physical Fatigue Level", subtitle: "1 = Fully refreshed, 5 = Severe fatigue" },
+  { id: "physicalActivity", section: "Recovery & Rest", type: "slider", min: 0, max: 25, step: 1, unit: "hrs/wk", bg: "/assessment_pics/8.jpg", cardTopColor: "#a3b1a8", title: "Physical Conditioning", subtitle: "Physical training hours per week" },
+  { id: "moodScore", section: "Wellbeing & Morale", type: "rating", min: 1, max: 5, bg: "/assessment_pics/9.jpg", cardTopColor: "#c2cfbd", title: "Overall Morale & Mood", subtitle: "1 = Distressed, 5 = Highly Resilient" },
+  { id: "burnoutSymptoms", section: "Wellbeing & Morale", type: "choice", options: ["Rarely", "Sometimes", "Often"], bg: "/assessment_pics/10.jpg", cardTopColor: "#aebfae", title: "Burnout / Overwhelm Symptoms", subtitle: "Frequency of feeling overwhelmed" },
+  { id: "interestScore", section: "Wellbeing & Morale", type: "choice", options: ["None", "Mild", "Mod", "High"], bg: "/assessment_pics/11.jpg", cardTopColor: "#b0bfad", title: "Interest or satisfaction in daily tasks & duty:", subtitle: "Select severity" },
+  { id: "discouragedScore", section: "Wellbeing & Morale", type: "choice", options: ["Rarely", "Some", "Often", "Const"], bg: "/assessment_pics/12.jpg", cardTopColor: "#94a8a0", title: "Feeling down, discouraged, or mentally exhausted:", subtitle: "Select frequency" },
+  { id: "concentrationScore", section: "Wellbeing & Morale", type: "choice", options: ["Never", "Rare", "Often", "Severe"], bg: "/assessment_pics/13.jpg", cardTopColor: "#abbab2", title: "Trouble concentrating on operational procedures:", subtitle: "Select frequency" },
+  { id: "completion", type: "completion", bg: "/assessment_pics/14.jpg", cardTopColor: "#b2bfad", title: "Assessment Complete", subtitle: "You have completed today's wellness assessment." }
+];
 
 function AssessmentContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const reason = searchParams.get("reason");
 
-  // Step wizard state: 1 = Duty & Ops, 2 = Recovery & Rest, 3 = Wellbeing & Morale
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Section A: Daily Duty & Operational Information
+  // Exact state matches original implementation
   const [dutyHours, setDutyHours] = useState<number>(48);
   const [consecDays, setConsecDays] = useState<number>(4);
   const [nightShifts, setNightShifts] = useState<number>(3);
   const [opExposure, setOpExposure] = useState<"Low" | "Medium" | "High">("Medium");
   const [remotePosting, setRemotePosting] = useState<"Yes" | "No">("No");
-
-  // Section B: Personal Welfare & Recovery
   const [sleepHours, setSleepHours] = useState<number>(6.5);
   const [physicalFatigue, setPhysicalFatigue] = useState<number>(2);
   const [physicalActivity, setPhysicalActivity] = useState<number>(5);
-
-  // Section C: Stress & Wellbeing Indicators
   const [moodScore, setMoodScore] = useState<number>(4);
   const [burnoutSymptoms, setBurnoutSymptoms] = useState<"Rarely" | "Sometimes" | "Often">("Rarely");
-  const [interestScore, setInterestScore] = useState<number>(0); // 0=Not at all, 1=Several days, 2=More than half, 3=Nearly every day
+  const [interestScore, setInterestScore] = useState<number>(0);
   const [discouragedScore, setDiscouragedScore] = useState<number>(0);
   const [concentrationScore, setConcentrationScore] = useState<number>(0);
 
@@ -96,7 +92,6 @@ function AssessmentContent() {
       const response = await submitAssessment(targetPersonnelId, overridePayload);
       setAssessmentResult(response.assessment);
 
-      // Clear any session dismiss flag so next visit checks updated database state
       if (user?.personnel_id && typeof window !== "undefined") {
         sessionStorage.removeItem(`assessment_dismissed_${user.personnel_id}`);
       }
@@ -130,13 +125,116 @@ function AssessmentContent() {
     }
   };
 
+  const screen = SCREENS[currentIndex];
+
+  const handleNext = () => {
+    if (currentIndex < SCREENS.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const renderControl = () => {
+    if (screen.type === "slider") {
+      let value = 0;
+      let setter: any = null;
+      if (screen.id === "dutyHours") { value = dutyHours; setter = setDutyHours; }
+      if (screen.id === "consecDays") { value = consecDays; setter = setConsecDays; }
+      if (screen.id === "nightShifts") { value = nightShifts; setter = setNightShifts; }
+      if (screen.id === "sleepHours") { value = sleepHours; setter = setSleepHours; }
+      if (screen.id === "physicalActivity") { value = physicalActivity; setter = setPhysicalActivity; }
+
+      return (
+        <div className="w-full">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-mb-text-primary font-semibold text-[13px] tracking-wider uppercase">{screen.title}</span>
+            <span className="font-mono font-bold text-mb-accent text-2xl">{value} <span className="text-xs font-normal text-mb-text-secondary">{screen.unit}</span></span>
+          </div>
+          <input
+            type="range"
+            min={screen.min}
+            max={screen.max}
+            step={screen.step}
+            value={value}
+            onChange={(e) => setter(parseFloat(e.target.value))}
+            className="w-full"
+          />
+        </div>
+      );
+    }
+
+    if (screen.type === "choice") {
+      let value: any;
+      let setter: any = null;
+      if (screen.id === "opExposure") { value = opExposure; setter = setOpExposure; }
+      if (screen.id === "burnoutSymptoms") { value = burnoutSymptoms; setter = setBurnoutSymptoms; }
+      if (screen.id === "interestScore") { value = interestScore; setter = setInterestScore; }
+      if (screen.id === "discouragedScore") { value = discouragedScore; setter = setDiscouragedScore; }
+      if (screen.id === "concentrationScore") { value = concentrationScore; setter = setConcentrationScore; }
+
+      const isIndexBased = ["interestScore", "discouragedScore", "concentrationScore"].includes(screen.id);
+
+      return (
+        <div className="w-full">
+          <div className="flex bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-1 shadow-inner gap-1">
+            {screen.options?.map((opt, idx) => {
+              const actualValue = isIndexBased ? idx : opt;
+              const isSelected = value === actualValue;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setter(actualValue)}
+                  className={`flex-1 py-1.5 text-sm rounded-xl font-bold transition-all duration-300 border ${
+                    isSelected
+                      ? "bg-gradient-to-b from-mb-accent/20 to-mb-accent/5 border-mb-accent/30 text-mb-text-primary shadow-sm"
+                      : "border-transparent text-mb-text-muted hover:text-mb-text-primary hover:bg-white/50"
+                  }`}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    if (screen.type === "rating") {
+      let value = 0;
+      let setter: any = null;
+      if (screen.id === "physicalFatigue") { value = physicalFatigue; setter = setPhysicalFatigue; }
+      if (screen.id === "moodScore") { value = moodScore; setter = setMoodScore; }
+
+      return (
+        <div className="w-full">
+          <RatingSlider
+            label=""
+            value={value}
+            onChange={setter}
+            min={screen.min || 1}
+            max={screen.max || 5}
+          />
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   if (evaluating) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-slate-300 p-6 text-center space-y-4">
-        <div className="w-12 h-12 border-3 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center space-y-4">
+        <div className="absolute inset-0 z-[-1] bg-[#0a110e]" />
+        <div className="w-12 h-12 border-3 border-mb-accent border-t-transparent rounded-full animate-spin" />
         <div>
-          <p className="text-base font-semibold text-slate-100">Running AI Stress Pipeline...</p>
-          <p className="text-xs text-slate-400 mt-1 font-mono">
+          <p className="text-base font-semibold text-mb-text-primary">Running AI Stress Pipeline...</p>
+          <p className="text-xs text-mb-text-secondary mt-1 font-mono">
             Evaluating combined operational & wellbeing telemetry via LightGBM
           </p>
         </div>
@@ -144,137 +242,47 @@ function AssessmentContent() {
     );
   }
 
-  // Display Unified Assessment Result (Section 3, 4, 5, 13)
   if (assessmentResult) {
     return (
-      <div className="p-4 flex flex-col gap-5 animate-in fade-in duration-500 pb-24">
-        {/* Success Banner */}
-        <div className="p-4 bg-teal-500/10 border border-teal-500/30 rounded-xl flex items-center space-x-3">
-          <CheckCircle2 className="w-7 h-7 text-teal-400 shrink-0" />
+      <div className="p-4 flex flex-col gap-5 animate-in fade-in duration-500 pb-24 relative min-h-screen">
+        <div className="absolute inset-0 z-[-1] bg-[#0a110e] transition-opacity duration-1000" />
+        {/* Unified Result Component */}
+        <div className="p-4 bg-mb-accent/10 border border-mb-accent/30 rounded-xl flex items-center space-x-3 mt-4">
+          <CheckCircle2 className="w-7 h-7 text-mb-accent shrink-0" />
           <div>
-            <h3 className="text-sm font-bold text-slate-100">Daily Assessment Completed</h3>
-            <p className="text-xs text-slate-300">
+            <h3 className="text-sm font-bold text-mb-text-primary">Daily Assessment Completed</h3>
+            <p className="text-xs text-mb-text-secondary">
               Evaluated via LightGBM Pipeline ({assessmentResult.model_version}) • 24h Timer Active
             </p>
           </div>
         </div>
-
-        {/* Core Unified Result Card */}
         <div className="flex flex-col items-center mt-4 mb-8">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-6">Continuous Risk Result</span>
-          
-          <div className="text-[80px] font-light text-white mb-2 tracking-tighter leading-none">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-secondary mb-6">Continuous Risk Result</span>
+          <div className="text-[80px] font-light text-mb-text-primary mb-2 tracking-tighter leading-none">
             {typeof assessmentResult.risk_score === 'number'
               ? assessmentResult.risk_score.toFixed(1)
               : assessmentResult.risk_score}
           </div>
           <div className={`text-xl font-medium mb-8 ${
-            assessmentResult.stress_level === "High" ? "text-saffron" : 
-            assessmentResult.stress_level === "Medium" ? "text-amber-400" : "text-emerald-400"
+            assessmentResult.stress_level === "High" ? "text-mb-danger" : 
+            assessmentResult.stress_level === "Medium" ? "text-mb-saffron" : "text-mb-green"
           }`}>
             {assessmentResult.stress_level} Risk
           </div>
-          
           <div className="w-full max-w-xs h-1.5 bg-white/10 rounded-full overflow-hidden mb-6 relative">
              <div 
                className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out ${
-                 assessmentResult.stress_level === "High" ? "bg-saffron w-[85%]" : 
-                 assessmentResult.stress_level === "Medium" ? "bg-amber-400 w-[55%]" : "bg-emerald-400 w-[25%]"
+                 assessmentResult.stress_level === "High" ? "bg-mb-danger w-[85%]" : 
+                 assessmentResult.stress_level === "Medium" ? "bg-mb-saffron w-[55%]" : "bg-mb-green w-[25%]"
                }`}
              />
           </div>
-
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider mb-8">
-            <span className="text-slate-400">Priority:</span>
-            <span className={`flex items-center gap-1.5 ${
-              assessmentResult.risk_priority === "Priority" ? "text-saffron" : 
-              assessmentResult.risk_priority === "Preventive" ? "text-amber-400" : "text-emerald-400"
-            }`}>
-              <div className="w-2 h-2 rounded-full bg-current" />
-              {assessmentResult.risk_priority}
-            </span>
-          </div>
-
-          {/* Key Contributing Model Factors */}
-          {assessmentResult.key_factors && assessmentResult.key_factors.length > 0 && (
-            <div className="w-full text-left bg-[var(--color-glass-dark)] backdrop-blur-xl border border-[var(--color-glass-border)] rounded-3xl p-6 shadow-2xl">
-              <span className="text-xs font-bold text-slate-400 tracking-wider block mb-4 uppercase">
-                Primary Associated Factors
-              </span>
-              <ul className="space-y-3">
-                {assessmentResult.key_factors.map((factor, i) => (
-                  <li key={i} className="text-sm font-medium text-slate-200 flex items-center space-x-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500 opacity-80 shrink-0"></span>
-                    <span>{factor}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
-
-          {/* Welfare Recommendations */}
-          {assessmentResult.recommendations && assessmentResult.recommendations.length > 0 && (
-            <div className="pt-2 border-t border-slate-700/60 space-y-2">
-              <span className="text-[11px] uppercase font-semibold text-teal-400 tracking-wider flex items-center space-x-1.5">
-                <HeartPulse className="w-3.5 h-3.5" />
-                <span>Supportive Welfare Interventions:</span>
-              </span>
-              <div className="space-y-2">
-                {assessmentResult.recommendations.map((rec) => (
-                  <div
-                    key={rec.id}
-                    className="p-3 bg-slate-800/60 rounded-lg text-xs space-y-1.5 border border-slate-700"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] uppercase font-mono font-bold text-teal-400">
-                        {rec.recommendation_type}
-                      </span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold uppercase ${
-                          rec.status === "completed"
-                            ? "bg-emerald-500/20 text-emerald-300"
-                            : rec.status === "acknowledged"
-                            ? "bg-blue-500/20 text-blue-300"
-                            : "bg-amber-500/20 text-amber-300"
-                        }`}
-                      >
-                        {rec.status}
-                      </span>
-                    </div>
-                    <p className="text-slate-200">{rec.recommendation_text}</p>
-                    {rec.status !== "completed" && (
-                      <button
-                        disabled={updatingRecId === rec.id}
-                        onClick={() => handleRecStatusChange(rec.id, "completed")}
-                        className="mt-1 text-[10px] text-teal-400 hover:underline"
-                      >
-                        Mark Completed
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-        {/* Prototype Ethical Notice */}
-        <p className="text-[10px] text-slate-500 italic text-center px-4 leading-normal">
-          AI decision-support prototype. Statistical associations only; not medical advice or disciplinary action.
-        </p>
-
-        {/* Actions */}
-        <div className="flex gap-3">
-          <Link
-            href="/"
-            className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 text-center transition-colors"
-          >
+        <div className="flex gap-3 mt-auto">
+          <Link href="/" className="flex-1 py-3 bg-mb-glass-strong hover:bg-white/10 border border-mb-glass-border rounded-2xl text-sm font-semibold text-mb-text-primary text-center transition-colors">
             Dashboard
           </Link>
-          <Link
-            href="/trends"
-            className="flex-1 py-2.5 bg-teal-500 hover:bg-teal-400 rounded-xl text-xs font-bold text-slate-950 text-center flex items-center justify-center transition-colors"
-          >
+          <Link href="/trends" className="flex-1 py-3 bg-mb-accent hover:opacity-90 rounded-2xl text-sm font-bold text-mb-text-dark text-center flex items-center justify-center transition-colors">
             View Trends
           </Link>
         </div>
@@ -282,343 +290,86 @@ function AssessmentContent() {
     );
   }
 
+  // Active Screen UI
   return (
-    <div className="p-4 flex flex-col h-full pb-20">
-      {/* Due Banner if automatically triggered */}
-      {reason === "due_24h" && (
-        <div className="mb-4 p-3 bg-amber-500/15 border border-amber-500/40 rounded-xl flex items-start gap-2.5 text-xs text-amber-200 animate-in fade-in">
-          <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-          <div>
-            <span className="font-bold text-amber-300 block">Daily Assessment Due</span>
-            It has been more than 24 hours since your last completed assessment. Please submit today&apos;s operational and recovery telemetry.
-          </div>
-        </div>
-      )}
+    <div className="relative min-h-screen flex flex-col">
+      {/* Dynamic Background Image overlay for just this page */}
+      {SCREENS.map((s, idx) => (
+        <div
+          key={s.id}
+          className={`absolute inset-0 z-[-1] bg-cover bg-center transition-opacity duration-700 ease-in-out ${
+            idx === currentIndex ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ backgroundImage: `url('${s.bg}')` }}
+        />
+      ))}
+      <div className="absolute inset-0 z-[-1] bg-gradient-to-b from-transparent via-transparent to-[#0a110e]/80" />
 
-      {reason === "initial" && (
-        <div className="mb-4 p-3 bg-teal-500/15 border border-teal-500/40 rounded-xl flex items-start gap-2.5 text-xs text-teal-200 animate-in fade-in">
-          <Sparkles className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-          <div>
-            <span className="font-bold text-teal-300 block">Initial Calibration Assessment</span>
-            Welcome to ManoBal! Complete your initial baseline assessment to calibrate your continuous stress telemetry.
+      {/* Top Header Section */}
+      <div className="pt-12 px-6 pb-4 flex justify-between items-center z-10">
+        <button
+          onClick={currentIndex > 0 ? handleBack : undefined}
+          className={`p-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white transition-opacity ${currentIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        {currentIndex > 0 && currentIndex < SCREENS.length - 1 && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold text-white/90 tracking-widest uppercase">
+              {String(currentIndex).padStart(2, '0')} / {String(SCREENS.length - 2).padStart(2, '0')}
+            </span>
           </div>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-slate-100">Daily Assessment</h2>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Single unified operational duty, recovery, and wellness reporting
-        </p>
+        )}
+        <div className="w-9 h-9" /> {/* spacer */}
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-200 flex items-center space-x-2">
-          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
+      {/* Main Content Area (bottom-aligned) */}
+      <div className="mt-auto p-5 pb-32 z-10 flex flex-col gap-5 w-full">
+        <div 
+          className="rounded-[32px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.12)] min-h-[220px] flex flex-col justify-center relative overflow-hidden border border-white/60"
+          style={{
+            background: `linear-gradient(to bottom, ${screen.cardTopColor} 0%, #f3f5f0 45%, #fdfcf8 100%)`
+          }}
+        >
+          
+          <div className="mb-8">
+            {screen.section && (
+              <span className="text-[10px] text-mb-accent font-bold tracking-widest uppercase block mb-1.5">{screen.section}</span>
+            )}
+            <h2 className="text-xl font-bold text-mb-text-primary tracking-wide leading-snug">{screen.title}</h2>
+            {screen.subtitle && (
+              <p className="text-[12px] text-mb-text-secondary mt-1.5">{screen.subtitle}</p>
+            )}
+          </div>
 
-      {/* Stepper Progress */}
-      <div className="flex items-center justify-between mb-8 px-2 text-xs font-semibold tracking-widest uppercase">
-        <button
-          onClick={() => setStep(1)}
-          className={`flex-1 text-center transition-all duration-300 pb-2 border-b-2 ${
-            step === 1 ? "text-teal-400 border-teal-400" : "text-slate-500 border-transparent hover:text-slate-300"
-          }`}
-        >
-          01 Duty & Ops
-        </button>
-        <button
-          onClick={() => setStep(2)}
-          className={`flex-1 text-center transition-all duration-300 pb-2 border-b-2 ${
-            step === 2 ? "text-teal-400 border-teal-400" : "text-slate-500 border-transparent hover:text-slate-300"
-          }`}
-        >
-          02 Recovery
-        </button>
-        <button
-          onClick={() => setStep(3)}
-          className={`flex-1 text-center transition-all duration-300 pb-2 border-b-2 ${
-            step === 3 ? "text-teal-400 border-teal-400" : "text-slate-500 border-transparent hover:text-slate-300"
-          }`}
-        >
-          03 Wellbeing
-        </button>
+          {screen.type === "intro" ? (
+             <div className="space-y-4 mt-auto">
+               <Button onClick={handleNext} className="w-full justify-center gap-2 bg-mb-accent hover:opacity-90 text-mb-text-dark font-bold py-4 rounded-2xl shadow-lg shadow-teal-900/20 text-base">
+                 Start Assessment <ArrowRight className="w-5 h-5" />
+               </Button>
+             </div>
+          ) : screen.type === "completion" ? (
+            <div className="space-y-4 mt-auto">
+               <Button onClick={handleSubmitAssessment} className="w-full justify-center gap-2 bg-mb-accent hover:opacity-90 text-mb-text-dark font-bold py-4 rounded-2xl shadow-lg shadow-teal-900/20 text-base">
+                 Submit Assessment <CheckCircle2 className="w-5 h-5" />
+               </Button>
+            </div>
+          ) : (
+             <div className="flex-1 flex flex-col justify-center">
+               {renderControl()}
+               <div className="mt-10 flex gap-3">
+                 <Button onClick={handleBack} className="flex-1 justify-center gap-1 bg-white/5 hover:bg-white/10 border border-white/10 text-mb-text-primary font-semibold py-3.5 rounded-2xl transition-colors">
+                   <ChevronLeft className="w-4 h-4" /> Previous
+                 </Button>
+                 <Button onClick={handleNext} className="flex-1 justify-center gap-2 bg-mb-glass hover:bg-white/10 border border-white/20 text-mb-text-primary font-bold py-3.5 rounded-2xl transition-colors">
+                   Next <ArrowRight className="w-4 h-4" />
+                 </Button>
+               </div>
+             </div>
+          )}
+
+        </div>
       </div>
-
-      {/* STEP 1: Daily Duty / Operational Information (Section 2.A) */}
-      {step === 1 && (
-        <div className="space-y-8 animate-in fade-in duration-300">
-          <div className="space-y-8">
-            {/* Duty Hours */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <span className="text-offwhite font-medium text-sm">Weekly Duty Hours</span>
-                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{dutyHours} <span className="text-sm font-normal text-slate-400">hrs</span></span>
-              </div>
-              <input
-                type="range"
-                min={20}
-                max={90}
-                step={2}
-                value={dutyHours}
-                onChange={(e) => setDutyHours(parseInt(e.target.value))}
-                className="w-full"
-              />
-              <span className="text-xs text-slate-400 block px-1">Standard military pacing ~44-52 hrs</span>
-            </div>
-
-            {/* Consecutive Duty Days */}
-            <div className="space-y-2 pt-6 border-t border-[var(--color-glass-border)]">
-              <div className="flex justify-between items-center px-1">
-                <span className="text-offwhite font-medium text-sm">Consecutive Duty Days</span>
-                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{consecDays} <span className="text-sm font-normal text-slate-400">days</span></span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={30}
-                step={1}
-                value={consecDays}
-                onChange={(e) => setConsecDays(parseInt(e.target.value))}
-                className="w-full"
-              />
-              <span className="text-xs text-slate-400 block px-1">Without 24h rest</span>
-            </div>
-
-            {/* Night Shifts */}
-            <div className="space-y-2 pt-6 border-t border-[var(--color-glass-border)]">
-              <div className="flex justify-between items-center px-1">
-                <span className="text-offwhite font-medium text-sm">Night Shifts (Last 30 Days)</span>
-                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{nightShifts} <span className="text-sm font-normal text-slate-400">shifts</span></span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={20}
-                step={1}
-                value={nightShifts}
-                onChange={(e) => setNightShifts(parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-
-            {/* Operational Exposure Level */}
-            <div className="space-y-4 pt-6 border-t border-[var(--color-glass-border)]">
-              <span className="text-sm text-offwhite font-medium block px-1">Operational Exposure Level</span>
-              <div className="grid grid-cols-3 gap-3">
-                {(["Low", "Medium", "High"] as const).map((lvl) => (
-                  <button
-                    key={lvl}
-                    type="button"
-                    onClick={() => setOpExposure(lvl)}
-                    className={`py-3 px-2 text-sm rounded-2xl border font-semibold transition-all duration-300 ${
-                      opExposure === lvl
-                        ? "bg-teal-600 text-offwhite border-teal-500 shadow-lg shadow-teal-500/20 transform scale-[1.02]"
-                        : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
-                    }`}
-                  >
-                    {lvl}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <Button onClick={() => setStep(2)} className="w-full justify-center gap-2">
-            Next: Recovery & Rest <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
-
-      {/* STEP 2: Personal Welfare / Recovery (Section 2.B) */}
-      {step === 2 && (
-        <div className="space-y-8 animate-in fade-in duration-300">
-          <div className="space-y-8">
-            {/* Sleep Hours */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <span className="text-offwhite font-medium text-sm">Restorative Sleep Hours</span>
-                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{sleepHours} <span className="text-sm font-normal text-slate-400">hrs</span></span>
-              </div>
-              <input
-                type="range"
-                min={2.0}
-                max={12.0}
-                step={0.5}
-                value={sleepHours}
-                onChange={(e) => setSleepHours(parseFloat(e.target.value))}
-                className="w-full"
-              />
-              <span className="text-xs text-slate-400 block px-1">Average sleep duration per 24h</span>
-            </div>
-
-            {/* Physical Fatigue */}
-            <div className="pt-6 border-t border-[var(--color-glass-border)]">
-              <RatingSlider
-                label="Physical Fatigue Level"
-                value={physicalFatigue}
-                onChange={setPhysicalFatigue}
-                min={1}
-                max={5}
-              />
-              <span className="text-xs text-slate-400 block mt-2 px-1">1 = Fully refreshed, 5 = Severe fatigue</span>
-            </div>
-
-            {/* Physical Activity / PT */}
-            <div className="space-y-2 pt-6 border-t border-[var(--color-glass-border)]">
-              <div className="flex justify-between items-center px-1">
-                <span className="text-offwhite font-medium text-sm">Physical Conditioning / PT</span>
-                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{physicalActivity} <span className="text-sm font-normal text-slate-400">hrs/wk</span></span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={25}
-                step={1}
-                value={physicalActivity}
-                onChange={(e) => setPhysicalActivity(parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => setStep(1)} className="flex-1 justify-center gap-1">
-              <ChevronLeft className="w-4 h-4" /> Back
-            </Button>
-            <Button onClick={() => setStep(3)} className="flex-1 justify-center gap-1">
-              Next: Wellbeing <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3: Stress / Wellbeing Indicators (Section 2.C) */}
-      {step === 3 && (
-        <div className="space-y-8 animate-in fade-in duration-300">
-          <div className="space-y-8">
-            {/* Morale / Mood */}
-            <div>
-              <RatingSlider
-                label="Overall Morale & Mood"
-                value={moodScore}
-                onChange={setMoodScore}
-                min={1}
-                max={5}
-              />
-              <span className="text-xs text-slate-400 block mt-2 px-1">1 = Very Low / Distressed, 5 = Highly Resilient</span>
-            </div>
-
-            {/* Burnout Symptoms Frequency */}
-            <div className="space-y-4 pt-6 border-t border-[var(--color-glass-border)]">
-              <span className="text-sm text-offwhite font-medium block px-1">
-                Frequency of Burnout / Overwhelm Symptoms
-              </span>
-              <div className="grid grid-cols-3 gap-3">
-                {(["Rarely", "Sometimes", "Often"] as const).map((b) => (
-                  <button
-                    key={b}
-                    type="button"
-                    onClick={() => setBurnoutSymptoms(b)}
-                    className={`py-3 px-2 text-sm rounded-2xl border font-semibold transition-all duration-300 ${
-                      burnoutSymptoms === b
-                        ? "bg-teal-600 text-offwhite border-teal-500 shadow-lg shadow-teal-500/20 transform scale-[1.02]"
-                        : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
-                    }`}
-                  >
-                    {b}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Validated Non-Diagnostic Operational Wellbeing Prompts */}
-            <div className="space-y-6 pt-6 border-t border-[var(--color-glass-border)]">
-              <span className="text-sm font-semibold text-slate-400 block px-1 tracking-wide">
-                Operational Screening Check
-              </span>
-
-              {/* Prompt 1 */}
-              <div className="space-y-3">
-                <p className="text-offwhite text-sm px-1">Interest or satisfaction in daily tasks & duty:</p>
-                <div className="grid grid-cols-4 gap-2 text-xs font-medium">
-                  {["None", "Mild", "Mod", "High"].map((lbl, idx) => (
-                    <button
-                      key={lbl}
-                      type="button"
-                      onClick={() => setInterestScore(idx)}
-                      className={`py-2.5 rounded-xl border transition-all duration-300 ${
-                        interestScore === idx
-                          ? "bg-teal-600 text-offwhite border-teal-500 shadow-md"
-                          : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
-                      }`}
-                    >
-                      {lbl}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prompt 2 */}
-              <div className="space-y-3 pt-2">
-                <p className="text-offwhite text-sm px-1">Feeling down, discouraged, or mentally exhausted:</p>
-                <div className="grid grid-cols-4 gap-2 text-xs font-medium">
-                  {["Rarely", "Some", "Often", "Constant"].map((lbl, idx) => (
-                    <button
-                      key={lbl}
-                      type="button"
-                      onClick={() => setDiscouragedScore(idx)}
-                      className={`py-2.5 rounded-xl border transition-all duration-300 ${
-                        discouragedScore === idx
-                          ? "bg-teal-600 text-offwhite border-teal-500 shadow-md"
-                          : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
-                      }`}
-                    >
-                      {lbl}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prompt 3 */}
-              <div className="space-y-3 pt-2">
-                <p className="text-offwhite text-sm px-1">Trouble concentrating on operational procedures:</p>
-                <div className="grid grid-cols-4 gap-2 text-xs font-medium">
-                  {["Never", "Rare", "Often", "Severe"].map((lbl, idx) => (
-                    <button
-                      key={lbl}
-                      type="button"
-                      onClick={() => setConcentrationScore(idx)}
-                      className={`py-2.5 rounded-xl border transition-all duration-300 ${
-                        concentrationScore === idx
-                          ? "bg-teal-600 text-offwhite border-teal-500 shadow-md"
-                          : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
-                      }`}
-                    >
-                      {lbl}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => setStep(2)} className="flex-1 justify-center gap-1">
-              <ChevronLeft className="w-4 h-4" /> Back
-            </Button>
-            <Button
-              onClick={handleSubmitAssessment}
-              className="flex-1 justify-center gap-1 bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 font-bold shadow-lg"
-            >
-              Submit Assessment ✓
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -627,8 +378,8 @@ export default function AssessmentPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-full items-center justify-center p-6 text-slate-400">
-          <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+        <div className="flex h-screen items-center justify-center p-6 text-mb-text-secondary bg-[#0a110e]">
+          <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

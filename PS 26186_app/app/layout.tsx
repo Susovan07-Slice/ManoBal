@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import MobileWrapper from "@/components/layout/MobileWrapper";
@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="bg-[#141a22] text-slate-200 min-h-screen">
+      <body className="bg-[#141a22] text-mb-text-secondary min-h-screen">
         <AuthProvider>
           <MobileWrapper>
             <SosButton />
@@ -41,3 +41,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+

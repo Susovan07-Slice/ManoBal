@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect } from 'react';
 import TopHeader from '@/components/layout/TopHeader';
@@ -23,8 +23,8 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full items-center justify-center bg-transparent backdrop-blur-sm text-slate-400 p-6 space-y-3">
-        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col h-full items-center justify-center bg-transparent backdrop-blur-sm text-mb-text-secondary p-6 space-y-3">
+        <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin" />
         <span className="text-xs font-mono tracking-widest uppercase">
           Verifying Service Token...
         </span>
@@ -46,3 +46,5 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 }
+
+

@@ -16,19 +16,19 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
-    op.alter_column(
-        'stress_assessments',
-        'risk_score',
-        existing_type=sa.Integer(),
-        type_=sa.Float(),
-        existing_nullable=False
-    )
+    with op.batch_alter_table('stress_assessments', schema=None) as batch_op:
+        batch_op.alter_column(
+            'risk_score',
+            existing_type=sa.Integer(),
+            type_=sa.Float(),
+            existing_nullable=False
+        )
 
 def downgrade() -> None:
-    op.alter_column(
-        'stress_assessments',
-        'risk_score',
-        existing_type=sa.Float(),
-        type_=sa.Integer(),
-        existing_nullable=False
-    )
+    with op.batch_alter_table('stress_assessments', schema=None) as batch_op:
+        batch_op.alter_column(
+            'risk_score',
+            existing_type=sa.Float(),
+            type_=sa.Integer(),
+            existing_nullable=False
+        )

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { HomeScreen } from "@/components/screens/HomeScreen";
@@ -118,10 +118,10 @@ export default function HomeRoute() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-slate-400 p-6 text-center">
-        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-slate-300">Synchronizing Health Telemetry...</p>
-        <span className="text-xs text-slate-500 font-mono mt-1">
+      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center">
+        <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-sm font-medium text-mb-text-secondary">Synchronizing Health Telemetry...</p>
+        <span className="text-xs text-mb-text-muted font-mono mt-1">
           Evaluating 24-hour schedule status & LightGBM history
         </span>
       </div>
@@ -130,11 +130,11 @@ export default function HomeRoute() {
 
   if (error && !trend) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-slate-400 p-6 text-center">
-        <p className="text-sm text-slate-300 mb-2">Could not synchronize dashboard telemetry.</p>
+      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center">
+        <p className="text-sm text-mb-text-secondary mb-2">Could not synchronize dashboard telemetry.</p>
         <button
           onClick={loadHomeData}
-          className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-teal-400 text-xs rounded-lg hover:bg-slate-700 transition"
+          className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-mb-accent text-xs rounded-lg hover:bg-slate-700 transition"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Retry
         </button>
@@ -164,8 +164,8 @@ export default function HomeRoute() {
 
       {/* Prototype Notice */}
       <div className="mt-6 mb-16 p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl flex items-start gap-2.5">
-        <ShieldAlert className="w-4 h-4 text-teal-500/70 shrink-0 mt-0.5" />
-        <p className="text-[11px] text-slate-400 leading-relaxed">
+        <ShieldAlert className="w-4 h-4 text-mb-accent/70 shrink-0 mt-0.5" />
+        <p className="text-[11px] text-mb-text-secondary leading-relaxed">
           <strong>Prototype Notice:</strong> Synthetically augmented operational demonstration. Stress
           indicators are decision-support metrics and not medical diagnoses.
         </p>
@@ -173,3 +173,5 @@ export default function HomeRoute() {
     </div>
   );
 }
+
+

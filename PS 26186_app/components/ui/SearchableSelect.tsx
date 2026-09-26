@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronDown, Check, X } from 'lucide-react';
@@ -88,8 +88,8 @@ export function SearchableSelect({
 
   return (
     <div className="relative" ref={containerRef}>
-      <label className="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">
-        {label} {required && <span className="text-teal-400">*</span>}
+      <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+        {label} {required && <span className="text-mb-accent">*</span>}
       </label>
 
       {/* Trigger / Display Box */}
@@ -103,45 +103,45 @@ export function SearchableSelect({
             setIsOpen((prev) => !prev);
           }
         }}
-        className={`w-full bg-[#141A22] border ${
-          isOpen ? 'border-teal-500' : 'border-slate-700'
-        } text-slate-100 text-sm rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-colors ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-slate-500'
+        className={`w-full bg-mb-glass-strong backdrop-blur-md border ${
+          isOpen ? 'border-mb-accent' : 'border-mb-glass-border'
+        } text-mb-text-primary text-sm rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-colors ${
+          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-slate-400'
         }`}
       >
-        <span className={value ? 'text-slate-100 font-medium' : 'text-slate-500'}>
+        <span className={value ? 'text-mb-text-primary font-medium' : 'text-mb-text-muted'}>
           {value || placeholder}
         </span>
-        <div className="flex items-center space-x-1.5 text-slate-400">
+        <div className="flex items-center space-x-1.5 text-mb-text-secondary">
           {value && !disabled && (
             <button
               type="button"
               onClick={handleClear}
-              className="p-0.5 hover:text-slate-200 transition-colors"
+              className="p-0.5 hover:text-mb-text-secondary transition-colors"
               title="Clear selection"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           )}
           <ChevronDown
-            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-teal-400' : ''}`}
+            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-mb-accent' : ''}`}
           />
         </div>
       </div>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-[#1C2530] border border-teal-500/50 rounded-lg shadow-2xl overflow-hidden backdrop-blur-md">
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-mb-glass-strong border border-mb-accent/50 rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.12)] overflow-hidden backdrop-blur-xl">
           {/* Search Box */}
           <div className="p-2 border-b border-slate-700 bg-slate-800/60 flex items-center space-x-2">
-            <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <Search className="w-3.5 h-3.5 text-mb-text-secondary shrink-0" />
             <input
               type="text"
               autoFocus
               placeholder={`Search ${label.toLowerCase()}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-slate-100 text-xs outline-none placeholder:text-slate-500"
+              className="w-full bg-transparent text-mb-text-primary text-xs outline-none placeholder:text-mb-text-muted"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
@@ -149,11 +149,11 @@ export function SearchableSelect({
           {/* Options List */}
           <div className="max-h-48 overflow-y-auto divide-y divide-slate-800 text-xs">
             {isLoading ? (
-              <div className="p-3 text-center text-slate-400 font-mono text-[11px]">
+              <div className="p-3 text-center text-mb-text-secondary font-mono text-[11px]">
                 Loading options...
               </div>
             ) : filteredOptions.length === 0 ? (
-              <div className="p-3 text-center text-slate-400">
+              <div className="p-3 text-center text-mb-text-secondary">
                 No matching {label.toLowerCase()} found
               </div>
             ) : (
@@ -166,12 +166,12 @@ export function SearchableSelect({
                     onClick={() => handleSelect(opt)}
                     className={`w-full text-left px-3 py-2 flex items-center justify-between transition-colors ${
                       isSelected
-                        ? 'bg-teal-500/20 text-teal-300 font-semibold'
-                        : 'text-slate-200 hover:bg-slate-800/80'
+                        ? 'bg-mb-accent/20 text-teal-300 font-semibold'
+                        : 'text-mb-text-secondary hover:bg-slate-800/80'
                     }`}
                   >
                     <span>{opt}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-teal-400 shrink-0" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-mb-accent shrink-0" />}
                   </button>
                 );
               })
@@ -182,3 +182,5 @@ export function SearchableSelect({
     </div>
   );
 }
+
+

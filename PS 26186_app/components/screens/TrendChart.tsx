@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TrendDay } from "@/types/trends";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -10,7 +10,7 @@ export function TrendChart({ data }: { data: TrendDay[] }) {
   }));
 
   return (
-    <div className="w-full h-[280px] bg-[var(--color-glass-dark)] backdrop-blur-xl p-4 rounded-3xl shadow-2xl border border-[var(--color-glass-border)] relative overflow-hidden">
+    <div className="w-full h-[280px] bg-mb-glass-strong backdrop-blur-xl p-4 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-mb-glass-border relative overflow-hidden">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={formattedData} margin={{ top: 10, right: 5, left: -20, bottom: 5 }}>
           <XAxis 
@@ -71,3 +71,5 @@ export function TrendChart({ data }: { data: TrendDay[] }) {
     </div>
   );
 }
+
+
