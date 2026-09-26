@@ -15,24 +15,26 @@ export default function BottomTabBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center justify-around h-20 bg-[#1C2530] border-t border-slate-800 shrink-0 px-2 pb-4">
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = pathname === tab.href;
-        return (
-          <Link
-            key={tab.name}
-            href={tab.href}
-            className={cn(
-              "flex flex-col items-center justify-center min-w-[64px] min-h-[44px] gap-1 transition-colors rounded-xl px-2 py-1",
-              isActive ? "text-teal-400" : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
-            )}
-          >
-            <Icon className="w-6 h-6" />
-            <span className="text-[10px] font-medium">{tab.name}</span>
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="absolute bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
+      <nav className="flex items-center gap-2 h-16 bg-[var(--color-glass-dark)] backdrop-blur-xl border border-[var(--color-glass-border)] rounded-full px-3 shadow-2xl pointer-events-auto">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = pathname === tab.href;
+          return (
+            <Link
+              key={tab.name}
+              href={tab.href}
+              className={cn(
+                "flex flex-col items-center justify-center min-w-[72px] min-h-[48px] gap-1 transition-all duration-300 rounded-full px-3",
+                isActive ? "text-teal-400 bg-teal-500/15 shadow-[inset_0_1px_4px_rgba(0,0,0,0.3)] transform scale-105" : "text-slate-400 hover:text-offwhite hover:bg-white/5"
+              )}
+            >
+              <Icon className={cn("w-5 h-5 transition-transform", isActive && "scale-110")} />
+              <span className="text-[10px] font-medium tracking-wide">{tab.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
