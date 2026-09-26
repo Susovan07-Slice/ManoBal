@@ -58,6 +58,13 @@ class PredictionRequest(BaseModel):
     YearsSinceLastPromotion: float = Field(1.0, ge=0.0, le=50.0, alias="years_since_last_promotion")
     YearsWithCurrManager: float = Field(2.0, ge=0.0, le=50.0, alias="years_with_curr_manager")
 
+    # Self-Reported Psychological & Fatigue Attributes (Optional for Assessment Extensions)
+    physical_fatigue: Optional[int] = Field(None, ge=1, le=5, alias="physical_fatigue")
+    interest_score: Optional[int] = Field(None, ge=0, le=3, alias="interest_score")
+    discouraged_score: Optional[int] = Field(None, ge=0, le=3, alias="discouraged_score")
+    concentration_score: Optional[int] = Field(None, ge=0, le=3, alias="concentration_score")
+    mood_score: Optional[int] = Field(None, ge=1, le=5, alias="mood_score")
+
     def to_dataframe_dict(self) -> Dict[str, Any]:
         """Converts model data to exact column names expected by the ML pipeline."""
         return {
@@ -102,15 +109,27 @@ class PredictionRequest(BaseModel):
             'Training_Load': self.Training_Load,
             'Leave_Gap_Days': self.Leave_Gap_Days,
             'Remote_Posting': self.Remote_Posting,
-            'Operational_Exposure': self.Operational_Exposure
+            'Operational_Exposure': self.Operational_Exposure,
+            'physical_fatigue': self.physical_fatigue,
+            'interest_score': self.interest_score,
+            'discouraged_score': self.discouraged_score,
+            'concentration_score': self.concentration_score,
+            'mood_score': self.mood_score
         }
 
 
 class PredictionResponse(BaseModel):
     stress_level: Literal['Low', 'Medium', 'High'] = Field(..., description="Estimated operational stress tier")
-    risk_score: int = Field(..., ge=0, le=100, description="Calibrated continuous stress risk index (0-100)")
+    risk_score: float = Field(..., ge=0.0, le=100.0, description="Calibrated continuous stress risk index (0-100)")
     risk_priority: Literal['Routine', 'Preventive', 'Priority'] = Field(..., description="Operational welfare priority for early intervention")
+    risk_probability: Optional[float] = Field(None, description="Calibrated continuous risk probability in [0, 1]")
+    confidence: Optional[str] = Field("Moderate", description="Model prediction confidence level (High, Moderate, Low)")
+    uncertainty: Optional[float] = Field(0.0, description="Normalized model prediction uncertainty [0, 1]")
+    risk_trend: Optional[str] = Field("Stable", description="Longitudinal risk trajectory (Improving, Worsening, Stable)")
+    risk_change: Optional[float] = Field(0.0, description="Change in risk score compared to previous assessment")
+    consecutive_high_risk: Optional[int] = Field(0, description="Consecutive assessments classified as High/Priority")
     probabilities: Dict[str, float] = Field(..., description="Estimated class probability distribution")
     key_factors: List[str] = Field(..., description="Top model-identified contributing operational factors")
     recommendations: List[str] = Field(..., description="Actionable, non-punitive welfare decision-support recommendations")
     disclaimer: str = Field(..., description="Standard medical and operational safety notice")
+

@@ -296,11 +296,34 @@ export default function PersonnelDetailPage() {
                     </span>
                   </div>
 
+                  {/* Confidence & Trend */}
+                  <div className="grid grid-cols-2 gap-2 text-xs py-1">
+                    <div className="p-1.5 bg-surfaceHighlight/40 rounded flex items-center justify-between">
+                      <span className="text-[11px] text-textSecondary">Confidence:</span>
+                      <span className="font-mono font-semibold text-textPrimary">
+                        {latestAssessment.confidence || 'High'}
+                      </span>
+                    </div>
+                    <div className="p-1.5 bg-surfaceHighlight/40 rounded flex items-center justify-between">
+                      <span className="text-[11px] text-textSecondary">Trend:</span>
+                      <span className={`font-mono font-semibold ${
+                        latestAssessment.risk_trend === 'Worsening'
+                          ? 'text-red-400'
+                          : latestAssessment.risk_trend === 'Improving'
+                          ? 'text-emerald-400'
+                          : 'text-textPrimary'
+                      }`}>
+                        {latestAssessment.risk_trend || 'Stable'}
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Probability Breakdown */}
                   <div className="space-y-1.5 pt-2">
                     <div className="text-[11px] text-textSecondary font-semibold uppercase tracking-wider">
                       Model Class Probabilities:
                     </div>
+
                     <div className="grid grid-cols-3 gap-1.5 text-center text-xs font-mono">
                       <div className="p-1.5 bg-surfaceHighlight/50 rounded">
                         <span className="text-[10px] text-textSecondary block">Low</span>

@@ -102,7 +102,8 @@ def create_personnel(
 )
 def list_personnel(
     page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(20, ge=1, le=100, description="Items per page"),
+    size: int = Query(200, ge=1, le=1000, description="Items per page"),
+
     department: Optional[str] = Query(None, description="Filter by operational department"),
     location: Optional[str] = Query(None, description="Filter by duty base location"),
     battalion: Optional[str] = Query(None, description="Filter by battalion unit"),
@@ -150,8 +151,9 @@ def list_personnel(
         query = query.filter(Personnel.department.ilike(f"%{department}%"))
 
     # If filtering by latest assessment metrics, join with latest assessments
-    all_personnel = query.order_by(Personnel.id.asc()).all()
+    all_personnel = query.order_by(Personnel.id.desc()).all()
     enriched = [_enrich_personnel_out(p, db) for p in all_personnel]
+
 
     if risk_priority:
         enriched = [p for p in enriched if p.latest_priority and p.latest_priority.lower() == risk_priority.lower()]

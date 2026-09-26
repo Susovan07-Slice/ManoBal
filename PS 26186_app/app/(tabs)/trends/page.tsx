@@ -153,12 +153,15 @@ export default function TrendsRoute() {
 
               <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800/50">
                 <span className="text-slate-400">
-                  Risk Score: <strong className="text-slate-200">{Math.round(a.risk_score)}/100</strong>
+                  Risk Score: <strong className="text-slate-200">
+                    {typeof a.risk_score === 'number' ? a.risk_score.toFixed(1) : a.risk_score}/100
+                  </strong>
                 </span>
                 <span className="text-slate-400">
                   Priority: <strong className="text-slate-200">{a.risk_priority}</strong>
                 </span>
               </div>
+
 
               {a.key_factors && a.key_factors.length > 0 && (
                 <div className="text-[11px] text-slate-400 pt-1">

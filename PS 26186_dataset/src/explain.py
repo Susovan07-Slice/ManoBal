@@ -20,7 +20,11 @@ class StressModelExplainer:
             
         self.predictor = joblib.load(predictor_path)
         self.pipeline = self.predictor.pipeline
-        self.model = self.pipeline.named_steps['classifier']
+        raw_model = self.pipeline.named_steps['classifier']
+        if hasattr(raw_model, 'calibrated_classifiers_') and len(raw_model.calibrated_classifiers_) > 0:
+            self.model = raw_model.calibrated_classifiers_[0].estimator
+        else:
+            self.model = raw_model
         self.preprocessor = self.pipeline.named_steps['preprocessor']
         self.feature_engineering = self.pipeline.named_steps['feature_engineering']
         

@@ -93,7 +93,8 @@ class TestDatabasePhase18(unittest.TestCase):
         from alembic.script import ScriptDirectory
         script = ScriptDirectory.from_config(alembic_cfg)
         head_rev = script.get_current_head()
-        self.assertIn(head_rev, ["a844f6a8b55f", "b912c3f4e5a6", "c023d4e5f6a7"])
+        self.assertIn(head_rev, ["a844f6a8b55f", "b912c3f4e5a6", "c023d4e5f6a7", "d134e5f6a7b8"])
+
 
     # =========================================================================
     # 4. DATABASE HEALTH CHECK

@@ -224,11 +224,14 @@ export function HomeScreen({
                   Continuous Risk Score
                 </span>
                 <span className="text-3xl font-black font-mono text-slate-100">
-                  {Math.round(latestAssessment.risk_score)}
+                  {typeof latestAssessment.risk_score === 'number'
+                    ? latestAssessment.risk_score.toFixed(1)
+                    : latestAssessment.risk_score}
                   <span className="text-xs text-slate-400 font-normal"> / 100</span>
                 </span>
               </div>
             </div>
+
 
             <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-700/60">
               <span className="text-slate-400">Operational Priority:</span>

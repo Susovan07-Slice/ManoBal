@@ -12,7 +12,8 @@ class StressAssessment(Base):
     low_probability = Column(Float, nullable=False)
     medium_probability = Column(Float, nullable=False)
     high_probability = Column(Float, nullable=False)
-    risk_score = Column(Integer, nullable=False, index=True)  # 0 - 100
+    risk_score = Column(Float, nullable=False, index=True)  # 0.0 - 100.0 continuous
+
     risk_priority = Column(String(16), nullable=False, index=True)  # Routine, Preventive, Priority
     key_factors = Column(Text, nullable=True)  # JSON-encoded array of factor strings
     model_version = Column(String(32), default="1.0.0-LightGBM")
