@@ -19,7 +19,7 @@ class WelfareRequestOut(BaseModel):
     battalion: Optional[str] = None
     job_role: Optional[str] = None
     location: Optional[str] = None
-    current_risk_score: Optional[int] = None
+    current_risk_score: Optional[float] = None
     current_stress_level: Optional[str] = None
     current_risk_priority: Optional[str] = None
     category: str
