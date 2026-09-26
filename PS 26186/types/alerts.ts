@@ -1,4 +1,4 @@
-export type StressRiskLevel = 'Low' | 'Moderate' | 'High' | 'Critical';
+export type StressRiskLevel = 'Low' | 'Medium' | 'Moderate' | 'High' | 'Critical';
 
 export interface RiskFactor {
   factor: string;         // human-readable, e.g. "Consecutive duty days 40% above unit average"

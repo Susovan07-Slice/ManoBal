@@ -1,0 +1,463 @@
+import json
+from datetime import datetime, timezone, timedelta
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy import desc
+
+from core.config import logger
+from db.session import get_db
+from db.models.user import User
+from db.models.personnel import Personnel
+from db.models.assessment import StressAssessment
+from db.models.recommendation import WelfareRecommendation
+from schemas.assessment import (
+    AssessmentOverride,
+    StressAssessmentOut,
+    RecommendationOut,
+    RecommendationStatusUpdate,
+    AssessmentResponse,
+    AssessmentScheduleStatus
+)
+from api.deps import get_current_user, require_roles, check_personnel_access
+from services.prediction_service import get_prediction_service
+
+router = APIRouter(tags=["Stress Assessments & Welfare Recommendations"])
+
+def _format_assessment_out(a: StressAssessment, personnel: Optional[Personnel] = None) -> StressAssessmentOut:
+    """Helper to convert StressAssessment ORM to Pydantic schema with parsed factors and recommendations."""
+    key_factors_parsed = []
+    if a.key_factors:
+        try:
+            key_factors_parsed = json.loads(a.key_factors)
+        except Exception:
+            key_factors_parsed = [a.key_factors]
+
+    recs_out = [
+        RecommendationOut(
+            id=r.id,
+            personnel_id=r.personnel_id,
+            assessment_id=r.assessment_id,
+            recommendation_type=r.recommendation_type,
+            recommendation_text=r.recommendation_text,
+            priority=r.priority,
+            status=r.status,
+            created_at=r.created_at
+        ) for r in a.recommendations
+    ]
+
+    p_code = personnel.personnel_code if personnel else (a.personnel.personnel_code if a.personnel else None)
+    p_name = personnel.name if personnel else (a.personnel.name if a.personnel else None)
+
+    return StressAssessmentOut(
+        id=a.id,
+        personnel_id=a.personnel_id,
+        personnel_code=p_code,
+        personnel_name=p_name,
+        stress_level=a.stress_level,
+        low_probability=a.low_probability,
+        medium_probability=a.medium_probability,
+        high_probability=a.high_probability,
+        risk_score=a.risk_score,
+        risk_priority=a.risk_priority,
+        key_factors=key_factors_parsed,
+        model_version=a.model_version,
+        assessment_timestamp=a.assessment_timestamp,
+        recommendations=recs_out
+    )
+
+
+@router.post(
+    "/personnel/{personnel_id}/assess",
+    response_model=AssessmentResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Trigger ML stress risk assessment & welfare recommendations for personnel"
+)
+def run_personnel_assessment(
+    personnel_id: int,
+    override_telemetry: Optional[AssessmentOverride] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Executes the finalized ML prediction pipeline on the personnel record,
+    computes calibrated 0-100 risk score, extracts contributing factors,
+    generates supportive non-punitive welfare recommendations, and persists
+    the results into the database.
+    """
+    personnel = check_personnel_access(current_user, personnel_id, db)
+
+    # Update personnel telemetry attributes if provided in override
+    if override_telemetry:
+        if override_telemetry.duty_hours_per_week is not None:
+            personnel.duty_hours_per_week = override_telemetry.duty_hours_per_week
+        if override_telemetry.night_shifts_per_month is not None:
+            personnel.night_shifts_per_month = override_telemetry.night_shifts_per_month
+        if override_telemetry.consecutive_duty_days is not None:
+            personnel.consecutive_duty_days = override_telemetry.consecutive_duty_days
+        if override_telemetry.leave_gap_days is not None:
+            personnel.leave_gap_days = override_telemetry.leave_gap_days
+        if override_telemetry.operational_exposure is not None:
+            personnel.operational_exposure = override_telemetry.operational_exposure
+        if override_telemetry.remote_posting is not None:
+            personnel.remote_posting = override_telemetry.remote_posting
+
+    # 1. Prepare feature dictionary for the ML inference pipeline
+    duty_hours = (
+        override_telemetry.duty_hours_per_week
+        if override_telemetry and override_telemetry.duty_hours_per_week is not None
+        else personnel.duty_hours_per_week
+    )
+    night_shifts = (
+        override_telemetry.night_shifts_per_month
+        if override_telemetry and override_telemetry.night_shifts_per_month is not None
+        else personnel.night_shifts_per_month
+    )
+    consec_days = (
+        override_telemetry.consecutive_duty_days
+        if override_telemetry and override_telemetry.consecutive_duty_days is not None
+        else personnel.consecutive_duty_days
+    )
+    leave_gap = (
+        override_telemetry.leave_gap_days
+        if override_telemetry and override_telemetry.leave_gap_days is not None
+        else personnel.leave_gap_days
+    )
+    sleep = (
+        override_telemetry.sleep_hours
+        if override_telemetry and override_telemetry.sleep_hours is not None
+        else max(4.0, 7.5 - (night_shifts * 0.12))
+    )
+    phys_act = (
+        override_telemetry.physical_activity_hours_per_week
+        if override_telemetry and override_telemetry.physical_activity_hours_per_week is not None
+        else 5.0
+    )
+    op_exposure = (
+        override_telemetry.operational_exposure
+        if override_telemetry and override_telemetry.operational_exposure is not None
+        else personnel.operational_exposure
+    )
+    remote = (
+        override_telemetry.remote_posting
+        if override_telemetry and override_telemetry.remote_posting is not None
+        else personnel.remote_posting
+    )
+
+    burnout_val = (
+        override_telemetry.burnout_symptoms
+        if override_telemetry and override_telemetry.burnout_symptoms is not None
+        else ('Often' if (consec_days > 14 or leave_gap > 180) else ('Sometimes' if consec_days > 7 else 'Rarely'))
+    )
+
+    satisfaction_val = (
+        int(override_telemetry.mood_score)
+        if override_telemetry and override_telemetry.mood_score is not None
+        else 3
+    )
+
+    # Map to domain features expected by the preprocessor pipeline
+    feature_dict = {
+        'Age': personnel.age,
+        'Gender': personnel.gender,
+        'Marital_Status': 'Married' if personnel.age >= 26 else 'Single',
+        'Location': personnel.location,
+        'Job_Role': personnel.job_role,
+        'Experience_Years': personnel.experience_years,
+        'Monthly_Salary_INR': 45000.0 + (personnel.experience_years * 3200.0),
+        'Company_Size': 'Large',
+        'Department': personnel.department if personnel.department in ['Engineering', 'Operations', 'HR', 'Marketing'] else 'Operations',
+        'Working_Hours_per_Week': duty_hours,
+        'Duty_Hours_Per_Week': duty_hours,
+        'Commute_Time_Hours': 0.5,
+        'Remote_Work': 'No',
+        'Annual_Leaves_Taken': max(0, min(30, int(personnel.experience_years * 2))),
+        'Team_Size': 30,
+        'Health_Issues': '',
+        'Sleep_Hours': sleep,
+        'Physical_Activity_Hours_per_Week': phys_act,
+        'Mental_Health_Leave_Taken': 'No',
+        'Burnout_Symptoms': burnout_val,
+        'BusinessTravel': 'Travel_Rarely',
+        'DistanceFromHome': 15.0,
+        'JobLevel': min(5, max(1, int(personnel.experience_years / 5) + 1)),
+        'JobSatisfaction': satisfaction_val,
+        'NumCompaniesWorked': 1,
+        'OverTime': 'Yes' if duty_hours > 50 else 'No',
+        'PerformanceRating': 3,
+        'RelationshipSatisfaction': satisfaction_val,
+        'TrainingTimesLastYear': personnel.training_load,
+        'WorkLifeBalance': 2 if duty_hours > 55 else 3,
+        'YearsAtCompany': personnel.experience_years,
+        'YearsInCurrentRole': min(personnel.experience_years, 3.0),
+        'YearsSinceLastPromotion': 2.0,
+        'YearsWithCurrManager': 2.0,
+        'Deployment_Days': personnel.deployment_days,
+        'Night_Shifts_Per_Month': night_shifts,
+        'Consecutive_Duty_Days': consec_days,
+        'Transfer_Frequency': personnel.transfer_frequency,
+        'Training_Load': personnel.training_load,
+        'Leave_Gap_Days': leave_gap,
+        'Remote_Posting': remote,
+        'Operational_Exposure': op_exposure
+    }
+
+    # 2. Invoke the in-memory ML inference service
+    try:
+        service = get_prediction_service()
+        result = service.predictor.assess_personnel(feature_dict)
+    except Exception as e:
+        logger.error(f"Inference failure during assessment of personnel {personnel_id}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Inference pipeline execution error: {str(e)}"
+        )
+
+    # 3. Persist StressAssessment to Database
+    probas = result["probabilities"]
+    new_assessment = StressAssessment(
+        personnel_id=personnel.id,
+        stress_level=result["stress_level"],
+        low_probability=probas.get("Low", 0.0),
+        medium_probability=probas.get("Medium", 0.0),
+        high_probability=probas.get("High", 0.0),
+        risk_score=result["risk_score"],
+        risk_priority=result["risk_priority"],
+        key_factors=json.dumps(result["key_factors"]),
+        model_version="1.0.0-LightGBM",
+        assessment_timestamp=datetime.now(timezone.utc)
+    )
+    db.add(new_assessment)
+    db.flush()  # Populates new_assessment.id
+
+    # 4. Persist WelfareRecommendations to Database
+    for rec in result.get("recommendations", []):
+        if isinstance(rec, dict):
+            rec_type = rec.get("type", "General Welfare")
+            rec_text = rec.get("action", "")
+            rec_priority = rec.get("priority", result["risk_priority"])
+        else:
+            rec_text = str(rec)
+            rec_lower = rec_text.lower()
+            if any(k in rec_lower for k in ["workload", "duty", "hours", "pacing"]):
+                rec_type = "Workload Optimization"
+            elif any(k in rec_lower for k in ["sleep", "rest", "circadian"]):
+                rec_type = "Sleep & Recovery"
+            elif any(k in rec_lower for k in ["leave", "block", "sanctioned"]):
+                rec_type = "Restorative Leave"
+            elif any(k in rec_lower for k in ["medical", "clinical", "health"]):
+                rec_type = "Medical Consultation"
+            elif any(k in rec_lower for k in ["interview", "counselor", "peer-support", "welfare"]):
+                rec_type = "Welfare Support"
+            else:
+                rec_type = "Operational Adjustment"
+            rec_priority = result["risk_priority"]
+
+        welfare_rec = WelfareRecommendation(
+            personnel_id=personnel.id,
+            assessment_id=new_assessment.id,
+            recommendation_type=rec_type,
+            recommendation_text=rec_text,
+            priority=rec_priority,
+            status="pending",
+            created_at=datetime.now(timezone.utc)
+        )
+        db.add(welfare_rec)
+
+    db.commit()
+    db.refresh(new_assessment)
+
+    logger.info(
+        f"Assessment recorded for {personnel.personnel_code}: Level={new_assessment.stress_level}, "
+        f"Risk Score={new_assessment.risk_score} ({new_assessment.risk_priority})"
+    )
+
+    assessment_out = _format_assessment_out(new_assessment, personnel)
+    return AssessmentResponse(
+        message="Stress risk assessment and welfare recommendations successfully generated and persisted.",
+        assessment=assessment_out
+    )
+
+
+@router.get(
+    "/personnel/{personnel_id}/assessment-status",
+    response_model=AssessmentScheduleStatus,
+    summary="Get 24-hour assessment schedule status for personnel"
+)
+def get_assessment_schedule_status(
+    personnel_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Evaluates whether an assessment is currently due based on the authoritative
+    server-side timestamp of the last completed assessment (>= 24 hours).
+    New jawans with no assessment return assessment_due=True.
+    """
+    personnel = check_personnel_access(current_user, personnel_id, db)
+
+    latest_assessment = (
+        db.query(StressAssessment)
+        .filter(StressAssessment.personnel_id == personnel_id)
+        .order_by(desc(StressAssessment.assessment_timestamp))
+        .first()
+    )
+
+    if not latest_assessment:
+        return AssessmentScheduleStatus(
+            personnel_id=personnel_id,
+            has_assessment=False,
+            last_assessment_at=None,
+            assessment_due=True,
+            hours_since_last_assessment=None,
+            next_assessment_due_at=None,
+            latest_stress_level=None,
+            latest_risk_score=None,
+            latest_priority=None,
+            message="No previous assessment found on record. Initial assessment is immediately due."
+        )
+
+    now = datetime.now(timezone.utc)
+    ts = latest_assessment.assessment_timestamp
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+
+    hours_elapsed = (now - ts).total_seconds() / 3600.0
+    assessment_due = hours_elapsed >= 24.0
+    next_due_at = ts + timedelta(hours=24)
+
+    msg = (
+        f"Daily assessment is due ({hours_elapsed:.1f} hours elapsed since last assessment)."
+        if assessment_due
+        else f"Assessment completed ({hours_elapsed:.1f} hours ago; next assessment due in {max(0.0, 24.0 - hours_elapsed):.1f}h)."
+    )
+
+    return AssessmentScheduleStatus(
+        personnel_id=personnel_id,
+        has_assessment=True,
+        last_assessment_at=ts,
+        assessment_due=assessment_due,
+        hours_since_last_assessment=round(hours_elapsed, 2),
+        next_assessment_due_at=next_due_at,
+        latest_stress_level=latest_assessment.stress_level,
+        latest_risk_score=latest_assessment.risk_score,
+        latest_priority=latest_assessment.risk_priority,
+        message=msg
+    )
+
+
+@router.get(
+    "/assessment/status",
+    response_model=AssessmentScheduleStatus,
+    summary="Get current authenticated user's 24-hour assessment schedule status"
+)
+def get_current_user_assessment_status(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Convenience endpoint returning the authoritative 24-hour assessment schedule status
+    for the currently logged in Jawan.
+    """
+    if not current_user.personnel_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current user has no linked personnel profile."
+        )
+    return get_assessment_schedule_status(current_user.personnel_id, db, current_user)
+
+
+@router.get(
+    "/personnel/{personnel_id}/assessments",
+    response_model=List[StressAssessmentOut],
+    summary="Get assessment history for specific personnel record"
+)
+def get_personnel_assessments(
+    personnel_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves the historical timeline of stress assessments for a given personnel.
+    Protected by RBAC (Personnel can only access their own history).
+    """
+    personnel = check_personnel_access(current_user, personnel_id, db)
+
+    assessments = (
+        db.query(StressAssessment)
+        .filter(StressAssessment.personnel_id == personnel_id)
+        .order_by(desc(StressAssessment.assessment_timestamp))
+        .all()
+    )
+
+    return [_format_assessment_out(a, personnel) for a in assessments]
+
+
+@router.get(
+    "/assessments/{assessment_id}",
+    response_model=StressAssessmentOut,
+    summary="Retrieve individual assessment details by ID"
+)
+def get_assessment_by_id(
+    assessment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves a single assessment by ID with its key factors and recommendations.
+    Enforces RBAC verification.
+    """
+    assessment = db.query(StressAssessment).filter(StressAssessment.id == assessment_id).first()
+    if not assessment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Assessment ID {assessment_id} not found."
+        )
+
+    check_personnel_access(current_user, assessment.personnel_id, db)
+    return _format_assessment_out(assessment)
+
+
+@router.patch(
+    "/recommendations/{recommendation_id}/status",
+    response_model=RecommendationOut,
+    summary="Update welfare recommendation status (Welfare / Officer / Admin)"
+)
+def update_recommendation_status(
+    recommendation_id: int,
+    status_update: RecommendationStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin", "officer", "welfare"))
+):
+    """
+    Updates the lifecycle status of a welfare recommendation
+    (pending, acknowledged, completed, dismissed).
+    Restricted to Welfare Counselor, Officer, and Admin roles.
+    """
+    rec = db.query(WelfareRecommendation).filter(WelfareRecommendation.id == recommendation_id).first()
+    if not rec:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Welfare recommendation ID {recommendation_id} not found."
+        )
+
+    # Organizational scope verification
+    if current_user.role in ["officer", "welfare"]:
+        user_battalion = (current_user.battalion or "").strip().lower()
+        user_location = (current_user.location or "").strip().lower()
+        p_battalion = (rec.personnel.battalion or "").strip().lower()
+        p_location = (rec.personnel.location or "").strip().lower()
+        if not user_battalion or not user_location or user_battalion != p_battalion or user_location != p_location:
+            logger.warning(
+                f"Scope Violation: User '{current_user.username}' attempted to update out-of-scope recommendation ID {recommendation_id}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Linked personnel is outside your assigned Battalion and Location scope."
+            )
+
+    rec.status = status_update.status
+    db.commit()
+    db.refresh(rec)
+    logger.info(f"Recommendation ID {recommendation_id} status changed to '{rec.status}' by {current_user.username}")
+    return rec

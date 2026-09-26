@@ -20,16 +20,20 @@ pip install -r requirements.txt
 ```
 
 ### 2. Start the Server
-Run the `uvicorn` development server from the root directory of the project:
+Run the development server on port 8005 (to avoid collisions with other local apps on port 8000):
 ```bash
-uvicorn api.main:app --reload --port 8000
+python -m uvicorn api.main:app --reload --port 8005
 ```
 
 ### 3. Verify the Deployment
-- The API will be active at: `http://localhost:8000`
-- You can access the automatic interactive Swagger UI documentation at: `http://localhost:8000/docs`
+- The API will be active at: `http://localhost:8005`
+- Interactive Swagger UI documentation: `http://localhost:8005/docs`
+- ReDoc API Specification: `http://localhost:8005/redoc`
+- Health check: `http://localhost:8005/api/health`
 
 ## Available Endpoints
 
-- **`GET /api/unit-aggregates`**: Returns aggregated statistics formatted for the Commander Dashboard.
-- **`POST /api/submit-checkin`**: Accepts daily self-reported metrics from the mobile application. In production, this will trigger the XGBoost ML pipeline to evaluate real-time stress risk.
+- **`POST /api/predict`**: Evaluates real-time stress risk (0-100), outputs TreeSHAP factors, and generates welfare recommendations.
+- **`GET /api/unit-aggregates`**: Returns aggregated telemetry for the Commander Dashboard.
+- **`POST /api/submit-checkin`**: Accepts daily self-reported metrics from the mobile application.
+- **`GET /api/health`**: Verifies backend health and in-memory model availability.

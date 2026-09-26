@@ -1,86 +1,38 @@
 import os
-import joblib
-import pandas as pd
-from sklearn.metrics import accuracy_score, classification_report
-from preprocess import clean_data
+import sys
 
-# ==============================================================================
-# SIH JUDGES NOTE: STRICT DATASET SEPARATION RULE (EXTERNAL VALIDATION)
-# ==============================================================================
-# This script handles the crucial final phase: External Validation.
-# It STRICTLY ONLY interacts with the completely unseen 'D2_cleaned.csv' dataset.
-# 
-# The model loaded here was trained purely on 'FINAL_MAIN_STRESS_DATASET.csv'.
-# By evaluating it strictly on D2 without any retraining, tweaking, or leakage, 
-# we prove the true robustness, generalization capability, and unbiased performance 
-# of the system in a real-world, out-of-distribution scenario.
-# ==============================================================================
+# Add parent directory to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-VALIDATION_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'D2_cleaned.csv')
-MODEL_LOAD_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'stress_model.pkl')
-TARGET_COL = 'risk_level'
+from src.data_processing import load_raw_dataset
+from src.external_validation import load_and_inspect_d2, run_external_validation
+from sklearn.model_selection import train_test_split
 
 def main():
-    print("--- Starting External Validation Phase ---")
+    print("=" * 70)
+    print(" EXTERNAL VALIDATION (D2_cleaned.csv) ")
+    print("=" * 70)
     
-    # 1. Ensure the external validation dataset exists
-    if not os.path.exists(VALIDATION_DATA_PATH):
-        print(f"Error: Validation dataset not found at {VALIDATION_DATA_PATH}")
-        print("Please ensure D2_cleaned.csv is placed in the data/ directory.")
-        return
-        
-    # 2. Ensure the trained model exists
-    if not os.path.exists(MODEL_LOAD_PATH):
-        print(f"Error: Saved model not found at {MODEL_LOAD_PATH}")
-        print("Please run train.py first to generate the model artifacts.")
-        return
-
-    # 3. Load the completely unseen validation dataset
-    print(f"Loading external validation data strictly from: {VALIDATION_DATA_PATH}")
-    df_val = pd.read_csv(VALIDATION_DATA_PATH)
+    main_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'FINAL_MAIN_STRESS_DATASET.csv')
+    if not os.path.exists(main_path):
+        main_path = os.path.join(os.path.dirname(__file__), '..', 'final_dataset.csv')
+    main_df = load_raw_dataset(main_path)
     
-    # Apply standard cleaning (which handles missing columns by padding with NaN to ensure pipeline matches)
-    df_val = clean_data(df_val)
+    d2_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'D2_cleaned.csv')
+    d2_df, d2_info = load_and_inspect_d2(d2_path)
     
-    if TARGET_COL not in df_val.columns:
-        print(f"Error: Target column '{TARGET_COL}' not found in the validation dataset.")
-        return
-        
-    X_val = df_val.drop(columns=[TARGET_COL])
-    y_val_true = df_val[TARGET_COL]
-
-    # 4. Load the Model Pipeline and Label Encoder
-    print(f"Loading saved model artifacts from: {MODEL_LOAD_PATH}")
-    model_artifacts = joblib.load(MODEL_LOAD_PATH)
-    pipeline = model_artifacts['pipeline']
-    le = model_artifacts['label_encoder']
+    # Split Main dataset into Train/Test to guarantee zero contamination
+    main_train, _ = train_test_split(main_df, test_size=0.2, stratify=main_df['Stress_Level'], random_state=42)
     
-    # Convert true string labels to numerical for evaluation
-    try:
-        y_val_true_encoded = le.transform(y_val_true)
-    except ValueError as e:
-        print(f"Error encoding target labels: {e}")
-        print("Validation set contains labels not seen during training. Make sure D2 classes match training classes.")
-        return
-
-    # 5. Execute Predictions on Unseen Data
-    print("Generating predictions on external validation set...")
-    y_val_pred_encoded = pipeline.predict(X_val)
+    print("Training Common-Feature Generalization Benchmark on Main training set...")
+    results = run_external_validation(main_train, d2_df)
     
-    # 6. Evaluate and Report True Performance
-    accuracy = accuracy_score(y_val_true_encoded, y_val_pred_encoded)
-    
-    print("\n" + "="*50)
-    print("EXTERNAL VALIDATION RESULTS (D2 DATASET)")
-    print("="*50)
-    print(f"Accuracy: {accuracy * 100:.2f}%")
+    print(f"\nD2 External Accuracy:     {results['accuracy']:.4f}")
+    print(f"D2 External Macro F1:     {results['macro_f1']:.4f}")
+    print(f"D2 High-Stress Recall:    {results['high_stress_recall']:.4f}")
+    print(f"D2 High-Stress Precision: {results['high_stress_precision']:.4f}")
     print("\nClassification Report:")
-    
-    # Decode labels for a readable classification report
-    target_names = le.classes_
-    print(classification_report(y_val_true_encoded, y_val_pred_encoded, target_names=target_names))
-    print("="*50)
-    print("--- External Validation Completed ---")
+    print(results['classification_report_text'])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

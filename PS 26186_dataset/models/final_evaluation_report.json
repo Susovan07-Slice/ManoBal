@@ -1,0 +1,122 @@
+{
+  "model_name": "LightGBM",
+  "best_hyperparameters": {
+    "classifier__subsample": 0.75,
+    "classifier__num_leaves": 15,
+    "classifier__n_estimators": 200,
+    "classifier__min_child_samples": 20,
+    "classifier__max_depth": 4,
+    "classifier__learning_rate": 0.12,
+    "classifier__colsample_bytree": 1.0
+  },
+  "cross_validation_results": {
+    "accuracy_mean": 0.605625,
+    "accuracy_std": 0.01034559084827928,
+    "macro_f1_mean": 0.6671713754035598,
+    "macro_f1_std": 0.008735108113212492,
+    "weighted_f1_mean": 0.605232447199994,
+    "high_stress_recall": 1.0,
+    "high_stress_precision": 1.0,
+    "high_stress_f1": 1.0
+  },
+  "test_results": {
+    "accuracy": 0.6,
+    "macro_f1": 0.663238155752353,
+    "weighted_f1": 0.6,
+    "macro_precision": 0.663238155752353,
+    "macro_recall": 0.663238155752353,
+    "class_wise_metrics": {
+      "Low": {
+        "precision": 0.5266272189349113,
+        "recall": 0.5266272189349113,
+        "f1_score": 0.5266272189349113,
+        "support": 169
+      },
+      "Medium": {
+        "precision": 0.46308724832214765,
+        "recall": 0.46308724832214765,
+        "f1_score": 0.46308724832214765,
+        "support": 149
+      },
+      "High": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "support": 82
+      }
+    },
+    "confusion_matrix": [
+      [
+        89,
+        80,
+        0
+      ],
+      [
+        80,
+        69,
+        0
+      ],
+      [
+        0,
+        0,
+        82
+      ]
+    ]
+  },
+  "feature_information": {
+    "numerical_features_count": 34,
+    "categorical_features_count": 14,
+    "numerical_features": [
+      "Age",
+      "Experience_Years",
+      "Monthly_Salary_INR",
+      "Working_Hours_per_Week",
+      "Commute_Time_Hours",
+      "Annual_Leaves_Taken",
+      "Team_Size",
+      "Sleep_Hours",
+      "Physical_Activity_Hours_per_Week",
+      "DistanceFromHome",
+      "JobLevel",
+      "JobSatisfaction",
+      "NumCompaniesWorked",
+      "PerformanceRating",
+      "RelationshipSatisfaction",
+      "TrainingTimesLastYear",
+      "WorkLifeBalance",
+      "YearsAtCompany",
+      "YearsInCurrentRole",
+      "YearsSinceLastPromotion",
+      "YearsWithCurrManager",
+      "Deployment_Days",
+      "Duty_Hours_Per_Week",
+      "Night_Shifts_Per_Month",
+      "Consecutive_Duty_Days",
+      "Transfer_Frequency",
+      "Training_Load",
+      "Leave_Gap_Days",
+      "workload_intensity_ratio",
+      "sleep_debt_index",
+      "night_shift_burden",
+      "recovery_deficit_score",
+      "active_recovery_ratio",
+      "deployment_fatigue_factor"
+    ],
+    "categorical_features": [
+      "Gender",
+      "Marital_Status",
+      "Location",
+      "Job_Role",
+      "Company_Size",
+      "Department",
+      "Remote_Work",
+      "Health_Issues",
+      "Mental_Health_Leave_Taken",
+      "Burnout_Symptoms",
+      "BusinessTravel",
+      "OverTime",
+      "Remote_Posting",
+      "Operational_Exposure"
+    ]
+  }
+}

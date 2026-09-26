@@ -2,5 +2,15 @@ fastapi
 uvicorn
 pandas
 scikit-learn
-xgboost
+lightgbm
 shap
+sqlalchemy
+alembic
+psycopg2-binary
+psycopg[binary]
+passlib[bcrypt]
+bcrypt
+python-jose[cryptography]
+python-multipart
+httpx
+pydantic
