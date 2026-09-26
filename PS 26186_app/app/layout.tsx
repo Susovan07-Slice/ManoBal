@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="bg-black">
+      <body className="bg-[#141a22] text-slate-200 min-h-screen">
         <AuthProvider>
           <MobileWrapper>
             <SosButton />

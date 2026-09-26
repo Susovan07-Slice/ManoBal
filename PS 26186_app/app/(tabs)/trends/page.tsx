@@ -69,7 +69,7 @@ export default function TrendsRoute() {
   if (!trend || trend.last7Days.length === 0) {
     return (
       <div className="flex flex-col h-full items-center justify-center text-slate-400 p-6 text-center">
-        <div className="w-14 h-14 bg-slate-800/80 rounded-2xl flex items-center justify-center mb-4 border border-slate-700">
+        <div className="w-14 h-14 bg-[#0a1412]/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-[#1e332c]/50">
           <Activity className="w-7 h-7 text-teal-400" />
         </div>
         <p className="text-lg font-semibold text-slate-100 mb-1">No Assessment History</p>
@@ -95,7 +95,7 @@ export default function TrendsRoute() {
         </div>
         <button
           onClick={fetchTrends}
-          className="p-2 bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-teal-400 rounded-lg border border-slate-700/60 transition"
+          className="p-2 bg-[#0a1412]/40 backdrop-blur-sm hover:bg-[#0a1412]/60 text-slate-400 hover:text-teal-400 rounded-lg border border-[#1e332c]/50 transition"
           title="Refresh telemetry"
         >
           <RefreshCw className="w-4 h-4" />
@@ -115,20 +115,20 @@ export default function TrendsRoute() {
       </div>
 
       {/* Historical Assessment Log */}
-      <div>
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+      <div className="mt-4">
+        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
           Assessment Log
         </h3>
-        <div className="space-y-2.5">
+        <div className="space-y-4">
           {assessments.slice(0, 5).map((a) => (
             <div
               key={a.id}
-              className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2 hover:border-slate-700 transition"
+              className="bg-[var(--color-glass-dark)] backdrop-blur-md border border-[var(--color-glass-border)] rounded-2xl p-5 flex flex-col gap-4 hover:bg-white/5 transition-all duration-300"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-xs font-mono text-slate-300">
+                  <Calendar className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-semibold tracking-wide text-slate-300">
                     {new Date(a.assessment_timestamp).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
@@ -139,38 +139,38 @@ export default function TrendsRoute() {
                   </span>
                 </div>
                 <span
-                  className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
                     a.stress_level === 'High'
-                      ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                      ? 'bg-rose-500/10 text-saffron border border-rose-500/20'
                       : a.stress_level === 'Medium'
-                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                   }`}
                 >
-                  {a.stress_level} Stress
+                  {a.stress_level}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800/50">
-                <span className="text-slate-400">
-                  Risk Score: <strong className="text-slate-200">
+              <div className="flex items-center justify-between text-xs pt-3 border-t border-[var(--color-glass-border)]">
+                <span className="text-slate-400 uppercase font-bold tracking-widest text-[10px]">
+                  Score: <strong className="text-slate-200 text-xs">
                     {typeof a.risk_score === 'number' ? a.risk_score.toFixed(1) : a.risk_score}/100
                   </strong>
                 </span>
-                <span className="text-slate-400">
-                  Priority: <strong className="text-slate-200">{a.risk_priority}</strong>
+                <span className="text-slate-400 uppercase font-bold tracking-widest text-[10px]">
+                  Priority: <strong className="text-slate-200 text-xs">{a.risk_priority}</strong>
                 </span>
               </div>
 
 
               {a.key_factors && a.key_factors.length > 0 && (
-                <div className="text-[11px] text-slate-400 pt-1">
-                  <span className="text-slate-500 block text-[10px] uppercase tracking-wide">
-                    Factors associated with this model prediction:
+                <div className="text-[11px] text-slate-400 pt-3 border-t border-[var(--color-glass-border)]">
+                  <span className="text-slate-500 block text-[9px] uppercase font-bold tracking-widest mb-2">
+                    Key Factors
                   </span>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="flex flex-wrap gap-2">
                     {a.key_factors.slice(0, 3).map((f, i) => (
-                      <span key={i} className="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">
+                      <span key={i} className="bg-black/20 text-slate-300 text-[10px] font-medium px-2.5 py-1 rounded-lg border border-[var(--color-glass-border)]">
                         {f}
                       </span>
                     ))}
@@ -183,7 +183,7 @@ export default function TrendsRoute() {
       </div>
 
       {/* Prototype Notice */}
-      <div className="p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl flex items-start gap-2.5">
+      <div className="p-3 bg-[#0a1412]/40 backdrop-blur-md border border-[#1e332c]/50 rounded-xl flex items-start gap-2.5">
         <ShieldAlert className="w-4 h-4 text-teal-500/70 shrink-0 mt-0.5" />
         <p className="text-[11px] text-slate-400 leading-relaxed">
           <strong>Prototype Notice:</strong> Predictions are decision-support indicators and are not medical diagnoses or disciplinary decisions.

@@ -10,54 +10,60 @@ export function TrendChart({ data }: { data: TrendDay[] }) {
   }));
 
   return (
-    <div className="w-full h-[240px] bg-[#1C2530] p-4 rounded-2xl shadow-lg border border-slate-800/50">
+    <div className="w-full h-[280px] bg-[var(--color-glass-dark)] backdrop-blur-xl p-4 rounded-3xl shadow-2xl border border-[var(--color-glass-border)] relative overflow-hidden">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={formattedData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+        <LineChart data={formattedData} margin={{ top: 10, right: 5, left: -20, bottom: 5 }}>
           <XAxis 
             dataKey="displayDate" 
             stroke="#94a3b8" 
-            fontSize={12} 
+            fontSize={10}
+            fontWeight={600}
             tickLine={false} 
             axisLine={false} 
+            dy={10}
           />
           <YAxis 
             yAxisId="left" 
             stroke="#94a3b8" 
-            fontSize={12} 
+            fontSize={10} 
             tickLine={false} 
             axisLine={false}
             domain={[0, 100]}
+            dx={-10}
           />
           <YAxis 
             yAxisId="right" 
             orientation="right" 
             stroke="#94a3b8" 
-            fontSize={12} 
+            fontSize={10} 
             tickLine={false} 
             axisLine={false}
             domain={[0, 12]}
+            dx={10}
           />
           <Tooltip 
-            contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B', borderRadius: '8px' }}
+            contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)', border: '1px solid var(--color-glass-border)', borderRadius: '16px', color: '#fff', fontSize: '12px', fontWeight: '500' }}
             itemStyle={{ color: '#F1F5F9' }}
+            cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2 }}
           />
           <Line 
             yAxisId="left"
             type="monotone" 
             dataKey="stressIndex" 
-            stroke="#F43F5E" 
-            strokeWidth={3}
-            dot={{ r: 4, fill: "#F43F5E", strokeWidth: 0 }}
-            name="Stress" 
+            stroke="var(--color-saffron)" 
+            strokeWidth={4}
+            dot={false}
+            activeDot={{ r: 6, fill: "var(--color-saffron)", strokeWidth: 0 }}
+            name="Risk Score" 
           />
           <Line 
             yAxisId="right"
             type="monotone" 
             dataKey="sleepHours" 
-            stroke="#0EA5E9" 
-            strokeWidth={3}
-            dot={{ r: 4, fill: "#0EA5E9", strokeWidth: 0 }}
+            stroke="#2dd4bf" 
+            strokeWidth={4}
+            dot={false}
+            activeDot={{ r: 6, fill: "#2dd4bf", strokeWidth: 0 }}
             name="Sleep (hrs)" 
           />
         </LineChart>

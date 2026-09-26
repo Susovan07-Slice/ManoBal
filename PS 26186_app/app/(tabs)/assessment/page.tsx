@@ -160,122 +160,58 @@ function AssessmentContent() {
         </div>
 
         {/* Core Unified Result Card */}
-        <div className="p-5 bg-[#1C2530] border border-slate-700/80 rounded-xl space-y-4 shadow-lg">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400 block">
-                Classified Stress Level
-              </span>
-              <span
-                className={`text-2xl font-extrabold ${
-                  assessmentResult.stress_level === "High"
-                    ? "text-rose-400"
-                    : assessmentResult.stress_level === "Medium"
-                    ? "text-amber-400"
-                    : "text-emerald-400"
-                }`}
-              >
-                {assessmentResult.stress_level} Stress
-              </span>
-            </div>
-
-            <div className="text-right">
-              <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400 block">
-                Continuous Risk Score
-              </span>
-              <span className="text-3xl font-black font-mono text-slate-100">
-                {typeof assessmentResult.risk_score === 'number'
-                  ? assessmentResult.risk_score.toFixed(1)
-                  : assessmentResult.risk_score}
-                <span className="text-xs text-slate-400 font-normal"> / 100</span>
-              </span>
-            </div>
+        <div className="flex flex-col items-center mt-4 mb-8">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-6">Continuous Risk Result</span>
+          
+          <div className="text-[80px] font-light text-white mb-2 tracking-tighter leading-none">
+            {typeof assessmentResult.risk_score === 'number'
+              ? assessmentResult.risk_score.toFixed(1)
+              : assessmentResult.risk_score}
+          </div>
+          <div className={`text-xl font-medium mb-8 ${
+            assessmentResult.stress_level === "High" ? "text-saffron" : 
+            assessmentResult.stress_level === "Medium" ? "text-amber-400" : "text-emerald-400"
+          }`}>
+            {assessmentResult.stress_level} Risk
+          </div>
+          
+          <div className="w-full max-w-xs h-1.5 bg-white/10 rounded-full overflow-hidden mb-6 relative">
+             <div 
+               className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out ${
+                 assessmentResult.stress_level === "High" ? "bg-saffron w-[85%]" : 
+                 assessmentResult.stress_level === "Medium" ? "bg-amber-400 w-[55%]" : "bg-emerald-400 w-[25%]"
+               }`}
+             />
           </div>
 
-          <div className="p-2.5 bg-slate-900/60 rounded-lg flex items-center justify-between text-xs">
-            <span className="text-slate-400">Operational Priority:</span>
-            <span
-              className={`font-mono font-bold uppercase px-2.5 py-0.5 rounded text-xs ${
-                assessmentResult.risk_priority === "Priority"
-                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
-                  : assessmentResult.risk_priority === "Preventive"
-                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                  : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-              }`}
-            >
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider mb-8">
+            <span className="text-slate-400">Priority:</span>
+            <span className={`flex items-center gap-1.5 ${
+              assessmentResult.risk_priority === "Priority" ? "text-saffron" : 
+              assessmentResult.risk_priority === "Preventive" ? "text-amber-400" : "text-emerald-400"
+            }`}>
+              <div className="w-2 h-2 rounded-full bg-current" />
               {assessmentResult.risk_priority}
             </span>
           </div>
 
-          {/* Model Confidence & Longitudinal Trend */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="p-2 bg-slate-900/60 rounded-lg flex items-center justify-between">
-              <span className="text-slate-400">Confidence:</span>
-              <span className="font-mono font-semibold text-slate-200">
-                {assessmentResult.confidence || "High"}
-              </span>
-            </div>
-            <div className="p-2 bg-slate-900/60 rounded-lg flex items-center justify-between">
-              <span className="text-slate-400">Trend:</span>
-              <span className={`font-mono font-semibold ${
-                assessmentResult.risk_trend === 'Worsening'
-                  ? 'text-rose-400'
-                  : assessmentResult.risk_trend === 'Improving'
-                  ? 'text-emerald-400'
-                  : 'text-slate-200'
-              }`}>
-                {assessmentResult.risk_trend || "Stable"}
-              </span>
-            </div>
-          </div>
-
-
-          {/* Model Class Probabilities */}
-          <div className="pt-2 border-t border-slate-700/60 space-y-1.5">
-            <span className="text-[11px] uppercase font-semibold text-slate-400 tracking-wider block">
-              Class Probability Distribution:
-            </span>
-            <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
-              <div className="p-2 bg-slate-900/40 rounded border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">Low</span>
-                <span className="text-emerald-400 font-bold">
-                  {(assessmentResult.low_probability * 100).toFixed(0)}%
-                </span>
-              </div>
-              <div className="p-2 bg-slate-900/40 rounded border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">Medium</span>
-                <span className="text-amber-400 font-bold">
-                  {(assessmentResult.medium_probability * 100).toFixed(0)}%
-                </span>
-              </div>
-              <div className="p-2 bg-slate-900/40 rounded border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">High</span>
-                <span className="text-rose-400 font-bold">
-                  {(assessmentResult.high_probability * 100).toFixed(0)}%
-                </span>
-              </div>
-            </div>
-          </div>
-
           {/* Key Contributing Model Factors */}
           {assessmentResult.key_factors && assessmentResult.key_factors.length > 0 && (
-            <div className="pt-2 border-t border-slate-700/60 space-y-1.5">
-              <span className="text-[11px] uppercase font-semibold text-slate-400 tracking-wider block">
-                Primary Associated Factors:
+            <div className="w-full text-left bg-[var(--color-glass-dark)] backdrop-blur-xl border border-[var(--color-glass-border)] rounded-3xl p-6 shadow-2xl">
+              <span className="text-xs font-bold text-slate-400 tracking-wider block mb-4 uppercase">
+                Primary Associated Factors
               </span>
-              <ul className="space-y-1.5">
+              <ul className="space-y-3">
                 {assessmentResult.key_factors.map((factor, i) => (
-                  <li
-                    key={i}
-                    className="text-xs text-slate-300 bg-slate-900/40 p-2 rounded border-l-2 border-teal-500 flex items-start space-x-1.5"
-                  >
-                    <span className="text-teal-400 font-bold">•</span>
+                  <li key={i} className="text-sm font-medium text-slate-200 flex items-center space-x-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500 opacity-80 shrink-0"></span>
                     <span>{factor}</span>
                   </li>
                 ))}
               </ul>
             </div>
           )}
+        </div>
 
           {/* Welfare Recommendations */}
           {assessmentResult.recommendations && assessmentResult.recommendations.length > 0 && (
@@ -321,7 +257,6 @@ function AssessmentContent() {
               </div>
             </div>
           )}
-        </div>
 
         {/* Prototype Ethical Notice */}
         <p className="text-[10px] text-slate-500 italic text-center px-4 leading-normal">
@@ -386,46 +321,42 @@ function AssessmentContent() {
       )}
 
       {/* Stepper Progress */}
-      <div className="flex items-center justify-between mb-5 bg-[#1C2530] p-2 rounded-xl border border-slate-800 text-xs font-medium">
+      <div className="flex items-center justify-between mb-8 px-2 text-xs font-semibold tracking-widest uppercase">
         <button
           onClick={() => setStep(1)}
-          className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-            step === 1 ? "bg-teal-500 text-slate-950 font-bold" : "text-slate-400 hover:text-slate-200"
+          className={`flex-1 text-center transition-all duration-300 pb-2 border-b-2 ${
+            step === 1 ? "text-teal-400 border-teal-400" : "text-slate-500 border-transparent hover:text-slate-300"
           }`}
         >
-          1. Duty & Ops
+          01 Duty & Ops
         </button>
         <button
           onClick={() => setStep(2)}
-          className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-            step === 2 ? "bg-teal-500 text-slate-950 font-bold" : "text-slate-400 hover:text-slate-200"
+          className={`flex-1 text-center transition-all duration-300 pb-2 border-b-2 ${
+            step === 2 ? "text-teal-400 border-teal-400" : "text-slate-500 border-transparent hover:text-slate-300"
           }`}
         >
-          2. Recovery
+          02 Recovery
         </button>
         <button
           onClick={() => setStep(3)}
-          className={`flex-1 py-1.5 rounded-lg text-center transition-colors ${
-            step === 3 ? "bg-teal-500 text-slate-950 font-bold" : "text-slate-400 hover:text-slate-200"
+          className={`flex-1 text-center transition-all duration-300 pb-2 border-b-2 ${
+            step === 3 ? "text-teal-400 border-teal-400" : "text-slate-500 border-transparent hover:text-slate-300"
           }`}
         >
-          3. Wellbeing
+          03 Wellbeing
         </button>
       </div>
 
       {/* STEP 1: Daily Duty / Operational Information (Section 2.A) */}
       {step === 1 && (
-        <div className="space-y-4 animate-in fade-in duration-300">
-          <Card className="p-4 space-y-4 bg-[#1C2530] border-slate-700/80">
-            <h3 className="text-xs uppercase font-mono tracking-wider text-teal-400 font-bold">
-              Section A: Operational Duty Telemetry
-            </h3>
-
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-8">
             {/* Duty Hours */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-200 font-medium">Weekly Duty Hours</span>
-                <span className="font-mono font-bold text-teal-400 text-sm">{dutyHours} hrs/week</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center px-1">
+                <span className="text-offwhite font-medium text-sm">Weekly Duty Hours</span>
+                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{dutyHours} <span className="text-sm font-normal text-slate-400">hrs</span></span>
               </div>
               <input
                 type="range"
@@ -434,16 +365,16 @@ function AssessmentContent() {
                 step={2}
                 value={dutyHours}
                 onChange={(e) => setDutyHours(parseInt(e.target.value))}
-                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                className="w-full"
               />
-              <span className="text-[10px] text-slate-400 block">Standard military pacing ~44-52 hrs</span>
+              <span className="text-xs text-slate-400 block px-1">Standard military pacing ~44-52 hrs</span>
             </div>
 
             {/* Consecutive Duty Days */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-800">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-200 font-medium">Consecutive Duty Days</span>
-                <span className="font-mono font-bold text-teal-400 text-sm">{consecDays} days continuous</span>
+            <div className="space-y-2 pt-6 border-t border-[var(--color-glass-border)]">
+              <div className="flex justify-between items-center px-1">
+                <span className="text-offwhite font-medium text-sm">Consecutive Duty Days</span>
+                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{consecDays} <span className="text-sm font-normal text-slate-400">days</span></span>
               </div>
               <input
                 type="range"
@@ -452,16 +383,16 @@ function AssessmentContent() {
                 step={1}
                 value={consecDays}
                 onChange={(e) => setConsecDays(parseInt(e.target.value))}
-                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                className="w-full"
               />
-              <span className="text-[10px] text-slate-400 block">Consecutive days on duty without 24h rest</span>
+              <span className="text-xs text-slate-400 block px-1">Without 24h rest</span>
             </div>
 
             {/* Night Shifts */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-800">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-200 font-medium">Night Shifts Assigned (Last 30 Days)</span>
-                <span className="font-mono font-bold text-teal-400 text-sm">{nightShifts} shifts</span>
+            <div className="space-y-2 pt-6 border-t border-[var(--color-glass-border)]">
+              <div className="flex justify-between items-center px-1">
+                <span className="text-offwhite font-medium text-sm">Night Shifts (Last 30 Days)</span>
+                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{nightShifts} <span className="text-sm font-normal text-slate-400">shifts</span></span>
               </div>
               <input
                 type="range"
@@ -470,23 +401,23 @@ function AssessmentContent() {
                 step={1}
                 value={nightShifts}
                 onChange={(e) => setNightShifts(parseInt(e.target.value))}
-                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                className="w-full"
               />
             </div>
 
             {/* Operational Exposure Level */}
-            <div className="space-y-2 pt-2 border-t border-slate-800">
-              <span className="text-xs text-slate-200 font-medium block">Operational Exposure Level</span>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-4 pt-6 border-t border-[var(--color-glass-border)]">
+              <span className="text-sm text-offwhite font-medium block px-1">Operational Exposure Level</span>
+              <div className="grid grid-cols-3 gap-3">
                 {(["Low", "Medium", "High"] as const).map((lvl) => (
                   <button
                     key={lvl}
                     type="button"
                     onClick={() => setOpExposure(lvl)}
-                    className={`py-2 px-1 text-xs rounded-xl border font-semibold transition-colors ${
+                    className={`py-3 px-2 text-sm rounded-2xl border font-semibold transition-all duration-300 ${
                       opExposure === lvl
-                        ? "bg-teal-500 text-slate-950 border-teal-500"
-                        : "bg-slate-900/60 text-slate-400 border-slate-700 hover:bg-slate-800"
+                        ? "bg-teal-600 text-offwhite border-teal-500 shadow-lg shadow-teal-500/20 transform scale-[1.02]"
+                        : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
                     }`}
                   >
                     {lvl}
@@ -494,7 +425,7 @@ function AssessmentContent() {
                 ))}
               </div>
             </div>
-          </Card>
+          </div>
 
           <Button onClick={() => setStep(2)} className="w-full justify-center gap-2">
             Next: Recovery & Rest <ChevronRight className="w-4 h-4" />
@@ -504,17 +435,13 @@ function AssessmentContent() {
 
       {/* STEP 2: Personal Welfare / Recovery (Section 2.B) */}
       {step === 2 && (
-        <div className="space-y-4 animate-in fade-in duration-300">
-          <Card className="p-4 space-y-4 bg-[#1C2530] border-slate-700/80">
-            <h3 className="text-xs uppercase font-mono tracking-wider text-teal-400 font-bold">
-              Section B: Personal Rest & Recovery
-            </h3>
-
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-8">
             {/* Sleep Hours */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-200 font-medium">Restorative Sleep Hours</span>
-                <span className="font-mono font-bold text-teal-400 text-sm">{sleepHours} hrs</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center px-1">
+                <span className="text-offwhite font-medium text-sm">Restorative Sleep Hours</span>
+                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{sleepHours} <span className="text-sm font-normal text-slate-400">hrs</span></span>
               </div>
               <input
                 type="range"
@@ -523,13 +450,13 @@ function AssessmentContent() {
                 step={0.5}
                 value={sleepHours}
                 onChange={(e) => setSleepHours(parseFloat(e.target.value))}
-                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                className="w-full"
               />
-              <span className="text-[10px] text-slate-400 block">Average restorative sleep duration per 24h</span>
+              <span className="text-xs text-slate-400 block px-1">Average sleep duration per 24h</span>
             </div>
 
             {/* Physical Fatigue */}
-            <div className="pt-2 border-t border-slate-800">
+            <div className="pt-6 border-t border-[var(--color-glass-border)]">
               <RatingSlider
                 label="Physical Fatigue Level"
                 value={physicalFatigue}
@@ -537,14 +464,14 @@ function AssessmentContent() {
                 min={1}
                 max={5}
               />
-              <span className="text-[10px] text-slate-400 block mt-1">1 = Fully refreshed, 5 = Severe bodily fatigue</span>
+              <span className="text-xs text-slate-400 block mt-2 px-1">1 = Fully refreshed, 5 = Severe fatigue</span>
             </div>
 
             {/* Physical Activity / PT */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-800">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-200 font-medium">Physical Conditioning / PT</span>
-                <span className="font-mono font-bold text-teal-400 text-sm">{physicalActivity} hrs/week</span>
+            <div className="space-y-2 pt-6 border-t border-[var(--color-glass-border)]">
+              <div className="flex justify-between items-center px-1">
+                <span className="text-offwhite font-medium text-sm">Physical Conditioning / PT</span>
+                <span className="font-mono font-bold text-teal-400 text-lg tracking-wide">{physicalActivity} <span className="text-sm font-normal text-slate-400">hrs/wk</span></span>
               </div>
               <input
                 type="range"
@@ -553,10 +480,10 @@ function AssessmentContent() {
                 step={1}
                 value={physicalActivity}
                 onChange={(e) => setPhysicalActivity(parseInt(e.target.value))}
-                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                className="w-full"
               />
             </div>
-          </Card>
+          </div>
 
           <div className="flex gap-3">
             <Button variant="ghost" onClick={() => setStep(1)} className="flex-1 justify-center gap-1">
@@ -571,12 +498,8 @@ function AssessmentContent() {
 
       {/* STEP 3: Stress / Wellbeing Indicators (Section 2.C) */}
       {step === 3 && (
-        <div className="space-y-4 animate-in fade-in duration-300">
-          <Card className="p-4 space-y-4 bg-[#1C2530] border-slate-700/80">
-            <h3 className="text-xs uppercase font-mono tracking-wider text-teal-400 font-bold">
-              Section C: Operational Wellbeing & Morale
-            </h3>
-
+        <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-8">
             {/* Morale / Mood */}
             <div>
               <RatingSlider
@@ -586,24 +509,24 @@ function AssessmentContent() {
                 min={1}
                 max={5}
               />
-              <span className="text-[10px] text-slate-400 block mt-1">1 = Very Low / Distressed, 5 = Highly Resilient</span>
+              <span className="text-xs text-slate-400 block mt-2 px-1">1 = Very Low / Distressed, 5 = Highly Resilient</span>
             </div>
 
             {/* Burnout Symptoms Frequency */}
-            <div className="space-y-2 pt-2 border-t border-slate-800">
-              <span className="text-xs text-slate-200 font-medium block">
+            <div className="space-y-4 pt-6 border-t border-[var(--color-glass-border)]">
+              <span className="text-sm text-offwhite font-medium block px-1">
                 Frequency of Burnout / Overwhelm Symptoms
               </span>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 {(["Rarely", "Sometimes", "Often"] as const).map((b) => (
                   <button
                     key={b}
                     type="button"
                     onClick={() => setBurnoutSymptoms(b)}
-                    className={`py-2 px-1 text-xs rounded-xl border font-semibold transition-colors ${
+                    className={`py-3 px-2 text-sm rounded-2xl border font-semibold transition-all duration-300 ${
                       burnoutSymptoms === b
-                        ? "bg-teal-500 text-slate-950 border-teal-500"
-                        : "bg-slate-900/60 text-slate-400 border-slate-700 hover:bg-slate-800"
+                        ? "bg-teal-600 text-offwhite border-teal-500 shadow-lg shadow-teal-500/20 transform scale-[1.02]"
+                        : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
                     }`}
                   >
                     {b}
@@ -613,24 +536,24 @@ function AssessmentContent() {
             </div>
 
             {/* Validated Non-Diagnostic Operational Wellbeing Prompts */}
-            <div className="space-y-3 pt-2 border-t border-slate-800 text-xs">
-              <span className="text-[11px] font-semibold text-slate-300 block">
-                Operational Screening Check (Last 2 Weeks):
+            <div className="space-y-6 pt-6 border-t border-[var(--color-glass-border)]">
+              <span className="text-sm font-semibold text-slate-400 block px-1 tracking-wide">
+                Operational Screening Check
               </span>
 
               {/* Prompt 1 */}
-              <div className="p-2.5 bg-slate-900/50 rounded-lg space-y-1.5 border border-slate-800">
-                <p className="text-slate-300 text-xs">Interest or satisfaction in daily tasks & duty:</p>
-                <div className="grid grid-cols-4 gap-1 text-[10px] font-mono">
+              <div className="space-y-3">
+                <p className="text-offwhite text-sm px-1">Interest or satisfaction in daily tasks & duty:</p>
+                <div className="grid grid-cols-4 gap-2 text-xs font-medium">
                   {["None", "Mild", "Mod", "High"].map((lbl, idx) => (
                     <button
                       key={lbl}
                       type="button"
                       onClick={() => setInterestScore(idx)}
-                      className={`py-1 rounded border text-center ${
+                      className={`py-2.5 rounded-xl border transition-all duration-300 ${
                         interestScore === idx
-                          ? "bg-teal-500 text-slate-950 font-bold border-teal-500"
-                          : "bg-slate-800 text-slate-400 border-slate-700"
+                          ? "bg-teal-600 text-offwhite border-teal-500 shadow-md"
+                          : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
                       }`}
                     >
                       {lbl}
@@ -640,18 +563,18 @@ function AssessmentContent() {
               </div>
 
               {/* Prompt 2 */}
-              <div className="p-2.5 bg-slate-900/50 rounded-lg space-y-1.5 border border-slate-800">
-                <p className="text-slate-300 text-xs">Feeling down, discouraged, or mentally exhausted:</p>
-                <div className="grid grid-cols-4 gap-1 text-[10px] font-mono">
+              <div className="space-y-3 pt-2">
+                <p className="text-offwhite text-sm px-1">Feeling down, discouraged, or mentally exhausted:</p>
+                <div className="grid grid-cols-4 gap-2 text-xs font-medium">
                   {["Rarely", "Some", "Often", "Constant"].map((lbl, idx) => (
                     <button
                       key={lbl}
                       type="button"
                       onClick={() => setDiscouragedScore(idx)}
-                      className={`py-1 rounded border text-center ${
+                      className={`py-2.5 rounded-xl border transition-all duration-300 ${
                         discouragedScore === idx
-                          ? "bg-teal-500 text-slate-950 font-bold border-teal-500"
-                          : "bg-slate-800 text-slate-400 border-slate-700"
+                          ? "bg-teal-600 text-offwhite border-teal-500 shadow-md"
+                          : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
                       }`}
                     >
                       {lbl}
@@ -661,18 +584,18 @@ function AssessmentContent() {
               </div>
 
               {/* Prompt 3 */}
-              <div className="p-2.5 bg-slate-900/50 rounded-lg space-y-1.5 border border-slate-800">
-                <p className="text-slate-300 text-xs">Trouble concentrating on operational procedures:</p>
-                <div className="grid grid-cols-4 gap-1 text-[10px] font-mono">
+              <div className="space-y-3 pt-2">
+                <p className="text-offwhite text-sm px-1">Trouble concentrating on operational procedures:</p>
+                <div className="grid grid-cols-4 gap-2 text-xs font-medium">
                   {["Never", "Rare", "Often", "Severe"].map((lbl, idx) => (
                     <button
                       key={lbl}
                       type="button"
                       onClick={() => setConcentrationScore(idx)}
-                      className={`py-1 rounded border text-center ${
+                      className={`py-2.5 rounded-xl border transition-all duration-300 ${
                         concentrationScore === idx
-                          ? "bg-teal-500 text-slate-950 font-bold border-teal-500"
-                          : "bg-slate-800 text-slate-400 border-slate-700"
+                          ? "bg-teal-600 text-offwhite border-teal-500 shadow-md"
+                          : "bg-[var(--color-glass-dark)] text-slate-400 border-[var(--color-glass-border)] hover:bg-white/10"
                       }`}
                     >
                       {lbl}
@@ -681,7 +604,7 @@ function AssessmentContent() {
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
 
           <div className="flex gap-3">
             <Button variant="ghost" onClick={() => setStep(2)} className="flex-1 justify-center gap-1">
