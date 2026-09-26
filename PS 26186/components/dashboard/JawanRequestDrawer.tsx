@@ -83,7 +83,7 @@ export default function JawanRequestDrawer({
           <div>
             <h3 className="font-semibold text-textPrimary text-base">{currentReq.personnel_name}</h3>
             <p className="text-xs text-textSecondary">{currentReq.job_role} • {currentReq.department}</p>
-            <p className="text-xs font-mono text-textSecondary mt-1">Station: {currentReq.location || 'Active Base'}</p>
+            <p className="text-xs font-mono text-accent mt-1">Scope: {currentReq.battalion || '7th Battalion'} • {currentReq.location || 'Active Base'}</p>
           </div>
           {currentReq.current_risk_score !== null && (
             <div className="text-right">

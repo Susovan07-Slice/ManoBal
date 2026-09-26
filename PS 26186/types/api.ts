@@ -182,6 +182,7 @@ export interface WelfareRequestOut {
   personnel_code?: string | null;
   personnel_name?: string | null;
   department?: string | null;
+  battalion?: string | null;
   job_role?: string | null;
   location?: string | null;
   current_risk_score?: number | null;

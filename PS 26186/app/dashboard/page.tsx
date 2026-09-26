@@ -62,6 +62,27 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboardData();
+    const interval = setInterval(() => {
+      Promise.all([
+        getDashboardSummary(),
+        getStressDistribution(),
+        getRiskDistribution(),
+        getHighRiskPersonnel(),
+        getWelfareRequests().catch(() => []),
+      ])
+        .then(([sumRes, stressRes, riskRes, highRiskRes, welfareRes]) => {
+          setSummary(sumRes);
+          setStressDist(stressRes.distribution || []);
+          setRiskDist(riskRes.distribution || []);
+          setTotalAssessed(stressRes.total_assessed || 0);
+          setHighRiskPersonnel(highRiskRes || []);
+          setWelfareRequests(welfareRes || []);
+        })
+        .catch((err) => {
+          console.warn('Background telemetry sync failure:', err);
+        });
+    }, 15000);
+    return () => clearInterval(interval);
   }, [loadDashboardData]);
 
   return (
