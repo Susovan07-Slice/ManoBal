@@ -12,6 +12,8 @@ class WelfareRequest(Base):
     message = Column(Text, nullable=True)
     urgency = Column(String(16), nullable=False, default="Routine", index=True)  # Routine, Medium, High
     status = Column(String(16), nullable=False, default="pending", index=True)  # pending, acknowledged, in_progress, resolved
+    battalion = Column(String(64), nullable=True, index=True)
+    location = Column(String(64), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     resolved_at = Column(DateTime(timezone=True), nullable=True)

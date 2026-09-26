@@ -397,7 +397,6 @@ def get_assessment_schedule_status(
     )
 
 
-
 @router.get(
     "/assessment/status",
     response_model=AssessmentScheduleStatus,
@@ -409,14 +408,24 @@ def get_current_user_assessment_status(
 ):
     """
     Convenience endpoint returning the authoritative 24-hour assessment schedule status
-    for the currently logged in Jawan.
+    for the currently logged in Jawan. For administrative/officer accounts without a linked
+    personnel profile, returns a graceful informational status.
     """
     if not current_user.personnel_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Current user has no linked personnel profile."
+        return AssessmentScheduleStatus(
+            personnel_id=0,
+            has_assessment=False,
+            last_assessment_at=None,
+            assessment_due=False,
+            hours_since_last_assessment=None,
+            next_assessment_due_at=None,
+            latest_stress_level=None,
+            latest_risk_score=None,
+            latest_priority=None,
+            message="Assessment schedule is only applicable to personnel accounts."
         )
     return get_assessment_schedule_status(current_user.personnel_id, db, current_user)
+
 
 
 @router.get(

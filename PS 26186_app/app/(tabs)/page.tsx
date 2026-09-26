@@ -102,6 +102,18 @@ export default function HomeRoute() {
 
   useEffect(() => {
     loadHomeData();
+
+    const handleWelfareCreated = () => {
+      loadHomeData();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('manobal:welfare_created', handleWelfareCreated);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('manobal:welfare_created', handleWelfareCreated);
+      }
+    };
   }, [loadHomeData]);
 
   if (loading) {

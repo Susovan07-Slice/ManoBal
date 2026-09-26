@@ -50,6 +50,17 @@ def _apply_scope(query, model, current_user: User):
     return query
 
 
+def _apply_scope_welfare_requests(query, current_user: User):
+    if current_user.role in ["officer", "welfare"]:
+        user_battalion = (current_user.battalion or "").strip().lower()
+        user_location = (current_user.location or "").strip().lower()
+        query = query.filter(
+            func.lower(func.coalesce(WelfareRequest.battalion, Personnel.battalion)) == user_battalion,
+            func.lower(func.coalesce(WelfareRequest.location, Personnel.location)) == user_location
+        )
+    return query
+
+
 @router.get(
     "/summary",
     response_model=DashboardSummary,
@@ -102,7 +113,7 @@ def get_dashboard_summary(
         .join(Personnel, WelfareRequest.personnel_id == Personnel.id)
         .filter(WelfareRequest.status == "pending")
     )
-    jawan_pending_query = _apply_scope(jawan_pending_query, Personnel, current_user)
+    jawan_pending_query = _apply_scope_welfare_requests(jawan_pending_query, current_user)
     pending_jawan_reqs = jawan_pending_query.count()
 
     pending_total = pending_ai_recs + pending_jawan_reqs
@@ -120,7 +131,7 @@ def get_dashboard_summary(
         .join(Personnel, WelfareRequest.personnel_id == Personnel.id)
         .filter(WelfareRequest.status.in_(["acknowledged", "in_progress"]))
     )
-    jawan_ack_query = _apply_scope(jawan_ack_query, Personnel, current_user)
+    jawan_ack_query = _apply_scope_welfare_requests(jawan_ack_query, current_user)
     ack_jawan_reqs = jawan_ack_query.count()
 
     ack_total = ack_ai_recs + ack_jawan_reqs

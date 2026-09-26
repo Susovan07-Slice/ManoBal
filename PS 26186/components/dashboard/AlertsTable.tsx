@@ -151,7 +151,8 @@ export default function AlertsTable({
                       <div className="text-textSecondary text-xs">{req.job_role || 'Field Service'}</div>
                     </td>
                     <td className="px-4 py-3 text-textSecondary text-xs">
-                      {req.department || 'Operations'} • {req.location || 'Active Base'}
+                      <div className="font-mono text-textPrimary text-[11px]">{req.battalion || '7th Battalion'}</div>
+                      <div className="text-[10px] text-textSecondary">{req.department || 'Operations'} • {req.location || 'Active Base'}</div>
                     </td>
                     <td className="px-4 py-3 font-medium text-textPrimary text-xs">
                       {req.category}

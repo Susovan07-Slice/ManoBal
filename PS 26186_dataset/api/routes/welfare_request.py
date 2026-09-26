@@ -24,9 +24,9 @@ def _format_welfare_request_out(req: WelfareRequest, personnel: Optional[Personn
     p_code = p.personnel_code if p else None
     p_name = p.name if p else None
     dept = p.department if p else None
-    batt = p.battalion if p else None
+    batt = req.battalion or (p.battalion if p else None)
     role = p.job_role if p else None
-    loc = p.location if p else None
+    loc = req.location or (p.location if p else None)
 
     # Fetch latest assessment risk score if db session provided
     risk_score = None
@@ -83,6 +83,12 @@ def submit_welfare_request(
     Binds directly to the authenticated user's personnel record (no spoofing allowed).
     Persists to PostgreSQL and triggers notification in Commander Welfare Alerts.
     """
+    if current_user.role not in ["personnel"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only personnel accounts can submit voluntary welfare support requests."
+        )
+
     if not current_user.personnel_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -96,10 +102,33 @@ def submit_welfare_request(
             detail=f"Personnel record with ID {current_user.personnel_id} not found."
         )
 
+    # Check for duplicate active request in the same category
+    req_category = request_in.category.strip()
+    active_existing = (
+        db.query(WelfareRequest)
+        .filter(
+            WelfareRequest.personnel_id == personnel.id,
+            WelfareRequest.category == req_category,
+            WelfareRequest.status.in_(["pending", "in_progress"])
+        )
+        .first()
+    )
+    if active_existing:
+        logger.warning(
+            f"WELFARE_REQUEST_DUPLICATE_REJECTED: personnel_id={personnel.id} "
+            f"existing_id={active_existing.id} category='{req_category}' status='{active_existing.status}'"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"You already have an active {active_existing.status} welfare request for '{req_category}' pending commander review."
+        )
+
     now = datetime.now(timezone.utc)
     new_request = WelfareRequest(
         personnel_id=personnel.id,
-        category=request_in.category.strip(),
+        battalion=personnel.battalion,
+        location=personnel.location,
+        category=req_category,
         message=request_in.message.strip() if request_in.message else None,
         urgency=request_in.urgency,
         status="pending",
@@ -107,13 +136,23 @@ def submit_welfare_request(
         updated_at=now,
         resolved_at=None
     )
-    db.add(new_request)
-    db.commit()
-    db.refresh(new_request)
+    try:
+        db.add(new_request)
+        db.commit()
+        db.refresh(new_request)
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to persist welfare request: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to persist welfare request. Transaction rolled back."
+        )
 
     logger.info(
-        f"Welfare request created: ID={new_request.id} for {personnel.personnel_code} "
-        f"(Category='{new_request.category}', Urgency='{new_request.urgency}')"
+        f"WELFARE_REQUEST_CREATE: user_id={current_user.id} personnel_id={personnel.id} "
+        f"personnel_code={personnel.personnel_code} battalion='{new_request.battalion}' "
+        f"location='{new_request.location}' request_id={new_request.id} status=pending "
+        f"category='{new_request.category}' urgency='{new_request.urgency}'"
     )
 
     return _format_welfare_request_out(new_request, personnel, db)
@@ -150,6 +189,52 @@ def get_my_welfare_requests(
 
 
 @router.get(
+    "/requests/{request_id}",
+    response_model=WelfareRequestOut,
+    summary="Get single welfare support request (Scope Enforced)"
+)
+def get_welfare_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves a single welfare support request by ID.
+    Enforces organizational scope (Officers and Welfare users can only view within their
+    assigned Battalion and Location; Jawans can only view their own requests).
+    """
+    req = db.query(WelfareRequest).filter(WelfareRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Welfare request ID {request_id} not found."
+        )
+
+    if current_user.role in ["officer", "welfare"]:
+        user_battalion = (current_user.battalion or "").strip().lower()
+        user_location = (current_user.location or "").strip().lower()
+        req_battalion = ((req.battalion or (req.personnel.battalion if req.personnel else "")) or "").strip().lower()
+        req_location = ((req.location or (req.personnel.location if req.personnel else "")) or "").strip().lower()
+
+        if not user_battalion or not user_location or user_battalion != req_battalion or user_location != req_location:
+            logger.warning(
+                f"Scope Violation: User '{current_user.username}' attempted to view out-of-scope welfare request ID {request_id}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Target welfare request is outside your assigned Battalion and Location scope."
+            )
+    elif current_user.role == "personnel":
+        if req.personnel_id != current_user.personnel_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: You can only view your own welfare requests."
+            )
+
+    return _format_welfare_request_out(req, db=db)
+
+
+@router.get(
     "/requests",
     response_model=List[WelfareRequestOut],
     summary="List all Jawan welfare support requests within scope (Commander / Welfare Officer / Admin)"
@@ -163,7 +248,7 @@ def list_welfare_requests(
     """
     Retrieves personnel-initiated welfare support requests.
     Enforces organizational scope: Officers and Welfare users only see requests
-    originating from their assigned Battalion + Location.
+    originating from their assigned Battalion + Location (strict AND condition).
     """
     query = db.query(WelfareRequest).join(Personnel, WelfareRequest.personnel_id == Personnel.id)
 
@@ -171,8 +256,8 @@ def list_welfare_requests(
         user_battalion = (current_user.battalion or "").strip().lower()
         user_location = (current_user.location or "").strip().lower()
         query = query.filter(
-            func.lower(Personnel.battalion) == user_battalion,
-            func.lower(Personnel.location) == user_location
+            func.lower(func.coalesce(WelfareRequest.battalion, Personnel.battalion)) == user_battalion,
+            func.lower(func.coalesce(WelfareRequest.location, Personnel.location)) == user_location
         )
 
     if status_filter:
@@ -181,6 +266,11 @@ def list_welfare_requests(
         query = query.filter(WelfareRequest.urgency == urgency_filter)
 
     requests = query.order_by(desc(WelfareRequest.created_at)).all()
+    logger.info(
+        f"WELFARE_REQUEST_QUERY: commander_id={current_user.id} role={current_user.role} "
+        f"battalion='{current_user.battalion}' location='{current_user.location}' "
+        f"status_filter={status_filter} urgency_filter={urgency_filter} result_count={len(requests)}"
+    )
     return [_format_welfare_request_out(r, db=db) for r in requests]
 
 
@@ -212,10 +302,10 @@ def update_welfare_request_status(
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
         user_location = (current_user.location or "").strip().lower()
-        p_battalion = (req.personnel.battalion or "").strip().lower()
-        p_location = (req.personnel.location or "").strip().lower()
+        req_battalion = ((req.battalion or (req.personnel.battalion if req.personnel else "")) or "").strip().lower()
+        req_location = ((req.location or (req.personnel.location if req.personnel else "")) or "").strip().lower()
 
-        if not user_battalion or not user_location or user_battalion != p_battalion or user_location != p_location:
+        if not user_battalion or not user_location or user_battalion != req_battalion or user_location != req_location:
             logger.warning(
                 f"Scope Violation: User '{current_user.username}' attempted to update out-of-scope welfare request ID {request_id}"
             )
@@ -234,12 +324,20 @@ def update_welfare_request_status(
     elif old_status == "resolved" and status_update.status != "resolved":
         req.resolved_at = None
 
-    db.commit()
-    db.refresh(req)
+    try:
+        db.commit()
+        db.refresh(req)
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to update welfare request status: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update welfare request status."
+        )
 
     logger.info(
-        f"Welfare request ID={request_id} status changed from '{old_status}' to '{req.status}' "
-        f"by '{current_user.username}' (Role: {current_user.role})"
+        f"WELFARE_REQUEST_STATUS_UPDATE: request_id={request_id} commander_id={current_user.id} "
+        f"role={current_user.role} old_status='{old_status}' new_status='{req.status}'"
     )
 
     return _format_welfare_request_out(req, db=db)
