@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { RatingSlider } from "@/components/ui/RatingSlider";
@@ -56,3 +56,5 @@ export function CheckInForm({ onSubmit }: { onSubmit: (c: Omit<DailyCheckIn, 'ch
     </div>
   );
 }
+
+
