@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { PersonalTrend } from "@/types/trends";
@@ -6,8 +6,7 @@ import { StressAssessmentOut, AssessmentScheduleStatus, WelfareRequestOut } from
 import { WelfareSupportSheet } from "./WelfareSupportSheet";
 import { TrendChart } from "./TrendChart";
 import Link from "next/link";
-import { Activity, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
-import { apiClient } from "@/lib/api";
+import { Activity, ArrowRight, CheckCircle2, Briefcase, Moon, FileText } from "lucide-react";
 
 export function HomeScreen({
   scheduleStatus,
@@ -35,177 +34,260 @@ export function HomeScreen({
 
   const isAssessmentDue = scheduleStatus ? scheduleStatus.assessment_due : !latestAssessment;
 
+  // Calculate ring gauge percentage (inverted: lower score = more filled in green)
+  const riskScore = latestAssessment?.risk_score ?? 0;
+  const ringPercentage = typeof riskScore === 'number' ? Math.min(100, Math.max(0, riskScore)) : 0;
+  const circumference = 2 * Math.PI * 54; // radius = 54
+  const strokeDashoffset = circumference - (ringPercentage / 100) * circumference;
+
+  const getRingColor = () => {
+    if (!latestAssessment) return "#9ca3af";
+    if (latestAssessment.stress_level === "High") return "#ef4444";
+    if (latestAssessment.stress_level === "Medium") return "#f59e0b";
+    return "#10b981";
+  };
+
   return (
-    <div className="flex flex-col gap-14 animate-in fade-in duration-700 pb-32 pt-10 px-5 max-w-md mx-auto">
-      {/* 1. Header Area */}
-      <div className="flex flex-col text-left">
-        <h2 className="text-2xl font-light text-mb-text-primary tracking-tight">
-          {getGreeting()}, <span className="font-medium capitalize text-mb-text-primary">{username || "Jawan"}</span>
+    <div className="flex flex-col gap-6 pb-32 px-4 max-w-[420px] mx-auto w-full">
+      {/* 1. Greeting — floats over wallpaper with text-shadow */}
+      <div className="pt-6 pb-2">
+        <h2
+          className="text-[26px] font-light text-white tracking-tight"
+          style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
+        >
+          {getGreeting()},{" "}
+          <span className="font-semibold capitalize">{username || "Jawan"}</span>
         </h2>
-        <p className="text-xs text-mb-text-secondary mt-2 font-medium tracking-wide">
+        <p
+          className="text-[13px] text-white/80 mt-1 font-medium tracking-wide"
+          style={{ textShadow: "0 1px 8px rgba(0,0,0,0.3)" }}
+        >
           Your operational wellbeing overview
         </p>
       </div>
 
-      {/* 2. Primary Wellbeing Area */}
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted mb-6">Your Wellbeing</span>
-        {latestAssessment ? (
-          <div className="flex flex-col gap-3">
-            <div className="text-[80px] font-light text-mb-text-primary tracking-tighter leading-none mb-1">
-              {typeof latestAssessment.risk_score === 'number' ? latestAssessment.risk_score.toFixed(1) : latestAssessment.risk_score}
-            </div>
-            <div className={`text-xl font-medium tracking-wide uppercase ${
-              latestAssessment.stress_level === "High" ? "text-mb-saffron" : 
-              latestAssessment.stress_level === "Medium" ? "text-mb-saffron" : "text-mb-green"
-            }`}>
-              {latestAssessment.stress_level} Risk
-            </div>
-            <div className={`text-xs font-bold uppercase tracking-widest ${
-              latestAssessment.risk_priority === "Priority" ? "text-mb-saffron" : 
-              latestAssessment.risk_priority === "Preventive" ? "text-mb-saffron" : "text-mb-green"
-            }`}>
-              â— {latestAssessment.risk_priority}
-            </div>
-            
-            {/* Minimalist Linear Risk Indicator */}
-            <div className="flex items-center gap-4 mt-6">
-              <span className="text-[9px] font-bold text-mb-text-muted uppercase tracking-widest">Low</span>
-              <div className="flex-1 h-[1px] bg-slate-600/50 relative flex items-center">
-                 <div 
-                   className={`absolute h-2 w-2 rounded-full transform -translate-x-1/2 ${
-                      latestAssessment.stress_level === "High" ? "bg-mb-saffron left-[85%] shadow-[0_0_10px_var(--color-saffron)]" : 
-                      latestAssessment.stress_level === "Medium" ? "bg-mb-saffron left-[55%] shadow-[0_0_10px_#fbbf24]" : "bg-mb-green left-[25%] shadow-[0_0_10px_#34d399]"
-                   }`}
-                 />
+      {/* 2. Hero Wellbeing Card — White Frosted Glass */}
+      <div className="flex flex-col relative">
+        <div className="bg-white/88 backdrop-blur-2xl border border-white/60 rounded-3xl p-7 shadow-[0_8px_40px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center text-center">
+          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-gray-400 mb-4">
+            Your Wellbeing
+          </span>
+
+          {latestAssessment ? (
+            <div className="flex flex-col items-center w-full">
+              {/* Circular Ring Gauge */}
+              <div className="relative w-[140px] h-[140px] mb-5">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                  {/* Background ring */}
+                  <circle
+                    cx="60" cy="60" r="54"
+                    fill="none"
+                    stroke="#f3f4f6"
+                    strokeWidth="8"
+                  />
+                  {/* Colored progress ring */}
+                  <circle
+                    cx="60" cy="60" r="54"
+                    fill="none"
+                    stroke={getRingColor()}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-all duration-1000 ease-out"
+                    style={{ filter: `drop-shadow(0 0 6px ${getRingColor()}40)` }}
+                  />
+                </svg>
+                {/* Center score */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-[36px] font-light text-gray-900 leading-none tracking-tight">
+                    {typeof riskScore === "number" ? riskScore.toFixed(1) : riskScore}
+                  </span>
+                  <span className="text-[11px] text-gray-400 font-medium mt-0.5">/100</span>
+                </div>
               </div>
-              <span className="text-[9px] font-bold text-mb-text-muted uppercase tracking-widest">High</span>
+
+              {/* Risk Badge + Priority */}
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={`text-[12px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-full ${
+                    latestAssessment.stress_level === "High"
+                      ? "bg-red-100 text-red-600"
+                      : latestAssessment.stress_level === "Medium"
+                      ? "bg-amber-100 text-amber-600"
+                      : "bg-emerald-100 text-emerald-600"
+                  }`}
+                >
+                  {latestAssessment.stress_level} Risk
+                </span>
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border ${
+                    latestAssessment.risk_priority === "Priority"
+                      ? "bg-red-50 text-red-500 border-red-200"
+                      : latestAssessment.risk_priority === "Preventive"
+                      ? "bg-amber-50 text-amber-500 border-amber-200"
+                      : "bg-gray-50 text-gray-500 border-gray-200"
+                  }`}
+                >
+                  {latestAssessment.risk_priority}
+                </span>
+              </div>
             </div>
-            <span className="text-[10px] text-mb-text-muted font-medium italic mt-3 block">Based on your latest assessment</span>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <Activity className="w-12 h-12 text-gray-300" />
+              <p className="text-[22px] font-light text-gray-700">No Data</p>
+              <p className="text-[13px] text-gray-400 max-w-[220px] leading-relaxed">
+                Complete an assessment to establish your baseline.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Quick Metrics — White Cards with Colored Top Borders */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <div className="p-4 bg-white/85 backdrop-blur-xl rounded-2xl border border-white/60 border-t-[3px] border-t-blue-500 shadow-[0_4px_20px_rgba(0,0,0,0.06)] flex flex-col items-center text-center gap-1">
+          <Briefcase className="w-4 h-4 text-blue-500 mb-1" />
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.12em]">
+            Duty Load
+          </span>
+          <span className="text-2xl font-light text-gray-900 leading-none">48</span>
+          <span className="text-[9px] text-gray-400 font-medium tracking-wide">HRS/WK</span>
+        </div>
+        <div className="p-4 bg-white/85 backdrop-blur-xl rounded-2xl border border-white/60 border-t-[3px] border-t-emerald-500 shadow-[0_4px_20px_rgba(0,0,0,0.06)] flex flex-col items-center text-center gap-1">
+          <Moon className="w-4 h-4 text-emerald-500 mb-1" />
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.12em]">
+            Recovery
+          </span>
+          <span className="text-2xl font-light text-gray-900 leading-none">7.2</span>
+          <span className="text-[9px] text-gray-400 font-medium tracking-wide">HRS</span>
+        </div>
+        <div className="p-4 bg-white/85 backdrop-blur-xl rounded-2xl border border-white/60 border-t-[3px] border-t-amber-500 shadow-[0_4px_20px_rgba(0,0,0,0.06)] flex flex-col items-center text-center gap-1">
+          <FileText className="w-4 h-4 text-amber-500 mb-1" />
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.12em]">
+            Logs
+          </span>
+          <span className="text-2xl font-light text-gray-900 leading-none">
+            {trend.last7Days?.length || 0}
+          </span>
+          <span className="text-[9px] text-gray-400 font-medium tracking-wide">PAST 7D</span>
+        </div>
+      </div>
+
+      {/* 4. Stress Trend Chart — White Card */}
+      <div className="flex flex-col">
+        <span className="text-[11px] uppercase font-bold tracking-[0.15em] text-white/90 mb-3 ml-1" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.3)" }}>
+          Stress Over Time
+        </span>
+        {trend.last7Days && trend.last7Days.length > 0 ? (
+          <div className="w-full h-[220px] bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+            <TrendChart data={trend.last7Days} />
           </div>
         ) : (
-          <div className="flex flex-col gap-2 py-4">
-            <Activity className="w-8 h-8 text-mb-accent opacity-80" />
-            <p className="text-xl font-light text-mb-text-primary mt-2">No Data</p>
-            <p className="text-xs text-mb-text-secondary">Complete an assessment to establish your baseline.</p>
+          <div className="w-full h-[220px] bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl flex items-center justify-center text-[13px] font-medium text-gray-400 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+            Not enough data
           </div>
         )}
       </div>
 
-      {/* 3. Quick Metrics */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="p-4 bg-mb-glass-strong backdrop-blur-xl rounded-[20px] border border-mb-glass-border flex flex-col items-start gap-1">
-          <span className="text-[9px] font-bold text-mb-text-muted uppercase tracking-widest mb-1">Duty Load</span>
-          <span className="text-lg font-light text-mb-text-primary">48 <span className="text-[10px] text-mb-text-muted font-medium">hrs/wk</span></span>
-        </div>
-        <div className="p-4 bg-mb-glass-strong backdrop-blur-xl rounded-[20px] border border-mb-glass-border flex flex-col items-start gap-1">
-          <span className="text-[9px] font-bold text-mb-text-muted uppercase tracking-widest mb-1">Recovery</span>
-          <span className="text-lg font-light text-mb-text-primary">7.2 <span className="text-[10px] text-mb-text-muted font-medium">hrs</span></span>
-        </div>
-        <div className="p-4 bg-mb-glass-strong backdrop-blur-xl rounded-[20px] border border-mb-glass-border flex flex-col items-start gap-1">
-           <span className="text-[9px] font-bold text-mb-text-muted uppercase tracking-widest mb-1">Logs</span>
-           <span className="text-lg font-light text-mb-text-primary">{trend.last7Days?.length || 0} <span className="text-[10px] text-mb-text-muted font-medium">past 7d</span></span>
-        </div>
-      </div>
-
-      {/* 4. Stress Trend */}
+      {/* 5. Latest Assessment Summary — Clean White Card */}
       <div className="flex flex-col">
-         <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted mb-4">Stress Over Time</span>
-         {trend.last7Days && trend.last7Days.length > 0 ? (
-           <div className="-mx-1">
-             <TrendChart data={trend.last7Days} />
-           </div>
-         ) : (
-           <div className="w-full h-[280px] bg-mb-glass-strong backdrop-blur-xl border border-mb-glass-border rounded-3xl flex items-center justify-center text-xs text-mb-text-muted">
-             Not enough data
-           </div>
-         )}
-      </div>
-
-      {/* 5. Latest Assessment Summary */}
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted mb-4">Latest Assessment</span>
-        <div className="flex flex-col gap-4">
-           <div className="flex justify-between items-center text-xs border-b border-mb-glass-border pb-4">
-             <span className="text-mb-text-secondary font-medium">Last assessment</span>
-             <span className="text-mb-text-secondary font-medium">
-               {latestAssessment ? new Date(latestAssessment.assessment_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "None"}
-             </span>
-           </div>
-           <div className="flex justify-between items-center text-xs border-b border-mb-glass-border pb-4">
-             <span className="text-mb-text-secondary font-medium">Next assessment</span>
-             <span className="text-mb-text-secondary font-medium">
-                {scheduleStatus?.hours_since_last_assessment != null ? `${Math.max(0, 24 - scheduleStatus.hours_since_last_assessment)}h remaining` : "Now"}
-             </span>
-           </div>
-           <div className="flex justify-between items-center text-xs pb-2">
-             <span className="text-mb-text-secondary font-medium">Status</span>
-             {isAssessmentDue ? (
-               <span className="text-mb-saffron font-bold">Due</span>
-             ) : (
-               <span className="text-mb-green font-bold flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Up to date</span>
-             )}
-           </div>
-        </div>
-      </div>
-
-      {/* 6. Personalized Insight */}
-      <div className="flex flex-col mt-2">
-        <div className="p-5 bg-mb-glass-strong backdrop-blur-xl border border-mb-glass-border rounded-3xl">
-          <div className="flex gap-4 items-start">
-             <div className="mt-0.5 shrink-0"><ShieldCheck className="w-5 h-5 text-mb-accent opacity-80" /></div>
-             <p className="text-sm font-medium text-mb-text-secondary leading-relaxed">
-               {isAssessmentDue 
-                  ? "Your daily assessment is due. Please log your operational telemetry." 
-                  : latestAssessment?.stress_level === "High" 
-                    ? "Your current stress level is elevated. Preventive measures and recovery are strongly advised."
-                    : latestAssessment?.stress_level === "Medium"
-                    ? "Your current stress level is moderate. Maintain consistent recovery routines."
-                    : "Your wellbeing indicators are optimal. Keep up the good work and maintain your baseline."}
-             </p>
+        <span className="text-[11px] uppercase font-bold tracking-[0.15em] text-white/90 mb-3 ml-1" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.3)" }}>
+          Latest Assessment
+        </span>
+        <div className="flex flex-col bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+          <div className="flex justify-between items-center text-[13px] border-b border-gray-200 pb-4">
+            <span className="text-gray-500 font-medium">Last assessment</span>
+            <span className="text-gray-800 font-semibold">
+              {latestAssessment
+                ? new Date(latestAssessment.assessment_timestamp).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "None"}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-[13px] border-b border-gray-200 pb-4">
+            <span className="text-gray-500 font-medium">Next assessment</span>
+            <span className="text-gray-800 font-semibold">
+              {scheduleStatus?.hours_since_last_assessment != null
+                ? `${Math.max(0, 24 - scheduleStatus.hours_since_last_assessment)}h remaining`
+                : "Now"}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-[13px]">
+            <span className="text-gray-500 font-medium">Status</span>
+            {isAssessmentDue ? (
+              <span className="text-amber-600 font-bold text-[12px] bg-amber-50 px-3 py-1 rounded-full">Due</span>
+            ) : (
+              <span className="text-emerald-600 font-bold flex items-center gap-1.5 text-[12px] bg-emerald-50 px-3 py-1 rounded-full">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Up to date
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Active Welfare Requests (Fallback to maintain functionality) */}
+      {/* 6. Active Welfare Requests */}
       {welfareRequests.length > 0 && (
-        <div className="flex flex-col mt-2 gap-3">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted mb-1">Active Welfare Requests</span>
-          {welfareRequests.map((req) => (
-            <div key={req.id} className="flex justify-between items-center text-xs py-3 border-b border-mb-glass-border">
-              <span className="text-mb-text-secondary opacity-80 line-clamp-1 flex-1 pr-4">{req.message || "Welfare request"}</span>
-              <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase shrink-0 ${
-                  req.status === "resolved" ? "bg-emerald-500/10 text-mb-green"
-                    : req.status === "in_progress" ? "bg-purple-500/10 text-purple-400"
-                    : req.status === "acknowledged" ? "bg-blue-500/10 text-blue-400"
-                    : "bg-amber-500/10 text-mb-saffron"
-                }`}>
-                {req.status.replace('_', ' ')}
-              </span>
-            </div>
-          ))}
+        <div className="flex flex-col">
+          <span className="text-[11px] uppercase font-bold tracking-[0.15em] text-white/90 mb-3 ml-1" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.3)" }}>
+            Active Welfare Requests
+          </span>
+          <div className="bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+            {welfareRequests.map((req, idx) => (
+              <div
+                key={req.id}
+                className={`flex justify-between items-center text-[13px] p-4 ${
+                  idx !== welfareRequests.length - 1 ? "border-b border-gray-200" : ""
+                }`}
+              >
+                <span className="text-gray-700 font-medium line-clamp-1 flex-1 pr-4 leading-relaxed">
+                  {req.message || "Welfare request"}
+                </span>
+                <span
+                  className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                    req.status === "resolved"
+                      ? "bg-emerald-100 text-emerald-600"
+                      : req.status === "in_progress"
+                      ? "bg-purple-100 text-purple-600"
+                      : req.status === "acknowledged"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-amber-100 text-amber-600"
+                  }`}
+                >
+                  {req.status.replace("_", " ")}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* 7. Primary Action & Welfare */}
-      <div className="flex flex-col gap-5 mt-6">
-         <Link 
-           href="/assessment" 
-           className={`w-full py-4 rounded-3xl flex justify-center items-center gap-2 text-sm font-bold transition-transform active:scale-[0.98] ${
-             isAssessmentDue 
-               ? "bg-mb-saffron text-black shadow-lg shadow-saffron/20" 
-               : "bg-mb-glass-strong backdrop-blur-xl border border-mb-glass-border text-mb-text-primary hover:bg-white/10"
-           }`}
-         >
-           {isAssessmentDue ? "Start Assessment" : "View Assessment"} <ArrowRight className="w-4 h-4" />
-         </Link>
-         
-         <button 
-           onClick={() => setShowSupportSheet(true)} 
-           className="w-full py-2 text-xs font-semibold text-mb-text-secondary hover:text-mb-text-primary transition-colors uppercase tracking-widest"
-         >
-           Request Welfare Support
-         </button>
+      <div className="flex flex-col gap-3 mt-2">
+        <Link
+          href="/assessment"
+          className={`w-full py-3.5 rounded-2xl flex justify-center items-center gap-2 text-[14px] font-bold transition-transform active:scale-[0.98] shadow-lg ${
+            isAssessmentDue
+              ? "bg-gradient-to-r from-mb-accent to-emerald-500 text-white shadow-emerald-500/25"
+              : "bg-white/70 backdrop-blur-md border border-white/60 text-gray-700 hover:bg-white/90 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+          }`}
+        >
+          {isAssessmentDue ? "Start Assessment" : "View Assessment"}{" "}
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+
+        <button
+          onClick={() => setShowSupportSheet(true)}
+          className="w-full py-3 text-[11px] font-bold text-white/50 hover:text-white/80 transition-colors uppercase tracking-widest"
+          style={{ textShadow: "0 1px 4px rgba(0,0,0,0.2)" }}
+        >
+          Request Welfare Support
+        </button>
       </div>
 
       <WelfareSupportSheet
@@ -216,5 +298,3 @@ export function HomeScreen({
     </div>
   );
 }
-
-

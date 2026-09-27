@@ -33,6 +33,7 @@ COPY src/ ./src/
 COPY tests/ ./tests/
 COPY alembic/ ./alembic/
 COPY alembic.ini .
+COPY data/ ./data/
 COPY docker-entrypoint.sh .
 
 # Ensure Linux LF line endings and executable permission

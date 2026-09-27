@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${jetBrainsMono.variable} bg-background text-textPrimary h-screen flex flex-col`}>
+      <body className={`${inter.variable} ${jetBrainsMono.variable} bg-background text-textPrimary min-h-screen flex flex-col`}>
         <RoleProvider>
           {children}
         </RoleProvider>

@@ -1,0 +1,115 @@
+{
+  "model_version": "risk_engine_v2",
+  "architecture": "Personnel Welfare Risk Engine V2 (Calibrated Ordinal Multilayer Ensemble)",
+  "timestamp": "2026-09-27T11:50:41.563166+00:00",
+  "artifact_path": "models/welfare_risk_engine_v2.pkl",
+  "artifact_checksum_sha256": "2628d08d7a2068f94ce0d66c551cf16f665de0c188e0ea8f8d984efae6499d93",
+  "feature_count": 20,
+  "features": [
+    "duty_hours",
+    "sleep_hours",
+    "consecutive_duty_days",
+    "night_shifts_per_month",
+    "leave_gap_days",
+    "physical_fatigue",
+    "mood_score",
+    "physical_activity",
+    "interest_score",
+    "discouraged_score",
+    "concentration_score",
+    "burnout_num",
+    "op_exposure_num",
+    "remote_num",
+    "sleep_deficit",
+    "duty_overtime",
+    "circadian_burden",
+    "fatigue_sleep_compound",
+    "duty_sleep_compound",
+    "demoralization_index"
+  ],
+  "monotonic_constraints": {
+    "duty_hours": 1,
+    "consecutive_duty_days": 1,
+    "night_shifts_per_month": 1,
+    "leave_gap_days": 1,
+    "physical_fatigue": 1,
+    "burnout_num": 1,
+    "op_exposure_num": 1,
+    "remote_num": 1,
+    "sleep_deficit": 1,
+    "duty_overtime": 1,
+    "circadian_burden": 1,
+    "fatigue_sleep_compound": 1,
+    "duty_sleep_compound": 1,
+    "demoralization_index": 1,
+    "discouraged_score": 1,
+    "interest_score": 1,
+    "concentration_score": 1,
+    "sleep_hours": -1,
+    "mood_score": -1,
+    "physical_activity": -1
+  },
+  "categories": [
+    "Low",
+    "Moderate",
+    "Elevated",
+    "High",
+    "Critical"
+  ],
+  "thresholds": {
+    "Low": [
+      0.0,
+      35.0
+    ],
+    "Moderate": [
+      35.0,
+      55.0
+    ],
+    "Elevated": [
+      55.0,
+      70.0
+    ],
+    "High": [
+      70.0,
+      85.0
+    ],
+    "Critical": [
+      85.0,
+      100.0
+    ]
+  },
+  "validation_metrics": {
+    "Model A (Monotonic LightGBM)": {
+      "accuracy": 0.6485,
+      "macro_f1": 0.6486,
+      "log_loss": 0.7914,
+      "brier_score": 0.4491,
+      "ece": 0.0441,
+      "spearman_rho": 0.8552
+    },
+    "Model B (Ordinal Cumulative Logit)": {
+      "accuracy": 0.7225,
+      "macro_f1": 0.7215,
+      "log_loss": 0.6191,
+      "brier_score": 0.3765,
+      "ece": 0.0289,
+      "spearman_rho": 0.8956
+    },
+    "Model C (Latent State + Exposure Fusion)": {
+      "accuracy": 0.447,
+      "macro_f1": 0.2412,
+      "log_loss": 1.2363,
+      "brier_score": 0.65,
+      "ece": 0.1993,
+      "spearman_rho": 0.831
+    },
+    "Model D (Calibrated Ensemble V2)": {
+      "accuracy": 0.7135,
+      "macro_f1": 0.7101,
+      "log_loss": 0.7733,
+      "brier_score": 0.4239,
+      "ece": 0.1478,
+      "spearman_rho": 0.8878
+    }
+  }
+}

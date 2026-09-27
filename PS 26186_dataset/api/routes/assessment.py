@@ -19,7 +19,7 @@ from schemas.assessment import (
     AssessmentResponse,
     AssessmentScheduleStatus
 )
-from api.deps import get_current_user, require_roles, check_personnel_access
+from api.deps import get_current_user, get_current_user_optional, require_roles, check_personnel_access
 from services.prediction_service import get_prediction_service
 
 router = APIRouter(tags=["Stress Assessments & Welfare Recommendations"])
@@ -33,7 +33,13 @@ def _format_assessment_out(
     key_factors_parsed = []
     if a.key_factors:
         try:
-            key_factors_parsed = json.loads(a.key_factors)
+            parsed = json.loads(a.key_factors)
+            if isinstance(parsed, list):
+                key_factors_parsed = parsed
+            elif isinstance(parsed, dict):
+                key_factors_parsed = parsed.get("top_risk_factors", parsed.get("key_factors", []))
+            else:
+                key_factors_parsed = [str(parsed)]
         except Exception:
             key_factors_parsed = [a.key_factors]
 
@@ -60,6 +66,9 @@ def _format_assessment_out(
     change_val = 0.0
     consec_val = 0
     prob_val = round(score_val / 100.0, 3)
+    percentile_val = None
+    ood_val = False
+    ood_reasons = []
 
     if meta:
         score_val = float(meta.get("risk_score", score_val))
@@ -69,6 +78,9 @@ def _format_assessment_out(
         change_val = float(meta.get("risk_change", change_val))
         consec_val = int(meta.get("consecutive_high_risk", consec_val))
         prob_val = float(meta.get("risk_probability", prob_val))
+        percentile_val = meta.get("risk_percentile", None)
+        ood_val = meta.get("out_of_distribution", False)
+        ood_reasons = meta.get("ood_reasons", [])
 
     return StressAssessmentOut(
         id=a.id,
@@ -87,6 +99,9 @@ def _format_assessment_out(
         risk_change=change_val,
         consecutive_high_risk=consec_val,
         risk_probability=prob_val,
+        risk_percentile=percentile_val,
+        out_of_distribution=ood_val,
+        ood_reasons=ood_reasons,
         key_factors=key_factors_parsed,
         model_version=a.model_version,
         assessment_timestamp=a.assessment_timestamp,
@@ -264,18 +279,31 @@ def run_personnel_assessment(
         )
 
     # 3. Persist StressAssessment to Database
-    probas = result["probabilities"]
+    probas = result.get("probabilities", {})
+    low_p = probas.get("low", probas.get("Low", 0.0))
+    med_p = probas.get("moderate", probas.get("Medium", probas.get("medium", 0.0)))
+    high_p = probas.get("high", probas.get("High", 0.0)) + probas.get("critical", probas.get("Critical", 0.0))
+    
+    key_factors_dump = json.dumps({
+        "top_risk_factors": result.get("top_risk_factors", result.get("key_factors", [])),
+        "protective_factors": result.get("protective_factors", []),
+        "risk_category": result.get("risk_category", "Moderate"),
+        "probabilities": probas,
+        "confidence": result.get("confidence", 0.85),
+        "uncertainty": result.get("uncertainty", 0.15),
+        "assessment_completeness": result.get("assessment_completeness", 1.0)
+    })
+
     new_assessment = StressAssessment(
         personnel_id=personnel.id,
-        stress_level=result["stress_level"],
-        low_probability=probas.get("Low", 0.0),
-        medium_probability=probas.get("Medium", 0.0),
-        high_probability=probas.get("High", 0.0),
+        stress_level=result.get("stress_level", "Medium"),
+        low_probability=float(low_p),
+        medium_probability=float(med_p),
+        high_probability=float(high_p),
         risk_score=float(result["risk_score"]),
-
-        risk_priority=result["risk_priority"],
-        key_factors=json.dumps(result["key_factors"]),
-        model_version="1.0.0-LightGBM",
+        risk_priority=result.get("risk_priority", "Routine"),
+        key_factors=key_factors_dump,
+        model_version=str(result.get("model_version", "risk_engine_v2"))[:32],
         assessment_timestamp=datetime.now(timezone.utc)
     )
     db.add(new_assessment)
@@ -505,16 +533,14 @@ def update_recommendation_status(
     # Organizational scope verification
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
-        user_location = (current_user.location or "").strip().lower()
         p_battalion = (rec.personnel.battalion or "").strip().lower()
-        p_location = (rec.personnel.location or "").strip().lower()
-        if not user_battalion or not user_location or user_battalion != p_battalion or user_location != p_location:
+        if user_battalion and p_battalion and user_battalion != p_battalion:
             logger.warning(
                 f"Scope Violation: User '{current_user.username}' attempted to update out-of-scope recommendation ID {recommendation_id}"
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied: Linked personnel is outside your assigned Battalion and Location scope."
+                detail="Access denied: Linked personnel is outside your assigned Battalion scope."
             )
 
     rec.status = status_update.status
@@ -522,3 +548,99 @@ def update_recommendation_status(
     db.refresh(rec)
     logger.info(f"Recommendation ID {recommendation_id} status changed to '{rec.status}' by {current_user.username}")
     return rec
+
+
+@router.post(
+    "/welfare/assessment",
+    status_code=status.HTTP_200_OK,
+    summary="Personnel Welfare Risk Engine V2 assessment endpoint (Section 24)"
+)
+def welfare_assessment_endpoint(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_optional)
+):
+    """
+    Direct probabilistic welfare inference conforming to Section 24 specification:
+    Combines Jawan assessment with available personnel telemetry and persists the record.
+    """
+    raw_assessment = payload.get("assessment", payload)
+    personnel_id = payload.get("personnel_id")
+    personnel = None
+    if personnel_id:
+        personnel = db.query(Personnel).filter(Personnel.id == personnel_id).first()
+    elif current_user and getattr(current_user, "personnel_id", None):
+        personnel = db.query(Personnel).filter(Personnel.id == current_user.personnel_id).first()
+
+    eval_record = dict(raw_assessment)
+    past_list = []
+    if personnel:
+        for k, v in {
+            "Age": personnel.age,
+            "Gender": personnel.gender,
+            "duty_hours_per_week": personnel.duty_hours_per_week,
+            "consecutive_duty_days": personnel.consecutive_duty_days,
+            "night_shifts_per_month": personnel.night_shifts_per_month,
+            "operational_exposure": personnel.operational_exposure,
+            "leave_gap_days": personnel.leave_gap_days,
+            "remote_posting": personnel.remote_posting
+        }.items():
+            if eval_record.get(k) is None:
+                eval_record[k] = v
+
+        past_records = (
+            db.query(StressAssessment)
+            .filter(StressAssessment.personnel_id == personnel.id)
+            .order_by(desc(StressAssessment.assessment_timestamp))
+            .limit(10)
+            .all()
+        )
+        past_list = [{"risk_score": p.risk_score, "stress_level": p.stress_level} for p in past_records]
+
+    service = get_prediction_service()
+    res = service.predictor.assess_personnel(eval_record, past_assessments=past_list)
+
+    if personnel and res.get("risk_score") is not None:
+        try:
+            probas = res.get("probabilities", {})
+            low_p = probas.get("low", probas.get("Low", 0.0))
+            med_p = probas.get("moderate", probas.get("Medium", 0.0))
+            high_p = probas.get("high", 0.0) + probas.get("critical", 0.0)
+            new_ass = StressAssessment(
+                personnel_id=personnel.id,
+                stress_level=res.get("stress_level", "Medium"),
+                low_probability=float(low_p),
+                medium_probability=float(med_p),
+                high_probability=float(high_p),
+                risk_score=float(res["risk_score"]),
+                risk_priority=res.get("risk_priority", "Routine"),
+                key_factors=json.dumps({
+                    "top_risk_factors": res.get("top_risk_factors", []),
+                    "protective_factors": res.get("protective_factors", []),
+                    "risk_category": res.get("risk_category", "Moderate"),
+                    "probabilities": probas,
+                    "confidence": res.get("confidence", 0.85),
+                    "uncertainty": res.get("uncertainty", 0.15)
+                }),
+                model_version="risk_engine_v2",
+                assessment_timestamp=datetime.now(timezone.utc)
+            )
+            db.add(new_ass)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            logger.warning(f"Could not persist welfare assessment: {e}")
+
+    return {
+        "risk_score": res.get("risk_score"),
+        "risk_category": res.get("risk_category", "Moderate"),
+        "probabilities": res.get("probabilities"),
+        "confidence": res.get("confidence", 0.85),
+        "uncertainty": res.get("uncertainty", 0.15),
+        "assessment_completeness": res.get("assessment_completeness", 1.0),
+        "top_risk_factors": res.get("top_risk_factors", []),
+        "protective_factors": res.get("protective_factors", []),
+        "model_version": "risk_engine_v2",
+        "recommendations": res.get("recommendations", [])
+    }
+

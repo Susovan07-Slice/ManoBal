@@ -11,14 +11,31 @@ class WelfarePredictionService:
     """
     def __init__(self, model_path: Optional[str] = None):
         if model_path is None:
-            model_path = settings.MODEL_PATH
+            v2_engine_path = os.path.join(settings.BASE_DIR, "models", "welfare_risk_engine_v2.pkl")
+            v4_path = os.path.join(settings.BASE_DIR, "models", "stress_risk_ensemble_v4.pkl")
+            v3_path = os.path.join(settings.BASE_DIR, "models", "stress_risk_ensemble_v3.pkl")
+            v2_path = os.path.join(settings.BASE_DIR, "models", "stress_risk_ensemble_v2.pkl")
+            if os.path.exists(v2_engine_path):
+                model_path = v2_engine_path
+            elif os.path.exists(v4_path):
+                model_path = v4_path
+            elif os.path.exists(v3_path):
+                model_path = v3_path
+            elif os.path.exists(v2_path):
+                model_path = v2_path
+            else:
+                model_path = settings.MODEL_PATH
             
         if not os.path.exists(model_path):
             logger.error(f"Critical error: ML Model artifact not found at: {model_path}")
             raise FileNotFoundError(f"Model file not found at {model_path}. Run training pipeline first.")
             
         logger.info(f"Loading ML Welfare Pipeline from: {model_path}")
-        self.predictor = PersonnelWelfarePredictor(model_path=model_path)
+        try:
+            self.predictor = PersonnelWelfarePredictor(model_path=model_path)
+        except Exception as e:
+            logger.warning(f"Failed loading {model_path} ({e}); falling back to default model: {settings.MODEL_PATH}")
+            self.predictor = PersonnelWelfarePredictor(model_path=settings.MODEL_PATH)
         logger.info("ML Welfare Pipeline successfully loaded into memory and ready for inference.")
 
     def predict(self, request: PredictionRequest) -> PredictionResponse:
