@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Home, CheckSquare, ClipboardList, TrendingUp } from "lucide-react";
 import Link from "next/link";

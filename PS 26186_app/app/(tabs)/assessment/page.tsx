@@ -15,8 +15,8 @@ const SCREENS = [
   { id: "intro", type: "intro", bg: "/assessment_pics/1.png", cardTopColor: "#d3d8cd", title: "Daily Assessment", subtitle: "Single unified operational duty, recovery, and wellness reporting." },
   { id: "dutyHours", section: "Operational Duty", type: "slider", min: 20, max: 90, step: 2, unit: "hrs/week", bg: "/assessment_pics/2.png", cardTopColor: "#cfd6c9", title: "Weekly Duty Hours", subtitle: "Standard military pacing ~44-52 hrs" },
   { id: "consecDays", section: "Operational Duty", type: "slider", min: 0, max: 30, step: 1, unit: "days", bg: "/assessment_pics/3.png", cardTopColor: "#b8c3b6", title: "Consecutive Duty Days", subtitle: "Without 24h rest" },
-  { id: "nightShifts", section: "Operational Duty", type: "slider", min: 0, max: 20, step: 1, unit: "shifts", bg: "/assessment_pics/4.png", cardTopColor: "#93a8a8", title: "Night Shifts (Last 30 Days)", subtitle: "Total number of night shifts" },
-  { id: "opExposure", section: "Operational Duty", type: "choice", options: ["Low", "Medium", "High"], bg: "/assessment_pics/5.png", cardTopColor: "#b8c2b7", title: "Operational Exposure Level", subtitle: "Select your perceived exposure" },
+  { id: "nightShifts", section: "Operational Duty", type: "slider", min: 0, max: 20, step: 1, unit: "shifts", bg: "/assessment_pics/5.png", cardTopColor: "#93a8a8", title: "Night Shifts (Last 30 Days)", subtitle: "Total number of night shifts" },
+  { id: "opExposure", section: "Operational Duty", type: "choice", options: ["Low", "Medium", "High"], bg: "/assessment_pics/4.png", cardTopColor: "#b8c2b7", title: "Operational Exposure Level", subtitle: "Select your perceived exposure" },
   { id: "sleepHours", section: "Recovery & Rest", type: "slider", min: 2.0, max: 12.0, step: 0.5, unit: "hrs", bg: "/assessment_pics/6.jpg", cardTopColor: "#99b0ac", title: "Restorative Sleep", subtitle: "Average sleep duration per 24h" },
   { id: "physicalFatigue", section: "Recovery & Rest", type: "rating", min: 1, max: 5, bg: "/assessment_pics/7.jpg", cardTopColor: "#bac5c0", title: "Physical Fatigue Level", subtitle: "1 = Fully refreshed, 5 = Severe fatigue" },
   { id: "physicalActivity", section: "Recovery & Rest", type: "slider", min: 0, max: 25, step: 1, unit: "hrs/wk", bg: "/assessment_pics/8.jpg", cardTopColor: "#a3b1a8", title: "Physical Conditioning", subtitle: "Physical training hours per week" },
@@ -244,45 +244,52 @@ function AssessmentContent() {
 
   if (assessmentResult) {
     return (
-      <div className="p-4 flex flex-col gap-5 animate-in fade-in duration-500 pb-24 relative min-h-screen">
-        <div className="absolute inset-0 z-[-1] bg-[#0a110e] transition-opacity duration-1000" />
+      <div className="p-5 flex flex-col gap-6 pb-32 relative min-h-screen">
+        {/* The military_wellness_background.jpg from MobileWrapper will automatically show through */}
+        
         {/* Unified Result Component */}
-        <div className="p-4 bg-mb-accent/10 border border-mb-accent/30 rounded-xl flex items-center space-x-3 mt-4">
-          <CheckCircle2 className="w-7 h-7 text-mb-accent shrink-0" />
+        <div className="p-5 bg-[rgba(15,35,27,0.35)] backdrop-blur-[16px] border border-white/10 rounded-2xl flex items-center space-x-4 mt-6 shadow-lg">
+          <CheckCircle2 className="w-8 h-8 text-[#00A896] shrink-0" />
           <div>
-            <h3 className="text-sm font-bold text-mb-text-primary">Daily Assessment Completed</h3>
-            <p className="text-xs text-mb-text-secondary">
-              Evaluated via LightGBM Pipeline ({assessmentResult.model_version}) • 24h Timer Active
-            </p>
+            <h3 className="text-[15px] font-bold text-white tracking-wide">Assessment Completed</h3>
           </div>
         </div>
-        <div className="flex flex-col items-center mt-4 mb-8">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-secondary mb-6">Continuous Risk Result</span>
-          <div className="text-[80px] font-light text-mb-text-primary mb-2 tracking-tighter leading-none">
+
+        <div className="flex flex-col items-center bg-[rgba(15,35,27,0.45)] backdrop-blur-[20px] border border-white/15 rounded-[32px] p-8 shadow-2xl mt-4">
+          <span className="text-[11px] uppercase font-bold tracking-[0.2em] text-white/60 mb-6">Continuous Risk Result</span>
+          
+          <div className="text-[96px] font-light text-white mb-4 tracking-tighter leading-[0.9]">
             {typeof assessmentResult.risk_score === 'number'
               ? assessmentResult.risk_score.toFixed(1)
               : assessmentResult.risk_score}
           </div>
-          <div className={`text-xl font-medium mb-8 ${
+          
+          <div className={`text-[20px] font-semibold tracking-wider uppercase px-5 py-2 rounded-full bg-black/20 mb-10 ${
             assessmentResult.stress_level === "High" ? "text-mb-danger" : 
             assessmentResult.stress_level === "Medium" ? "text-mb-saffron" : "text-mb-green"
           }`}>
             {assessmentResult.stress_level} Risk
           </div>
-          <div className="w-full max-w-xs h-1.5 bg-white/10 rounded-full overflow-hidden mb-6 relative">
-             <div 
-               className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out ${
-                 assessmentResult.stress_level === "High" ? "bg-mb-danger w-[85%]" : 
-                 assessmentResult.stress_level === "Medium" ? "bg-mb-saffron w-[55%]" : "bg-mb-green w-[25%]"
-               }`}
-             />
+          
+          <div className="flex items-center gap-4 w-full max-w-[240px]">
+            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Low</span>
+            <div className="flex-1 h-[2px] bg-white/10 rounded-full relative flex items-center">
+               <div 
+                 className={`absolute h-3.5 w-3.5 rounded-full transform -translate-x-1/2 shadow-lg transition-all duration-1000 ease-out ${
+                   assessmentResult.stress_level === "High" ? "bg-mb-danger left-[85%] shadow-mb-danger/50" : 
+                   assessmentResult.stress_level === "Medium" ? "bg-mb-saffron left-[55%] shadow-mb-saffron/50" : "bg-mb-green left-[25%] shadow-mb-green/50"
+                 }`}
+               />
+            </div>
+            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">High</span>
           </div>
         </div>
-        <div className="flex gap-3 mt-auto">
-          <Link href="/" className="flex-1 py-3 bg-mb-glass-strong hover:bg-white/10 border border-mb-glass-border rounded-2xl text-sm font-semibold text-mb-text-primary text-center transition-colors">
+
+        <div className="flex gap-4 mt-auto w-full">
+          <Link href="/" className="flex-1 py-4 bg-[rgba(255,255,255,0.12)] backdrop-blur-md border border-white/20 hover:bg-white/20 rounded-2xl text-[15px] font-bold text-white text-center transition-colors">
             Dashboard
           </Link>
-          <Link href="/trends" className="flex-1 py-3 bg-mb-accent hover:opacity-90 rounded-2xl text-sm font-bold text-mb-text-dark text-center flex items-center justify-center transition-colors">
+          <Link href="/trends" className="flex-1 py-4 bg-[#00a896] shadow-[0_8px_20px_rgba(0,168,150,0.3)] hover:opacity-90 rounded-2xl text-[15px] font-bold text-white text-center transition-colors">
             View Trends
           </Link>
         </div>

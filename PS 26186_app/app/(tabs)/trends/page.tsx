@@ -87,7 +87,7 @@ export default function TrendsRoute() {
   }
 
   return (
-    <div className="p-4 flex flex-col gap-6 animate-in fade-in duration-500 pb-20">
+    <div className="p-4 flex flex-col gap-6 pb-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-mb-text-primary">Personal Insights</h2>
@@ -109,7 +109,6 @@ export default function TrendsRoute() {
           <h3 className="text-sm font-semibold text-mb-text-secondary uppercase tracking-wider">
             Assessment Trajectory ({trend.last7Days.length} Records)
           </h3>
-          <span className="text-xs text-mb-accent/80 font-mono">Real Backend Data</span>
         </div>
         <TrendChart data={trend.last7Days} />
       </div>
@@ -182,13 +181,6 @@ export default function TrendsRoute() {
         </div>
       </div>
 
-      {/* Prototype Notice */}
-      <div className="p-4 bg-[#0a1412]/40 backdrop-blur-md border border-[#1e332c]/50 rounded-xl flex items-start gap-3">
-        <ShieldAlert className="w-5 h-5 text-mb-accent/70 shrink-0 mt-0.5" />
-        <p className="text-xs text-mb-text-secondary leading-relaxed">
-          <strong>Prototype Notice:</strong> Predictions are decision-support indicators and are not medical diagnoses or disciplinary decisions.
-        </p>
-      </div>
     </div>
   );
 }

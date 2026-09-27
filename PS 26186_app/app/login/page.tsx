@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -48,21 +48,16 @@ export default function MobileLoginPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-transparent text-mb-text-primary p-6 justify-center">
-      {/* Disclaimer */}
-      <div className="mb-6 p-3 bg-slate-800/80 border border-slate-700 rounded-lg text-xs text-mb-text-secondary flex items-start space-x-2">
-        <Info className="w-4 h-4 text-mb-accent shrink-0 mt-0.5" />
-        <p>
-          <strong className="text-mb-text-primary">Prototype Notice:</strong> Synthetically augmented research prototype. Does not contain real CRPF records. Supportive decision-support only.
-        </p>
-      </div>
-
+    <div 
+      className="flex flex-col min-h-screen text-mb-text-primary p-6 justify-center bg-cover bg-center bg-no-repeat absolute inset-0 z-20"
+      style={{ backgroundImage: "url('/login-bg.png')" }}
+    >
       <div className="flex flex-col items-center mb-8">
         <div className="w-14 h-14 bg-mb-accent/20 border border-mb-accent/40 rounded-full flex items-center justify-center mb-3">
           <Shield className="w-7 h-7 text-mb-accent" />
         </div>
         <h1 className="text-2xl font-bold text-mb-text-primary tracking-wider">ManoBal</h1>
-        <p className="text-xs text-mb-text-secondary uppercase tracking-widest font-mono mt-1">
+        <p className="text-xs text-mb-text-primary uppercase tracking-widest font-mono mt-1 font-semibold">
           Personnel Wellness Check-In
         </p>
       </div>
@@ -76,11 +71,11 @@ export default function MobileLoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+          <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1">
             Service Username
           </label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-mb-text-muted">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
               <User className="w-4 h-4" />
             </span>
             <input
@@ -89,27 +84,27 @@ export default function MobileLoginPage() {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. jawan_verma"
               disabled={loading}
-              className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg pl-10 pr-3 py-2.5 outline-none transition-colors"
+              className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg pl-10 pr-3 py-3 outline-none transition-colors shadow-sm placeholder:text-gray-400"
               required
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+          <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1">
             Password
           </label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-mb-text-muted">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
               <Lock className="w-4 h-4" />
             </span>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              placeholder="••••••••••••"
               disabled={loading}
-              className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg pl-10 pr-3 py-2.5 outline-none transition-colors"
+              className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg pl-10 pr-3 py-3 outline-none transition-colors shadow-sm placeholder:text-gray-400"
               required
             />
           </div>
@@ -118,7 +113,7 @@ export default function MobileLoginPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full mt-4 bg-mb-accent hover:bg-mb-accent text-mb-text-dark font-bold py-2.5 rounded-lg text-sm"
+          className="w-full mt-4 bg-mb-accent hover:bg-mb-accent text-mb-text-dark font-bold py-3 rounded-lg text-sm"
         >
           {loading ? 'Authenticating...' : 'Sign In to Portal'}
         </Button>

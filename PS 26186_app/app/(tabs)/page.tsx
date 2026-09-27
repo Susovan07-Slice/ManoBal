@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { HomeScreen } from "@/components/screens/HomeScreen";
@@ -162,14 +162,6 @@ export default function HomeRoute() {
         />
       </div>
 
-      {/* Prototype Notice */}
-      <div className="mt-6 mb-16 p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl flex items-start gap-2.5">
-        <ShieldAlert className="w-4 h-4 text-mb-accent/70 shrink-0 mt-0.5" />
-        <p className="text-[11px] text-mb-text-secondary leading-relaxed">
-          <strong>Prototype Notice:</strong> Synthetically augmented operational demonstration. Stress
-          indicators are decision-support metrics and not medical diagnoses.
-        </p>
-      </div>
     </div>
   );
 }

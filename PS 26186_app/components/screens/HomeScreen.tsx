@@ -35,7 +35,7 @@ export function HomeScreen({
   const isAssessmentDue = scheduleStatus ? scheduleStatus.assessment_due : !latestAssessment;
 
   return (
-    <div className="flex flex-col gap-10 animate-in fade-in duration-700 pb-32 px-5 max-w-[420px] mx-auto w-full">
+    <div className="flex flex-col gap-10 pb-32 px-5 max-w-[420px] mx-auto w-full">
       {/* 1. Header Area with Readability Scrim */}
       <div className="relative -mx-5 px-5 pt-8 pb-8 -mb-4">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a110e]/70 via-[#0a110e]/40 to-transparent pointer-events-none" />
