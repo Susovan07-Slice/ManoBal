@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { submitWelfareRequest } from "@/lib/welfare";
@@ -61,20 +61,20 @@ export function WelfareSupportSheet({
   };
 
   return (
-    <div className="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm flex flex-col justify-end animate-in fade-in duration-200">
-      <div className="bg-mb-glass-strong backdrop-blur-2xl border-t border-mb-glass-border rounded-t-2xl max-h-[90%] overflow-y-auto p-5 space-y-4 shadow-[0_8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom duration-300">
+    <div className="absolute inset-0 z-[60] bg-black/60 backdrop-blur-sm flex flex-col justify-end animate-in fade-in duration-200">
+      <div className="bg-white/95 backdrop-blur-2xl border-t border-white/60 rounded-t-3xl max-h-[90%] overflow-y-auto p-5 space-y-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom duration-300">
         {/* Header */}
-        <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+        <div className="flex justify-between items-start border-b border-gray-200 pb-3">
           <div className="flex items-center space-x-2">
             <HeartPulse className="w-5 h-5 text-mb-accent" />
             <div>
-              <h3 className="text-base font-bold text-mb-text-primary">Request Welfare Support</h3>
-              <p className="text-[11px] text-mb-text-secondary font-mono">Voluntary â€¢ Non-Punitive Decision Support</p>
+              <h3 className="text-base font-bold text-gray-800">Request Welfare Support</h3>
+              <p className="text-[11px] text-gray-500 font-mono">Voluntary &bull; Non-Punitive Decision Support</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-mb-text-secondary hover:text-mb-text-secondary hover:bg-slate-800 transition"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -90,7 +90,7 @@ export function WelfareSupportSheet({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Category */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-mb-text-secondary block">Support Category</label>
+            <label className="text-xs font-semibold text-gray-500 block">Support Category</label>
             <div className="grid grid-cols-1 gap-1.5">
               {CATEGORIES.map((cat) => (
                 <button
@@ -99,8 +99,8 @@ export function WelfareSupportSheet({
                   onClick={() => setCategory(cat)}
                   className={`text-left text-xs p-2.5 rounded-xl border transition-colors ${
                     category === cat
-                      ? "bg-mb-accent/20 text-teal-300 border-mb-accent/60 font-semibold"
-                      : "bg-slate-900/60 text-mb-text-secondary border-slate-800 hover:bg-slate-800"
+                      ? "bg-teal-50 text-teal-700 border-teal-300 font-bold shadow-sm"
+                      : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800"
                   }`}
                 >
                   {cat}
@@ -110,34 +110,34 @@ export function WelfareSupportSheet({
           </div>
 
           {/* Urgency */}
-          <div className="space-y-1.5 pt-2 border-t border-slate-800">
-            <label className="text-xs font-semibold text-mb-text-secondary block">Requested Urgency</label>
+          <div className="space-y-1.5 pt-2 border-t border-gray-200">
+            <label className="text-xs font-semibold text-gray-500 block">Requested Urgency</label>
             <div className="grid grid-cols-3 gap-2">
               {URGENCIES.map((u) => (
                 <button
                   key={u.value}
                   type="button"
                   onClick={() => setUrgency(u.value)}
-                  className={`p-2 rounded-xl border text-center transition-colors ${
+                  className={`p-2 rounded-xl border text-center transition-colors shadow-sm ${
                     urgency === u.value
                       ? u.value === "High"
-                        ? "bg-rose-500/20 text-rose-300 border-rose-500 font-bold"
-                        : "bg-mb-accent text-mb-text-dark border-mb-accent font-bold"
-                      : "bg-slate-900/60 text-mb-text-secondary border-slate-800 hover:bg-slate-800 text-xs"
+                        ? "bg-rose-50 text-rose-700 border-rose-300 font-bold"
+                        : "bg-teal-50 text-teal-700 border-teal-300 font-bold"
+                      : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800 text-xs"
                   }`}
                 >
                   <span className="text-xs block">{u.label}</span>
-                  <span className="text-[9px] text-mb-text-secondary font-normal block mt-0.5">{u.desc}</span>
+                  <span className="text-[9px] font-normal block mt-0.5 opacity-80">{u.desc}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Optional Message */}
-          <div className="space-y-1.5 pt-2 border-t border-slate-800">
+          <div className="space-y-1.5 pt-2 border-t border-gray-200">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-semibold text-mb-text-secondary">Brief Note / Context (Optional)</label>
-              <span className="text-[10px] text-mb-text-muted">Max 1000 chars</span>
+              <label className="font-semibold text-gray-500">Brief Note / Context (Optional)</label>
+              <span className="text-[10px] text-gray-400">Max 1000 chars</span>
             </div>
             <textarea
               value={message}
@@ -145,12 +145,12 @@ export function WelfareSupportSheet({
               maxLength={1000}
               rows={3}
               placeholder="E.g., I would like to consult regarding consecutive night shifts or request leave pacing..."
-              className="w-full bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs text-mb-text-primary placeholder:text-mb-text-muted focus:outline-none focus:border-mb-accent transition"
+              className="w-full bg-white border border-gray-200 rounded-xl p-3 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-mb-accent focus:ring-1 focus:ring-mb-accent transition"
             />
           </div>
 
           {/* Disclaimer */}
-          <p className="text-[10px] text-mb-text-secondary italic leading-relaxed">
+          <p className="text-[10px] text-gray-500 italic leading-relaxed">
             This request will appear in your battalion Commander & Welfare Officer dashboard for supportive review. It is not disciplinary.
           </p>
 

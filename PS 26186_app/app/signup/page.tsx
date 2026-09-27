@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -167,8 +167,8 @@ export default function JawanSignupPage() {
 
         {/* Header */}
         <div className="flex flex-col items-center text-center">
-          <div className="w-14 h-14 bg-mb-accent/20 border border-mb-accent/40 rounded-full flex items-center justify-center mb-3">
-            <Shield className="w-7 h-7 text-mb-accent" />
+          <div className="w-32 h-32 mb-4 drop-shadow-xl flex items-center justify-center">
+            <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-mb-text-primary tracking-wider">ManoBal</h1>
           <p className="text-xs text-mb-accent uppercase tracking-widest font-mono mt-1 font-semibold">
