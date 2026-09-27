@@ -53,9 +53,21 @@ export default function MobileLoginPage() {
       style={{ backgroundImage: "url('/login-bg.png')" }}
     >
       <div className="flex flex-col items-center mb-8">
-        <div className="w-20 h-20 rounded-full overflow-hidden mb-3 shadow-lg shadow-black/30 border-2 border-white/30">
-          <img src="/manobal-logo.jpg" alt="ManoBal Logo" className="w-full h-full object-cover" />
+        <div className="mb-4">
+          <img src="/armed forces.png" alt="Indian Armed Forces" className="h-12 object-contain filter invert opacity-90" />
         </div>
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-1 border border-white/20">
+            <img src="/army.png" alt="Indian Army" className="w-full h-full object-contain filter invert" />
+          </div>
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-1 border border-white/20">
+            <img src="/navy.png" alt="Indian Navy" className="w-full h-full object-contain filter invert" />
+          </div>
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-1 border border-white/20">
+            <img src="/airforce.png" alt="Indian Air Force" className="w-full h-full object-contain filter invert" />
+          </div>
+        </div>
+        
         <h1 className="text-2xl font-bold text-mb-text-primary tracking-wider">ManoBal</h1>
         <p className="text-xs text-mb-text-primary uppercase tracking-widest font-mono mt-1 font-semibold">
           Personnel Wellness Check-In
