@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { LifeBuoy, CheckCircle2, AlertTriangle, ShieldAlert, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmSheet } from '@/components/ui/ConfirmSheet';
 import { cn } from '@/lib/utils';
 import { submitWelfareRequest } from '@/lib/welfare';
+import { useAuth } from '@/lib/AuthContext';
 
 interface FeedbackAlert {
   type: 'success' | 'active' | 'unauthorized' | 'error';
@@ -13,10 +14,15 @@ interface FeedbackAlert {
 }
 
 export default function SosButton() {
+  const { user } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackAlert | null>(null);
+
+  if (!user) {
+    return null;
+  }
 
   const handleTrigger = () => {
     if (!sent && !submitting) {
