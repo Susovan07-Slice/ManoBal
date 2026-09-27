@@ -600,6 +600,16 @@ def welfare_assessment_endpoint(
     service = get_prediction_service()
     res = service.predictor.assess_personnel(eval_record, past_assessments=past_list)
 
+    if res.get("risk_score") is None and res.get("error"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": res["error"],
+                "validation_errors": res.get("validation_errors", [res["error"]]),
+                "risk_category": res.get("risk_category", "Invalid Input")
+            }
+        )
+
     if personnel and res.get("risk_score") is not None:
         try:
             probas = res.get("probabilities", {})
