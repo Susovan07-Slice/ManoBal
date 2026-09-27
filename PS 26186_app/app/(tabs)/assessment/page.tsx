@@ -243,53 +243,157 @@ function AssessmentContent() {
   }
 
   if (assessmentResult) {
+    const scoreVal = typeof assessmentResult.risk_score === 'number'
+      ? assessmentResult.risk_score
+      : parseFloat(String(assessmentResult.risk_score)) || 0;
+
+    let parsedFactors: any = {};
+    if (typeof assessmentResult.key_factors === 'string') {
+      try {
+        parsedFactors = JSON.parse(assessmentResult.key_factors);
+      } catch (e) {
+        parsedFactors = { top_risk_factors: [assessmentResult.key_factors] };
+      }
+    } else if (Array.isArray(assessmentResult.key_factors)) {
+      parsedFactors = { top_risk_factors: assessmentResult.key_factors };
+    }
+
+    const category = assessmentResult.risk_category ||
+      (scoreVal >= 85 ? "Critical" :
+       scoreVal >= 70 ? "High" :
+       scoreVal >= 55 ? "Elevated" :
+       scoreVal >= 35 ? "Moderate" : "Low");
+
+    const topFactors: string[] = (
+      parsedFactors.top_risk_factors ||
+      assessmentResult.top_risk_factors ||
+      (Array.isArray(assessmentResult.key_factors) ? assessmentResult.key_factors : [])
+    ).slice(0, 4);
+
+    const protective: string[] = (
+      parsedFactors.protective_factors ||
+      assessmentResult.protective_factors ||
+      []
+    ).slice(0, 3);
+
+    const categoryColor =
+      category === "Critical" ? "text-red-500 border-red-500/30 bg-red-500/10" :
+      category === "High" ? "text-amber-500 border-amber-500/30 bg-amber-500/10" :
+      category === "Elevated" ? "text-yellow-400 border-yellow-400/30 bg-yellow-400/10" :
+      category === "Moderate" ? "text-blue-400 border-blue-400/30 bg-blue-400/10" :
+      "text-emerald-400 border-emerald-400/30 bg-emerald-400/10";
+
+    const barColor =
+      category === "Critical" ? "bg-red-500" :
+      category === "High" ? "bg-amber-500" :
+      category === "Elevated" ? "bg-yellow-400" :
+      category === "Moderate" ? "bg-blue-400" :
+      "bg-emerald-400";
+
     return (
-      <div className="p-5 flex flex-col gap-6 pb-32 relative min-h-screen">
-        {/* The military_wellness_background.jpg from MobileWrapper will automatically show through */}
-        
-        {/* Unified Result Component */}
-        <div className="p-5 bg-[rgba(15,35,27,0.35)] backdrop-blur-[16px] border border-white/10 rounded-2xl flex items-center space-x-4 mt-6 shadow-lg">
-          <CheckCircle2 className="w-8 h-8 text-[#00A896] shrink-0" />
+      <div className="p-5 flex flex-col gap-5 pb-32 relative min-h-screen">
+        {/* Status Confirmation Banner */}
+        <div className="p-4 bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl flex items-center space-x-3 mt-2 shadow-lg">
+          <CheckCircle2 className="w-7 h-7 text-[#00A896] shrink-0" />
           <div>
-            <h3 className="text-[15px] font-bold text-white tracking-wide">Assessment Completed</h3>
+            <h3 className="text-sm font-bold text-white tracking-wide">Daily Assessment Completed</h3>
+            <p className="text-xs text-white/60">
+              Evaluated via Welfare Risk Engine V2 • Confidential & Non-Punitive
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-col items-center bg-[rgba(15,35,27,0.45)] backdrop-blur-[20px] border border-white/15 rounded-[32px] p-8 shadow-2xl mt-4">
-          <span className="text-[11px] uppercase font-bold tracking-[0.2em] text-white/60 mb-6">Continuous Risk Result</span>
-          
-          <div className="text-[96px] font-light text-white mb-4 tracking-tighter leading-[0.9]">
-            {typeof assessmentResult.risk_score === 'number'
-              ? assessmentResult.risk_score.toFixed(1)
-              : assessmentResult.risk_score}
+        {/* Welfare Risk Score Card */}
+        <div className="flex flex-col items-center bg-[rgba(15,35,27,0.45)] backdrop-blur-[20px] border border-white/15 rounded-[32px] p-7 shadow-2xl text-center">
+          <span className="text-[11px] uppercase font-bold tracking-[0.2em] text-white/60 mb-2">
+            Continuous Welfare Risk
+          </span>
+          <div className="flex items-baseline justify-center gap-1 my-2">
+            <span className="text-[72px] font-light text-white tracking-tight leading-none">
+              {scoreVal.toFixed(1)}
+            </span>
+            <span className="text-2xl font-normal text-white/60">/ 100</span>
           </div>
-          
-          <div className={`text-[20px] font-semibold tracking-wider uppercase px-5 py-2 rounded-full bg-black/20 mb-10 ${
-            assessmentResult.stress_level === "High" ? "text-mb-danger" : 
-            assessmentResult.stress_level === "Medium" ? "text-mb-saffron" : "text-mb-green"
-          }`}>
-            {assessmentResult.stress_level} Risk
+
+          <div className={`px-5 py-1.5 rounded-full border text-sm font-bold mt-2 mb-5 ${categoryColor}`}>
+            {category} Concern
           </div>
-          
-          <div className="flex items-center gap-4 w-full max-w-[240px]">
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Low</span>
-            <div className="flex-1 h-[2px] bg-white/10 rounded-full relative flex items-center">
-               <div 
-                 className={`absolute h-3.5 w-3.5 rounded-full transform -translate-x-1/2 shadow-lg transition-all duration-1000 ease-out ${
-                   assessmentResult.stress_level === "High" ? "bg-mb-danger left-[85%] shadow-mb-danger/50" : 
-                   assessmentResult.stress_level === "Medium" ? "bg-mb-saffron left-[55%] shadow-mb-saffron/50" : "bg-mb-green left-[25%] shadow-mb-green/50"
-                 }`}
-               />
+
+          {/* Continuous Progress Bar */}
+          <div className="w-full max-w-xs h-2.5 bg-white/10 rounded-full overflow-hidden relative">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ease-out ${barColor}`}
+              style={{ width: `${Math.min(100, Math.max(5, scoreVal))}%` }}
+            />
+          </div>
+        </div>
+
+        {/* What is Contributing (Risk Factors) */}
+        {topFactors.length > 0 && (
+          <div className="bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl p-5 shadow-lg">
+            <h4 className="text-xs uppercase font-bold tracking-wider text-white/70 mb-3 flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              What is contributing?
+            </h4>
+            <ul className="space-y-2 text-sm text-white/90">
+              {topFactors.map((factor, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-amber-400 shrink-0 font-bold">•</span>
+                  <span>{factor}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Protective Factors */}
+        {protective.length > 0 && (
+          <div className="bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl p-5 shadow-lg">
+            <h4 className="text-xs uppercase font-bold tracking-wider text-white/70 mb-3 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              Protective Factors
+            </h4>
+            <ul className="space-y-2 text-sm text-white/90">
+              {protective.map((factor, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-emerald-400 shrink-0 font-bold">•</span>
+                  <span>{factor}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Recommended Action */}
+        {assessmentResult.recommendations && assessmentResult.recommendations.length > 0 && (
+          <div className="bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl p-5 shadow-lg">
+            <h4 className="text-xs uppercase font-bold tracking-wider text-[#00A896] mb-3 flex items-center gap-1.5">
+              <HeartPulse className="w-4 h-4 text-[#00A896]" />
+              Recommended Guidance
+            </h4>
+            <div className="space-y-2">
+              {assessmentResult.recommendations.slice(0, 2).map((rec: any, idx: number) => (
+                <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/5 text-sm text-white/90">
+                  <div className="font-semibold text-xs text-[#00A896] mb-0.5">{rec.recommendation_type || rec.type || "Welfare Action"}</div>
+                  <div>{rec.recommendation_text || rec.action || String(rec)}</div>
+                </div>
+              ))}
             </div>
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">High</span>
           </div>
-        </div>
+        )}
 
-        <div className="flex gap-4 mt-auto w-full">
-          <Link href="/" className="flex-1 py-4 bg-[rgba(255,255,255,0.12)] backdrop-blur-md border border-white/20 hover:bg-white/20 rounded-2xl text-[15px] font-bold text-white text-center transition-colors">
+        {/* Navigation Action Buttons */}
+        <div className="flex gap-4 mt-auto w-full pt-2">
+          <Link
+            href="/"
+            className="flex-1 py-4 bg-[rgba(255,255,255,0.12)] backdrop-blur-md border border-white/20 hover:bg-white/20 rounded-2xl text-[15px] font-bold text-white text-center transition-colors"
+          >
             Dashboard
           </Link>
-          <Link href="/trends" className="flex-1 py-4 bg-[#00a896] shadow-[0_8px_20px_rgba(0,168,150,0.3)] hover:opacity-90 rounded-2xl text-[15px] font-bold text-white text-center transition-colors">
+          <Link
+            href="/trends"
+            className="flex-1 py-4 bg-[#00a896] shadow-[0_8px_20px_rgba(0,168,150,0.3)] hover:opacity-90 rounded-2xl text-[15px] font-bold text-white text-center transition-colors"
+          >
             View Trends
           </Link>
         </div>

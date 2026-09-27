@@ -1,0 +1,156 @@
+<USER_REQUEST>
+# PHASE: RISK SCORE OPTIMIZATION, CALIBRATION & REALISM
+
+## Objective
+
+Completely audit and redesign the Personnel Stress & Welfare Monitoring application's Risk Score so that it behaves realistically, consistently, and monotonically with respect to relevant risk factors.
+
+The current implementation is NOT acceptable because examples such as:
+
+* Normal/healthy conditions → Risk Score ≈ 2.2
+* Moderate-risk conditions → Risk Score ≈ 32.1
+* Very high workload such as 90 work-hours/week can sometimes produce an unexpectedly LOW risk score
+
+must no longer occur unless they are genuinely supported by the trained model and validated data.
+
+Do NOT simply change the displayed thresholds.
+Do NOT add arbitrary `if/else` rules to force desired scores.
+Do NOT hard-code "90 hours = high risk".
+Do NOT manually assign arbitrary weights just to make examples look good.
+
+The objective is to make the underlying risk estimation mathematically and statistically coherent.
+
+---
+
+# 1. FULL PIPELINE AUDIT
+
+Trace the complete path:
+
+INPUT
+→ validation
+→ preprocessing
+→ feature engineering
+→ feature ordering
+→ encoding/scaling
+→ model prediction
+→ probability
+→ calibration
+→ continuous risk score
+→ risk category
+→ UI display
+→ SHAP/explanation
+
+Check every stage for:
+
+* wrong feature names
+* wrong feature order
+* inverted numerical transformations
+* incorrect scaling
+* incorrect categorical encoding
+* missing/default values
+* feature leakage
+* incorrect model input schema
+* probability/class ordering errors
+* incorrect probability interpretation
+* inverted features
+* duplicated transformations
+* stale model files
+* mismatch between training and inference preprocessing
+* incorrect threshold logic
+* rounding/clamping problems
+* score normalization problems
+
+Document the ROOT CAUSE of every issue found.
+
+---
+
+# 2. DEFINE THE SEMANTICS OF RISK
+
+Risk Score must represent:
+
+"How concerning the current overall personnel stress/welfa
+<truncated 9311 bytes>
+ore": ...,
+"risk_category": "...",
+"top_risk_factors": [...]
+}
+
+Do NOT expose sensitive internal model information unnecessarily in production.
+
+---
+
+# 18. AUTOMATED REGRESSION TESTS
+
+Create tests that fail if:
+
+* increasing a clearly harmful controlled variable unexpectedly decreases risk without a documented model/data explanation
+* class probabilities are mapped incorrectly
+* score is outside [0,100]
+* score becomes NaN
+* score becomes constant for substantially different inputs
+* normal and severe profiles become indistinguishable
+* preprocessing differs between training and inference
+* SHAP feature names do not match input features
+* stale model/calibration artifacts are used
+
+---
+
+# 19. BEFORE/AFTER REPORT
+
+Produce a report containing:
+
+### Current implementation
+
+Example:
+
+Normal → 2.2
+Moderate → 32.1
+Extreme workload → unexpectedly low
+
+### Root cause
+
+Explain exactly why these values occurred.
+
+### New implementation
+
+Show the new pipeline.
+
+### Validation
+
+Show controlled scenarios and resulting:
+
+* probabilities
+* risk scores
+* categories
+
+### Calibration
+
+Show calibration metrics/plots.
+
+### Sensitivity
+
+Show how risk changes when:
+
+* work hours increase
+* sleep decreases
+* workload increases
+* job satisfaction decreases
+* relevant duty strain increases
+
+### Final decision
+
+Document why the selected scoring method was chosen.
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-27T15:02:01+05:30.
+
+The user's current state is as follows:
+Active Document: c:\Users\SAI SUSOVAN DASH\Desktop\ManoBal\ManoBal\PS 26186_dataset\audit_phase34d_trace.py (LANGUAGE_PYTHON)
+Cursor is on line: 1
+Other open documents:
+- c:\Users\SAI SUSOVAN DASH\Desktop\ManoBal\ManoBal\PS 26186_dataset\audit_phase34d_trace.py (LANGUAGE_PYTHON)
+Browser State:
+  Page 180541D3F3D41E642072B425D22C2066 (Commander & Welfare Officer Dashboard) - http://localhost:3000/signup [ACTIVE]
+    Viewport: 1536x776, Page Height: 888
+</ADDITIONAL_METADATA>

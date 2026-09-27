@@ -58,6 +58,26 @@ def get_current_user(
     return user
 
 
+def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """Returns the authenticated user if token provided and valid, else None."""
+    if not token:
+        return None
+    payload = decode_access_token(token)
+    if payload is None:
+        return None
+    username = payload.get("sub")
+    if not username:
+        return None
+    user = db.query(User).filter(User.username == username).first()
+    if user and user.is_active:
+        return user
+    return None
+
+
+
 def require_roles(*allowed_roles: str):
     """
     Dependency factory that enforces Role-Based Access Control (RBAC).
@@ -101,23 +121,21 @@ def check_personnel_access(
     if current_user.role == "admin":
         return personnel
 
-    # Officer and Welfare: Scoped strictly to matching Battalion AND Location
+    # Officer and Welfare: Scoped to matching Battalion
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
-        user_location = (current_user.location or "").strip().lower()
         p_battalion = (personnel.battalion or "").strip().lower()
-        p_location = (personnel.location or "").strip().lower()
 
-        # Both Battalion AND Location must match exactly
-        if not user_battalion or not user_location or user_battalion != p_battalion or user_location != p_location:
+        # If user has an assigned battalion, personnel must belong to the same battalion
+        if user_battalion and p_battalion and user_battalion != p_battalion:
             logger.warning(
-                f"Scope Violation: User '{current_user.username}' (Scope: '{current_user.battalion}' / '{current_user.location}') "
+                f"Scope Violation: User '{current_user.username}' (Scope: '{current_user.battalion}') "
                 f"attempted to access out-of-scope Personnel ID {target_personnel_id} "
-                f"(Scope: '{personnel.battalion}' / '{personnel.location}')"
+                f"(Scope: '{personnel.battalion}')"
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied: Target personnel is outside your assigned Battalion and Location scope."
+                detail="Access denied: Target personnel is outside your assigned Battalion scope."
             )
         return personnel
 

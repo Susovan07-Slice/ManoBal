@@ -55,7 +55,7 @@ export function TrendChart({ data }: { data: TrendDay[] }) {
             stroke="#D98A2B" 
             strokeWidth={3}
             dot={false}
-            activeDot={{ r: 6, fill: "#D98A2B", strokeWidth: 0, shadow: '0 0 10px #D98A2B' }}
+            activeDot={{ r: 6, fill: "#D98A2B", strokeWidth: 0, style: { filter: 'drop-shadow(0 0 8px #D98A2B)' } }}
             name="Risk Score" 
           />
           <Line 
@@ -65,7 +65,7 @@ export function TrendChart({ data }: { data: TrendDay[] }) {
             stroke="#00A896" 
             strokeWidth={3}
             dot={false}
-            activeDot={{ r: 6, fill: "#00A896", strokeWidth: 0, shadow: '0 0 10px #00A896' }}
+            activeDot={{ r: 6, fill: "#00A896", strokeWidth: 0, style: { filter: 'drop-shadow(0 0 8px #00A896)' } }}
             name="Sleep (hrs)" 
           />
         </LineChart>

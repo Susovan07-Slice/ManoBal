@@ -131,12 +131,9 @@ def list_personnel(
     # Scoped access control for Officer and Welfare roles
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip()
-        user_location = (current_user.location or "").strip()
-        query = query.filter(
-            func.lower(Personnel.battalion) == user_battalion.lower(),
-            func.lower(Personnel.location) == user_location.lower()
-        )
-        # Client query parameters can only narrow within the already-authorized scope
+        if user_battalion:
+            query = query.filter(func.lower(Personnel.battalion) == user_battalion.lower())
+        # Client query parameters can narrow the search
         if location:
             query = query.filter(Personnel.location.ilike(f"%{location}%"))
         if battalion:

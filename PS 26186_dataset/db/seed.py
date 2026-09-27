@@ -511,8 +511,29 @@ def seed_database():
                     )
                     db.add(welfare_rec)
 
+        # Ensure standard demo users exist for testing & UI access
+        demo_users = [
+            ("admin", "AdminPassword123!", "admin", None, None, None),
+            ("officer_sharma", "OfficerPassword123!", "officer", None, "1st Battalion", "Srinagar"),
+            ("jawan_verma", "PersonnelPassword123!", "personnel", 1, "1st Battalion", "Srinagar")
+        ]
+        for uname, pwd, role, p_id, bat, loc in demo_users:
+            existing = db.query(User).filter(User.username == uname).first()
+            if not existing:
+                db.add(User(
+                    username=uname,
+                    hashed_password=hash_password(pwd),
+                    role=role,
+                    personnel_id=p_id,
+                    battalion=bat,
+                    location=loc,
+                    is_active=True
+                ))
+            else:
+                existing.hashed_password = hash_password(pwd)
+
         db.commit()
-        logger.info("Successfully completed database seeding with 15 synthetic personnel and ML assessments.")
+        logger.info("Successfully completed database seeding with 15 synthetic personnel, test users, and ML assessments.")
 
     except Exception as e:
         db.rollback()

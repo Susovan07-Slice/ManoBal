@@ -315,13 +315,61 @@ def calculate_risk_score(
       If return_metadata is False: (risk_score, stress_level, priority)
       If return_metadata is True:  (risk_score, stress_level, priority, metadata_dict)
     """
-    p_low = float(probabilities.get('Low', 0.0))
-    p_med = float(probabilities.get('Medium', 0.0))
-    p_high = float(probabilities.get('High', 0.0))
+    from src.welfare_risk_engine_v2 import PersonnelWelfareRiskEngineV2
+    import os
+    import joblib
 
-    # 1. Calibrated Model Expected Risk Baseline (Section 6 & 7)
-    p_base = (p_low * 0.06) + (p_med * 0.48) + (p_high * 0.94)
-    z_base = _logit(p_base)
+    v2_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'welfare_risk_engine_v2.pkl')
+    if os.path.exists(v2_path):
+        try:
+            engine = joblib.load(v2_path)
+        except Exception:
+            engine = PersonnelWelfareRiskEngineV2()
+    else:
+        engine = PersonnelWelfareRiskEngineV2()
+
+    rec_dict: Dict[str, Any] = {}
+    if record is not None:
+        if isinstance(record, pd.DataFrame):
+            if not record.empty:
+                rec_dict = record.iloc[0].to_dict()
+        elif isinstance(record, pd.Series):
+            rec_dict = record.to_dict()
+        elif isinstance(record, dict):
+            rec_dict = dict(record)
+
+    if not rec_dict and probabilities:
+        p_high = float(probabilities.get('High', probabilities.get('high', 0.0)))
+        p_med = float(probabilities.get('Medium', probabilities.get('moderate', 0.0)))
+        rec_dict = {
+            'duty_hours_per_week': 40.0 + (p_med * 15.0) + (p_high * 35.0),
+            'sleep_hours': 7.5 - (p_med * 1.5) - (p_high * 3.0),
+            'physical_fatigue': 1.0 + (p_med * 1.5) + (p_high * 2.5),
+            'mood_score': 5.0 - (p_med * 1.5) - (p_high * 2.5)
+        }
+
+    res = engine.assess(rec_dict, past_assessments=past_assessments)
+    final_score = res.get('risk_score', 30.0)
+    stress_level = res.get('stress_level', 'Medium')
+    priority = res.get('risk_priority', 'Routine')
+
+    if return_metadata:
+        metadata = {
+            'risk_probability': round(float(final_score or 30.0) / 100.0, 4),
+            'confidence': res.get('confidence', 0.85),
+            'uncertainty': res.get('uncertainty', 0.15),
+            'risk_trend': res.get('risk_trend', 'Stable'),
+            'risk_change': res.get('risk_change', 0.0),
+            'consecutive_high_risk': res.get('consecutive_high_risk', 0),
+            'risk_category': res.get('risk_category', 'Low'),
+            'probabilities': res.get('probabilities', {}),
+            'top_risk_factors': res.get('top_risk_factors', []),
+            'protective_factors': res.get('protective_factors', []),
+            'model_version': 'risk_engine_v2'
+        }
+        return final_score, stress_level, priority, metadata
+
+    return final_score, stress_level, priority
 
     record_dict: Dict[str, Any] = {}
     if record is not None:
@@ -386,12 +434,22 @@ def calculate_risk_score(
 
         i_ops_psy = ((duty_strain + consec_strain) / 2.0) * psy_strain
 
+        # Physical Fatigue Strain
+        fatigue_val = record_dict.get('physical_fatigue', None)
+        fatigue_strain = 0.0
+        if fatigue_val is not None:
+            try:
+                fatigue_strain = float(max(0, int(fatigue_val) - 1)) / 4.0
+            except Exception:
+                fatigue_strain = 0.0
+
         # 3. Continuous Latent Severity Synthesis (Section 7)
         delta_z = (
             (1.20 * duty_strain) +
             (1.40 * sleep_strain) +
             (0.90 * consec_strain) +
             (0.85 * night_strain) +
+            (0.60 * fatigue_strain) +
             (0.40 * exp_strain) +
             (0.15 * remote_strain) +
             (0.20 * act_strain) +
@@ -404,20 +462,10 @@ def calculate_risk_score(
         z_compound = (0.40 * z_base) + (0.60 * delta_z)
         risk_prob = _sigmoid(z_compound)
 
-        # 4. Minimal Safety Consistency Layer (Section 21)
-        is_extreme_op_rec = (duty >= 80.0 and consec >= 21.0 and sleep <= 4.0 and (night >= 12.0 or exposure == 'high'))
-        is_extreme_severe = (duty >= 85.0 and consec >= 25.0 and sleep <= 2.5 and night >= 15.0)
-        is_phase25_extreme = (duty >= 60.0 and consec >= 15.0 and night >= 10.0 and sleep <= 4.5 and exposure == 'high')
-
-        min_severity = 0.0
-        if is_extreme_severe:
-            min_severity = 0.94
-        elif is_extreme_op_rec:
-            min_severity = 0.90
-        elif is_phase25_extreme:
-            min_severity = 0.85
-
-        final_prob = max(risk_prob, min_severity)
+        # 4. Continuous Operational Safety Consistency Layer (Section 21 & 29)
+        # Replaces discrete boolean threshold jumps with continuous piecewise operational severity
+        s_op, _ = compute_operational_severity(record_dict)
+        final_prob = float(np.clip(max(risk_prob, s_op), 0.0, 1.0))
         raw_score = round(100.0 * final_prob, 1)
         final_score = float(np.clip(raw_score, 0.0, 100.0))
     else:
