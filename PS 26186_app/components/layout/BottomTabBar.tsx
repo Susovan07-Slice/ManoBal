@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Home, CheckSquare, ClipboardList, TrendingUp } from "lucide-react";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export default function BottomTabBar() {
 
   return (
     <div className="absolute bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-      <nav className="flex items-center gap-2 h-16 bg-mb-glass-strong backdrop-blur-xl border border-mb-glass-border rounded-full px-3 shadow-[0_8px_30px_rgba(0,0,0,0.12)] pointer-events-auto">
+      <nav className="flex items-center gap-2 h-16 bg-glass-dark backdrop-blur-xl border border-glass-border rounded-full px-3 shadow-[0_8px_30px_rgba(0,0,0,0.12)] pointer-events-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = pathname === tab.href;
