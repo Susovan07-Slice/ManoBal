@@ -42,22 +42,18 @@ def _apply_scope(query, model, current_user: User):
     """
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
-        user_location = (current_user.location or "").strip().lower()
-        query = query.filter(
-            func.lower(Personnel.battalion) == user_battalion,
-            func.lower(Personnel.location) == user_location
-        )
+        if user_battalion:
+            query = query.filter(func.lower(Personnel.battalion) == user_battalion)
     return query
 
 
 def _apply_scope_welfare_requests(query, current_user: User):
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
-        user_location = (current_user.location or "").strip().lower()
-        query = query.filter(
-            func.lower(func.coalesce(WelfareRequest.battalion, Personnel.battalion)) == user_battalion,
-            func.lower(func.coalesce(WelfareRequest.location, Personnel.location)) == user_location
-        )
+        if user_battalion:
+            query = query.filter(
+                func.lower(func.coalesce(WelfareRequest.battalion, Personnel.battalion)) == user_battalion
+            )
     return query
 
 
@@ -73,15 +69,14 @@ def get_dashboard_summary(
     """
     Computes real-time aggregate statistics.
     For Officers and Welfare roles, metrics are strictly constrained to their
-    assigned Battalion and Location scope.
+    assigned Battalion scope.
     """
     # 1. Total personnel in scope
     p_query = db.query(Personnel)
     if current_user.role in ["officer", "welfare"]:
-        p_query = p_query.filter(
-            func.lower(Personnel.battalion) == (current_user.battalion or "").strip().lower(),
-            func.lower(Personnel.location) == (current_user.location or "").strip().lower()
-        )
+        user_battalion = (current_user.battalion or "").strip().lower()
+        if user_battalion:
+            p_query = p_query.filter(func.lower(Personnel.battalion) == user_battalion)
     total_personnel = p_query.count()
 
     # 2. Latest assessment per personnel in scope

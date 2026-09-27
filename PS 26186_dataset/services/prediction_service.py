@@ -11,8 +11,17 @@ class WelfarePredictionService:
     """
     def __init__(self, model_path: Optional[str] = None):
         if model_path is None:
+            v2_engine_path = os.path.join(settings.BASE_DIR, "models", "welfare_risk_engine_v2.pkl")
+            v4_path = os.path.join(settings.BASE_DIR, "models", "stress_risk_ensemble_v4.pkl")
+            v3_path = os.path.join(settings.BASE_DIR, "models", "stress_risk_ensemble_v3.pkl")
             v2_path = os.path.join(settings.BASE_DIR, "models", "stress_risk_ensemble_v2.pkl")
-            if os.path.exists(v2_path):
+            if os.path.exists(v2_engine_path):
+                model_path = v2_engine_path
+            elif os.path.exists(v4_path):
+                model_path = v4_path
+            elif os.path.exists(v3_path):
+                model_path = v3_path
+            elif os.path.exists(v2_path):
                 model_path = v2_path
             else:
                 model_path = settings.MODEL_PATH

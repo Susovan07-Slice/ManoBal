@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from core.config import logger, settings
-from schemas.prediction import PredictionRequest, PredictionResponse
+from schemas.prediction import PredictionRequest, PredictionResponse, DiagnosticResponse
 from services.prediction_service import WelfarePredictionService, get_prediction_service
 from api.deps import get_current_user
 from db.models.user import User
@@ -64,6 +64,44 @@ def evaluate_sensitivity(
     }
     res = evaluate_counterfactual_sensitivity(service.predictor.predictor, b_dict, perturbations)
     return res
+
+@router.post(
+    "/predict/diagnostic",
+    response_model=DiagnosticResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Development Diagnostic Stress Inference Endpoint",
+    description="Development-only diagnostic response providing full raw vs calibrated probabilities, risk score, and factors."
+)
+def predict_diagnostic(
+    request: PredictionRequest,
+    current_user: User = Depends(get_current_user),
+    service: WelfarePredictionService = Depends(get_prediction_service)
+) -> DiagnosticResponse:
+    record_dict = request.to_dataframe_dict()
+    raw_res = service.predictor.assess_personnel(record_dict)
+    
+    # Extract internal raw and calibrated probabilities
+    raw_probs = raw_res.get("raw_probabilities", raw_res.get("probabilities", {}))
+    cal_probs = raw_res.get("calibrated_probabilities", raw_res.get("probabilities", {}))
+    
+    return DiagnosticResponse(
+        model_version=str(raw_res.get("model_version", "stress_risk_ensemble_v4")),
+        predicted_class=str(raw_res.get("stress_level", "Routine")),
+        raw_probabilities={
+            "low": float(raw_probs.get("Low", 0.0)),
+            "medium": float(raw_probs.get("Medium", 0.0)),
+            "high": float(raw_probs.get("High", 0.0)),
+        },
+        calibrated_probabilities={
+            "low": float(cal_probs.get("Low", 0.0)),
+            "medium": float(cal_probs.get("Medium", 0.0)),
+            "high": float(cal_probs.get("High", 0.0)),
+        },
+        risk_score=float(raw_res.get("risk_score", 0.0)),
+        risk_category=str(raw_res.get("risk_priority", "Routine")),
+        top_risk_factors=raw_res.get("key_factors", raw_res.get("top_factors", []))
+    )
+
 
 from sqlalchemy import text
 from db.session import engine

@@ -6,6 +6,7 @@ import { getAssessmentHistory } from "@/lib/assessment";
 import { computePersonalTrend } from "@/lib/trends";
 import { StressAssessmentOut } from "@/types/api";
 import { PersonalTrend } from "@/types/trends";
+import { RiskCalendarHeatmap } from "@/components/screens/RiskCalendarHeatmap";
 import { TrendChart } from "@/components/screens/TrendChart";
 import { TrendSummaryCard } from "@/components/screens/TrendSummaryCard";
 import Link from "next/link";
@@ -87,7 +88,7 @@ export default function TrendsRoute() {
   }
 
   return (
-    <div className="p-4 flex flex-col gap-6 pb-20">
+    <div className="p-4 flex flex-col gap-6 pb-28 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-mb-text-primary">Personal Insights</h2>
@@ -112,6 +113,9 @@ export default function TrendsRoute() {
         </div>
         <TrendChart data={trend.last7Days} />
       </div>
+
+      {/* Primary Visualization: Calendar Heatmap of Historical Risk Trends */}
+      <RiskCalendarHeatmap assessments={assessments} onRefresh={fetchTrends} />
 
       {/* Historical Assessment Log */}
       <div className="mt-4">

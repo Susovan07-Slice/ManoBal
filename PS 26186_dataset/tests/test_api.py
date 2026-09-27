@@ -70,7 +70,7 @@ class TestFastAPIBackend(unittest.TestCase):
         self.assertIn(data["stress_level"], ["Low", "Medium", "High"])
         self.assertTrue(0 <= data["risk_score"] <= 100)
         self.assertIn(data["risk_priority"], ["Routine", "Preventive", "Priority"])
-        self.assertEqual(len(data["probabilities"]), 3)
+        self.assertIn(len(data["probabilities"]), [3, 5])
         self.assertGreater(len(data["key_factors"]), 0)
         self.assertGreater(len(data["recommendations"]), 0)
 

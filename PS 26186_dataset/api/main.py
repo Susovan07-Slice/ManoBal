@@ -96,6 +96,10 @@ app.include_router(hrms_router, prefix="/api")
 app.include_router(telemetry_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
 
+# Also mount prediction and auth at root prefix for direct access
+app.include_router(prediction_router, prefix="")
+app.include_router(auth_router, prefix="")
+
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def root_dashboard():
     return """

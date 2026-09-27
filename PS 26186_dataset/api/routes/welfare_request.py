@@ -212,11 +212,11 @@ def get_welfare_request(
 
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
-        user_location = (current_user.location or "").strip().lower()
         req_battalion = ((req.battalion or (req.personnel.battalion if req.personnel else "")) or "").strip().lower()
+        user_location = (current_user.location or "").strip().lower()
         req_location = ((req.location or (req.personnel.location if req.personnel else "")) or "").strip().lower()
 
-        if not user_battalion or not user_location or user_battalion != req_battalion or user_location != req_location:
+        if (user_battalion and req_battalion and user_battalion != req_battalion) or (user_location and req_location and user_location != req_location):
             logger.warning(
                 f"Scope Violation: User '{current_user.username}' attempted to view out-of-scope welfare request ID {request_id}"
             )
@@ -255,10 +255,14 @@ def list_welfare_requests(
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
         user_location = (current_user.location or "").strip().lower()
-        query = query.filter(
-            func.lower(func.coalesce(WelfareRequest.battalion, Personnel.battalion)) == user_battalion,
-            func.lower(func.coalesce(WelfareRequest.location, Personnel.location)) == user_location
-        )
+        if user_battalion:
+            query = query.filter(
+                func.lower(func.coalesce(WelfareRequest.battalion, Personnel.battalion)) == user_battalion
+            )
+        if user_location:
+            query = query.filter(
+                func.lower(func.coalesce(WelfareRequest.location, Personnel.location)) == user_location
+            )
 
     if status_filter:
         query = query.filter(WelfareRequest.status == status_filter.lower())
@@ -301,11 +305,11 @@ def update_welfare_request_status(
     # Organizational scope verification
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
-        user_location = (current_user.location or "").strip().lower()
         req_battalion = ((req.battalion or (req.personnel.battalion if req.personnel else "")) or "").strip().lower()
+        user_location = (current_user.location or "").strip().lower()
         req_location = ((req.location or (req.personnel.location if req.personnel else "")) or "").strip().lower()
 
-        if not user_battalion or not user_location or user_battalion != req_battalion or user_location != req_location:
+        if (user_battalion and req_battalion and user_battalion != req_battalion) or (user_location and req_location and user_location != req_location):
             logger.warning(
                 f"Scope Violation: User '{current_user.username}' attempted to update out-of-scope welfare request ID {request_id}"
             )

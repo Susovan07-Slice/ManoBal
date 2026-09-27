@@ -1,0 +1,253 @@
+[
+  {
+    "api_field": "duty_hours_per_week",
+    "internal_field": "duty_hours_per_week / Working_Hours_per_Week / Duty_Hours_Per_Week",
+    "model_features": [
+      "Duty_Hours_Per_Week",
+      "Working_Hours_per_Week",
+      "workload_intensity_ratio",
+      "active_recovery_ratio"
+    ],
+    "datatype": "float",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0.0, 120.0] (typical [20, 90])",
+    "semantic_meaning": "Weekly operational duty hours assigned/worked",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "Working_Hours_per_Week, Duty_Hours_Per_Week, duty_hours_per_week",
+    "lgb_importance": 264.0,
+    "xgb_importance": 0.08208394050598145,
+    "lr_coef_mean": 1.19090494219536
+  },
+  {
+    "api_field": "consecutive_duty_days",
+    "internal_field": "consecutive_duty_days / Consecutive_Duty_Days / consecutive_days_on_duty",
+    "model_features": [
+      "Consecutive_Duty_Days",
+      "consecutive_days_on_duty",
+      "night_shift_burden",
+      "deployment_fatigue_factor"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0, 60] (typical [0, 30])",
+    "semantic_meaning": "Continuous consecutive duty days without a 24h rest period",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "Consecutive_Duty_Days, consecutive_days_on_duty",
+    "lgb_importance": 274.0,
+    "xgb_importance": 0.038564957678318024,
+    "lr_coef_mean": 0.5598444547191823
+  },
+  {
+    "api_field": "night_shifts_per_month",
+    "internal_field": "night_shifts_per_month / Night_Shifts_Per_Month",
+    "model_features": [
+      "Night_Shifts_Per_Month",
+      "night_shift_burden"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0, 31] (typical [0, 20])",
+    "semantic_meaning": "Night shifts assigned in trailing 30 days (circadian strain)",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "Night_Shifts_Per_Month",
+    "lgb_importance": 191.0,
+    "xgb_importance": 0.008243164047598839,
+    "lr_coef_mean": 0.9491748206456331
+  },
+  {
+    "api_field": "sleep_hours",
+    "internal_field": "sleep_hours / Sleep_Hours",
+    "model_features": [
+      "Sleep_Hours",
+      "sleep_debt_index",
+      "active_recovery_ratio"
+    ],
+    "datatype": "float",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0.0, 24.0] (typical [2.5, 9.0])",
+    "semantic_meaning": "Average nightly restorative sleep hours",
+    "expected_direction": "Decreasing (-1) (Protective)",
+    "consumed": true,
+    "aliased": "Sleep_Hours",
+    "lgb_importance": 351.0,
+    "xgb_importance": 0.10582248866558075,
+    "lr_coef_mean": 0.8350069039533784
+  },
+  {
+    "api_field": "physical_fatigue",
+    "internal_field": "physical_fatigue",
+    "model_features": [
+      "physical_fatigue"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[1, 5] (1=Refreshed, 5=Exhausted)",
+    "semantic_meaning": "Self-reported physical fatigue and muscular exhaustion",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "physical_fatigue",
+    "lgb_importance": 0.0,
+    "xgb_importance": 0.011777260340750217,
+    "lr_coef_mean": 0.11621160771955784
+  },
+  {
+    "api_field": "physical_activity_hours_per_week",
+    "internal_field": "physical_activity_hours_per_week / Physical_Activity_Hours_per_Week",
+    "model_features": [
+      "Physical_Activity_Hours_per_Week",
+      "active_recovery_ratio"
+    ],
+    "datatype": "float",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0.0, 50.0] (typical [0.5, 15.0])",
+    "semantic_meaning": "Weekly physical conditioning / exercise hours",
+    "expected_direction": "Decreasing (-1) (Protective)",
+    "consumed": true,
+    "aliased": "Physical_Activity_Hours_per_Week",
+    "lgb_importance": 389.0,
+    "xgb_importance": 0.07476445287466049,
+    "lr_coef_mean": 0.8216745203680815
+  },
+  {
+    "api_field": "mood_score",
+    "internal_field": "mood_score / JobSatisfaction / RelationshipSatisfaction",
+    "model_features": [
+      "mood_score",
+      "JobSatisfaction",
+      "RelationshipSatisfaction"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[1, 5] (1=Distressed/Depressed, 5=Highly Resilient)",
+    "semantic_meaning": "Self-reported psychological morale, mood and satisfaction",
+    "expected_direction": "Decreasing (-1) (Protective)",
+    "consumed": true,
+    "aliased": "JobSatisfaction, RelationshipSatisfaction, mood_score",
+    "lgb_importance": 201.0,
+    "xgb_importance": 0.044163305312395096,
+    "lr_coef_mean": 1.5790060132910895
+  },
+  {
+    "api_field": "burnout_symptoms",
+    "internal_field": "burnout_symptoms / Burnout_Symptoms",
+    "model_features": [
+      "Burnout_Symptoms"
+    ],
+    "datatype": "str",
+    "encoding": "OneHotEncoder (Rarely, Sometimes, Often)",
+    "allowed_range": "[\"Rarely\", \"Sometimes\", \"Often\"]",
+    "semantic_meaning": "Frequency of feeling emotionally overwhelmed/burned out",
+    "expected_direction": "Increasing (Often > Sometimes > Rarely)",
+    "consumed": true,
+    "aliased": "Burnout_Symptoms",
+    "lgb_importance": 170.0,
+    "xgb_importance": 0.12722070515155792,
+    "lr_coef_mean": 1.0455348192203826
+  },
+  {
+    "api_field": "interest_score",
+    "internal_field": "interest_score",
+    "model_features": [
+      "interest_score"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0, 3] (0=None/Normal, 1=Mild loss, 2=Moderate loss, 3=Severe loss/Anhedonia)",
+    "semantic_meaning": "Severity of loss of interest/satisfaction in tasks (PHQ-9 item 1)",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "interest_score",
+    "lgb_importance": 68.0,
+    "xgb_importance": 0.02455112896859646,
+    "lr_coef_mean": 0.616075801594049
+  },
+  {
+    "api_field": "discouraged_score",
+    "internal_field": "discouraged_score",
+    "model_features": [
+      "discouraged_score"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0, 3] (0=Never, 1=Several days, 2=More than half, 3=Nearly every day)",
+    "semantic_meaning": "Frequency of feeling down, depressed, discouraged, or exhausted (PHQ-9 item 2)",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "discouraged_score",
+    "lgb_importance": 105.0,
+    "xgb_importance": 0.014266107231378555,
+    "lr_coef_mean": 0.7989618572447886
+  },
+  {
+    "api_field": "concentration_score",
+    "internal_field": "concentration_score",
+    "model_features": [
+      "concentration_score"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0, 3] (0=Never, 1=Several days, 2=More than half, 3=Nearly every day)",
+    "semantic_meaning": "Difficulty concentrating on operational procedures (PHQ-9 item 7)",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "concentration_score",
+    "lgb_importance": 76.0,
+    "xgb_importance": 0.028369352221488953,
+    "lr_coef_mean": 0.7200546224871643
+  },
+  {
+    "api_field": "operational_exposure",
+    "internal_field": "operational_exposure / Operational_Exposure",
+    "model_features": [
+      "Operational_Exposure"
+    ],
+    "datatype": "str",
+    "encoding": "OneHotEncoder (Low, Medium, High)",
+    "allowed_range": "[\"Low\", \"Medium\", \"High\"]",
+    "semantic_meaning": "Environmental and operational hazard exposure level",
+    "expected_direction": "Increasing (High > Medium > Low)",
+    "consumed": true,
+    "aliased": "Operational_Exposure",
+    "lgb_importance": 5.0,
+    "xgb_importance": 0.00036141398595646024,
+    "lr_coef_mean": 0.3494872143348171
+  },
+  {
+    "api_field": "remote_posting",
+    "internal_field": "remote_posting / Remote_Posting",
+    "model_features": [
+      "Remote_Posting"
+    ],
+    "datatype": "str",
+    "encoding": "OneHotEncoder (No, Yes)",
+    "allowed_range": "[\"No\", \"Yes\"]",
+    "semantic_meaning": "Stationed at isolated / high-altitude / remote military post",
+    "expected_direction": "Increasing (Yes > No)",
+    "consumed": true,
+    "aliased": "Remote_Posting",
+    "lgb_importance": 0.0,
+    "xgb_importance": 0.0004174639761913568,
+    "lr_coef_mean": 0.062380587722992105
+  },
+  {
+    "api_field": "leave_gap_days",
+    "internal_field": "leave_gap_days / Leave_Gap_Days",
+    "model_features": [
+      "Leave_Gap_Days",
+      "recovery_deficit_score"
+    ],
+    "datatype": "int",
+    "encoding": "StandardScaler (numeric)",
+    "allowed_range": "[0, 365] (typical [7, 365])",
+    "semantic_meaning": "Days elapsed since personnel last took sanctioned restorative leave",
+    "expected_direction": "Increasing (+1)",
+    "consumed": true,
+    "aliased": "Leave_Gap_Days",
+    "lgb_importance": 355.0,
+    "xgb_importance": 0.016849108040332794,
+    "lr_coef_mean": 0.42875854017021814
+  }
+]

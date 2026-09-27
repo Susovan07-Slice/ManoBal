@@ -186,66 +186,116 @@ def register_jawan(signup_data: JawanSignup, db: Session = Depends(get_db)):
             detail=str(e)
         )
 
-    # 2. Check duplicate username
+    # 2. Check duplicate username and existing personnel
     existing_user = db.query(User).filter(func.lower(User.username) == clean_username).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Service username '{signup_data.username}' is already registered."
-        )
-
-    # 3. Check duplicate personnel_code
     existing_personnel = db.query(Personnel).filter(func.upper(Personnel.personnel_code) == clean_code).first()
-    if existing_personnel:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Personnel ID '{signup_data.personnel_code}' is already registered in the system."
-        )
 
     try:
-        # 4. Create Personnel record first within transaction
-        new_personnel = Personnel(
-            personnel_code=clean_code,
-            name=signup_data.name.strip(),
-            age=signup_data.age,
-            gender=signup_data.gender,
-            department=signup_data.department.strip(),
-            battalion=clean_battalion,
-            job_role=signup_data.job_role.strip(),
-            location=clean_location,
-            experience_years=signup_data.experience_years,
-            duty_hours_per_week=signup_data.duty_hours_per_week or 40.0,
-            night_shifts_per_month=0,
-            consecutive_duty_days=0,
-            transfer_frequency=0,
-            training_load=2,
-            leave_gap_days=30,
-            deployment_days=0,
-            remote_posting="No",
-            operational_exposure="Low"
-        )
-        db.add(new_personnel)
-        db.flush()
+        if existing_personnel:
+            # Allow personnel claiming / updating profile
+            target_personnel = existing_personnel
+            target_personnel.name = signup_data.name.strip()
+            target_personnel.age = signup_data.age
+            target_personnel.gender = signup_data.gender
+            target_personnel.department = signup_data.department.strip()
+            target_personnel.job_role = signup_data.job_role.strip()
+            target_personnel.battalion = clean_battalion
+            target_personnel.location = clean_location
+            target_personnel.experience_years = signup_data.experience_years
+            if signup_data.duty_hours_per_week:
+                target_personnel.duty_hours_per_week = signup_data.duty_hours_per_week
 
-        # 5. Create User record with role strictly enforced as 'personnel'
-        hashed_pw = hash_password(signup_data.password)
-        new_user = User(
-            username=clean_username,
-            hashed_password=hashed_pw,
-            role="personnel",  # Strictly server-enforced
-            personnel_id=new_personnel.id,
-            battalion=clean_battalion,
-            location=clean_location,
-            is_active=True
-        )
-        db.add(new_user)
+            linked_user = db.query(User).filter(User.personnel_id == target_personnel.id).first()
+            hashed_pw = hash_password(signup_data.password)
+
+            if existing_user:
+                if existing_user.personnel_id == target_personnel.id or not existing_user.personnel_id:
+                    existing_user.hashed_password = hashed_pw
+                    existing_user.battalion = clean_battalion
+                    existing_user.location = clean_location
+                    existing_user.personnel_id = target_personnel.id
+                    existing_user.is_active = True
+                    new_user = existing_user
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Service username '{signup_data.username}' is already linked to a different personnel profile."
+                    )
+            elif linked_user:
+                if linked_user.username != clean_username:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Personnel code '{signup_data.personnel_code}' is already registered."
+                    )
+                linked_user.hashed_password = hashed_pw
+                linked_user.battalion = clean_battalion
+                linked_user.location = clean_location
+                linked_user.is_active = True
+                new_user = linked_user
+            else:
+                new_user = User(
+                    username=clean_username,
+                    hashed_password=hashed_pw,
+                    role="personnel",
+                    personnel_id=target_personnel.id,
+                    battalion=clean_battalion,
+                    location=clean_location,
+                    is_active=True
+                )
+                db.add(new_user)
+        else:
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Service username '{signup_data.username}' is already registered."
+                )
+
+            # Create Personnel record
+            target_personnel = Personnel(
+                personnel_code=clean_code,
+                name=signup_data.name.strip(),
+                age=signup_data.age,
+                gender=signup_data.gender,
+                department=signup_data.department.strip(),
+                battalion=clean_battalion,
+                job_role=signup_data.job_role.strip(),
+                location=clean_location,
+                experience_years=signup_data.experience_years,
+                duty_hours_per_week=signup_data.duty_hours_per_week or 40.0,
+                night_shifts_per_month=0,
+                consecutive_duty_days=0,
+                transfer_frequency=0,
+                training_load=2,
+                leave_gap_days=30,
+                deployment_days=0,
+                remote_posting="No",
+                operational_exposure="Low"
+            )
+            db.add(target_personnel)
+            db.flush()
+
+            hashed_pw = hash_password(signup_data.password)
+            new_user = User(
+                username=clean_username,
+                hashed_password=hashed_pw,
+                role="personnel",
+                personnel_id=target_personnel.id,
+                battalion=clean_battalion,
+                location=clean_location,
+                is_active=True
+            )
+            db.add(new_user)
+
         db.commit()
         db.refresh(new_user)
-        db.refresh(new_personnel)
+        db.refresh(target_personnel)
         logger.info(
-            f"Self-registered new Jawan: '{new_user.username}' linked to Personnel ID {new_personnel.id} "
-            f"({new_personnel.personnel_code}) in '{clean_battalion} • {clean_location}'"
+            f"Jawan registration successful: '{new_user.username}' linked to Personnel ID {target_personnel.id} "
+            f"({target_personnel.personnel_code}) in '{clean_battalion} • {clean_location}'"
         )
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         logger.error(f"Error registering jawan: {e}", exc_info=True)

@@ -58,18 +58,16 @@ def ingest_wearable_telemetry(
             )
     elif current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
-        user_location = (current_user.location or "").strip().lower()
         p_battalion = (personnel.battalion or "").strip().lower()
-        p_location = (personnel.location or "").strip().lower()
 
-        if not user_battalion or not user_location or user_battalion != p_battalion or user_location != p_location:
+        if user_battalion and p_battalion and user_battalion != p_battalion:
             logger.warning(
-                f"TELEMETRY_SCOPE_VIOLATION: User '{current_user.username}' ({user_battalion} • {user_location}) "
-                f"attempted telemetry ingestion for out-of-scope personnel ID {personnel.id} ({p_battalion} • {p_location})"
+                f"TELEMETRY_SCOPE_VIOLATION: User '{current_user.username}' ({user_battalion}) "
+                f"attempted telemetry ingestion for out-of-scope personnel ID {personnel.id} ({p_battalion})"
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied: Target personnel is outside your assigned Battalion and Location scope."
+                detail="Access denied: Target personnel is outside your assigned Battalion scope."
             )
 
     now = datetime.now(timezone.utc)

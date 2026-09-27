@@ -66,6 +66,9 @@ class StressAssessmentOut(BaseModel):
     risk_change: Optional[float] = 0.0
     consecutive_high_risk: Optional[int] = 0
     risk_probability: Optional[float] = None
+    risk_percentile: Optional[float] = None
+    out_of_distribution: Optional[bool] = False
+    ood_reasons: Optional[List[str]] = []
     key_factors: List[str] = []
     model_version: str
     assessment_timestamp: datetime

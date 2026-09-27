@@ -141,4 +141,20 @@ class PredictionResponse(BaseModel):
     wearable_7d_features_used: Optional[bool] = Field(False, description="Whether 7-day wearable telemetry was integrated")
     wearable_30d_features_used: Optional[bool] = Field(False, description="Whether 30-day wearable telemetry was integrated")
     is_simulated: Optional[bool] = Field(True, description="Prototype simulation indicator")
+    calibrated_probability: Optional[float] = Field(None, description="Calibrated risk probability in [0, 1]")
+    prediction_uncertainty: Optional[float] = Field(None, description="Normalized model prediction uncertainty [0, 1]")
+    calibration_method: Optional[str] = Field("Platt Scaling (Sigmoid) via 5-Fold OOF CalibratedClassifierCV", description="Probability calibration method")
+    out_of_distribution: Optional[bool] = Field(False, description="Out-of-distribution input flag")
+    risk_percentile: Optional[float] = Field(None, description="Empirical reference population percentile [0.0 - 100.0]")
+    ood_reasons: Optional[List[str]] = Field(default_factory=list, description="Reasons triggering out-of-distribution warning")
+
+
+class DiagnosticResponse(BaseModel):
+    model_version: str = Field(..., description="Active ML model version")
+    predicted_class: str = Field(..., description="Predicted stress level class")
+    raw_probabilities: Dict[str, float] = Field(..., description="Uncalibrated model probabilities")
+    calibrated_probabilities: Dict[str, float] = Field(..., description="Calibrated probabilities")
+    risk_score: float = Field(..., description="Continuous calibrated risk score (0-100)")
+    risk_category: str = Field(..., description="Operational triage priority category")
+    top_risk_factors: List[str] = Field(..., description="Top contributing factors")
 

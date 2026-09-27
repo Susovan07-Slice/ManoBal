@@ -59,13 +59,16 @@ export interface StressAssessmentOut {
   high_probability: number;
   risk_score: number;
   risk_priority: 'Routine' | 'Preventive' | 'Priority';
-  confidence?: 'High' | 'Moderate' | 'Low' | string;
+  risk_category?: 'Low' | 'Moderate' | 'Elevated' | 'High' | 'Critical' | string;
+  confidence?: 'High' | 'Moderate' | 'Low' | string | number;
   uncertainty?: number;
   risk_trend?: 'Improving' | 'Worsening' | 'Stable' | string;
   risk_change?: number;
   consecutive_high_risk?: number;
   risk_probability?: number;
   key_factors: string[];
+  top_risk_factors?: string[];
+  protective_factors?: string[];
   model_version: string;
   assessment_timestamp: string;
   recommendations: RecommendationOut[];
