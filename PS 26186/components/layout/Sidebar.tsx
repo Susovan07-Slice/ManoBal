@@ -25,9 +25,9 @@ export default function Sidebar() {
   return (
     <>
       <aside className="w-64 border-r border-surfaceHighlight bg-surface flex flex-col h-full shrink-0">
-        <div className="h-16 flex items-center px-6 border-b border-surfaceHighlight">
-          <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center mr-3 shrink-0">
-            <ShieldAlert className="text-accent w-4 h-4" />
+        <div className="h-20 flex items-center px-6 border-b border-surfaceHighlight">
+          <div className="w-12 h-12 flex items-center justify-center mr-4 shrink-0">
+            <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain drop-shadow-sm" />
           </div>
           <div>
             <h1 className="font-bold text-textPrimary tracking-wider uppercase text-sm leading-tight">

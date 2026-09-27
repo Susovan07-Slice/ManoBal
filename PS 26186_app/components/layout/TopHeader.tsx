@@ -8,20 +8,12 @@ export default function TopHeader({ title }: { title: string }) {
   const { user, logout } = useAuth();
 
   return (
-    <header className="flex items-center justify-between px-5 h-14 bg-black/25 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.15)] shrink-0 sticky top-0 z-40 transition-all">
-      <div className="flex items-center space-x-2.5">
-        <div className="flex gap-1.5 items-center">
-          <div className="w-6 h-6 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-0.5 border border-white/20">
-            <img src="/army.png" alt="Army" className="w-full h-full object-contain filter invert" />
-          </div>
-          <div className="w-6 h-6 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-0.5 border border-white/20">
-            <img src="/navy.png" alt="Navy" className="w-full h-full object-contain filter invert" />
-          </div>
-          <div className="w-6 h-6 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-0.5 border border-white/20">
-            <img src="/airforce.png" alt="Air Force" className="w-full h-full object-contain filter invert" />
-          </div>
+    <header className="flex items-center justify-between px-5 h-20 bg-black/25 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.15)] shrink-0 sticky top-0 z-40 transition-all">
+      <div className="flex items-center space-x-4">
+        <div className="w-20 h-20 flex items-center justify-center">
+          <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain drop-shadow-lg" />
         </div>
-        <h1 className="text-[15px] font-semibold text-white/95 tracking-tight">{title}</h1>
+        <h1 className="text-[20px] font-bold text-white/95 tracking-tight">{title}</h1>
       </div>
 
       {user && (

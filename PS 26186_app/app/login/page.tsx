@@ -53,19 +53,8 @@ export default function MobileLoginPage() {
       style={{ backgroundImage: "url('/login-bg.png')" }}
     >
       <div className="flex flex-col items-center mb-8">
-        <div className="mb-4">
-          <img src="/armed forces.png" alt="Indian Armed Forces" className="h-12 object-contain filter invert opacity-90" />
-        </div>
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-1 border border-white/20">
-            <img src="/army.png" alt="Indian Army" className="w-full h-full object-contain filter invert" />
-          </div>
-          <div className="w-16 h-16 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-1 border border-white/20">
-            <img src="/navy.png" alt="Indian Navy" className="w-full h-full object-contain filter invert" />
-          </div>
-          <div className="w-16 h-16 rounded-full overflow-hidden bg-black/40 flex items-center justify-center p-1 border border-white/20">
-            <img src="/airforce.png" alt="Indian Air Force" className="w-full h-full object-contain filter invert" />
-          </div>
+        <div className="w-32 h-32 mb-4 drop-shadow-xl flex items-center justify-center">
+          <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain" />
         </div>
         
         <h1 className="text-2xl font-bold text-mb-text-primary tracking-wider">ManoBal</h1>
