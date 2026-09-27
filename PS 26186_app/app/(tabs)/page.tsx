@@ -68,6 +68,7 @@ export default function HomeRoute() {
           const sessionDismissed = sessionStorage.getItem(`assessment_dismissed_${user.personnel_id}`);
           if (!sessionDismissed) {
             autoRedirectedRef.current = true;
+            sessionStorage.setItem(`assessment_dismissed_${user.personnel_id}`, 'true');
             router.push(
               !statusRes.has_assessment
                 ? "/assessment?reason=initial"

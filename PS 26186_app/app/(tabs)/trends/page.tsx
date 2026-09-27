@@ -91,12 +91,12 @@ export default function TrendsRoute() {
     <div className="p-4 flex flex-col gap-6 pb-28 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-mb-text-primary">Personal Insights</h2>
-          <p className="text-sm text-mb-text-secondary mt-0.5">Real-time stress and operational telemetry tracking</p>
+          <h2 className="text-2xl font-bold text-gray-800">Personal Insights</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Real-time stress and operational telemetry tracking</p>
         </div>
         <button
           onClick={fetchTrends}
-          className="p-2 bg-[#0a1412]/40 backdrop-blur-sm hover:bg-[#0a1412]/60 text-mb-text-secondary hover:text-mb-accent rounded-lg border border-[#1e332c]/50 transition"
+          className="p-2 bg-white/70 backdrop-blur-sm hover:bg-white text-gray-500 hover:text-gray-700 rounded-lg border border-gray-200 transition"
           title="Refresh telemetry"
         >
           <RefreshCw className="w-4 h-4" />
@@ -107,7 +107,7 @@ export default function TrendsRoute() {
       
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-mb-text-secondary uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
             Assessment Trajectory ({trend.last7Days.length} Records)
           </h3>
         </div>
@@ -119,19 +119,19 @@ export default function TrendsRoute() {
 
       {/* Historical Assessment Log */}
       <div className="mt-4">
-        <h3 className="text-xs font-bold text-mb-text-secondary uppercase tracking-widest mb-4">
+        <h3 className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">
           Assessment Log
         </h3>
         <div className="space-y-4">
           {assessments.slice(0, 5).map((a) => (
             <div
               key={a.id}
-              className="bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border rounded-2xl p-5 flex flex-col gap-4 hover:bg-white/5 transition-all duration-300"
+              className="bg-white/85 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_rgba(0,0,0,0.06)] rounded-2xl p-5 flex flex-col gap-4 hover:bg-white/95 transition-all duration-300"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-mb-text-secondary" />
-                  <span className="text-sm font-semibold tracking-wide text-mb-text-secondary">
+                  <Calendar className="w-5 h-5 text-gray-600" />
+                  <span className="text-sm font-semibold tracking-wide text-gray-600">
                     {new Date(a.assessment_timestamp).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
@@ -154,26 +154,26 @@ export default function TrendsRoute() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-sm pt-4 border-t border-mb-glass-border">
-                <span className="text-mb-text-secondary uppercase font-bold tracking-widest text-xs">
-                  Score: <strong className="text-mb-text-secondary text-sm">
+              <div className="flex items-center justify-between text-sm pt-4 border-t border-gray-200">
+                <span className="text-gray-600 uppercase font-bold tracking-widest text-xs">
+                  Score: <strong className="text-gray-800 text-sm">
                     {typeof a.risk_score === 'number' ? a.risk_score.toFixed(1) : a.risk_score}/100
                   </strong>
                 </span>
-                <span className="text-mb-text-secondary uppercase font-bold tracking-widest text-xs">
-                  Priority: <strong className="text-mb-text-secondary text-sm">{a.risk_priority}</strong>
+                <span className="text-gray-600 uppercase font-bold tracking-widest text-xs">
+                  Priority: <strong className="text-gray-800 text-sm">{a.risk_priority}</strong>
                 </span>
               </div>
 
 
               {a.key_factors && a.key_factors.length > 0 && (
-                <div className="text-sm text-mb-text-secondary pt-4 border-t border-mb-glass-border">
-                  <span className="text-mb-text-muted block text-[11px] uppercase font-bold tracking-widest mb-2.5">
+                <div className="text-sm text-mb-text-secondary pt-4 border-t border-gray-200">
+                  <span className="text-gray-400 block text-[11px] uppercase font-bold tracking-widest mb-2.5">
                     Key Factors
                   </span>
                   <div className="flex flex-wrap gap-2.5">
                     {a.key_factors.slice(0, 3).map((f, i) => (
-                      <span key={i} className="bg-black/20 text-mb-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg border border-mb-glass-border">
+                      <span key={i} className="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200">
                         {f}
                       </span>
                     ))}

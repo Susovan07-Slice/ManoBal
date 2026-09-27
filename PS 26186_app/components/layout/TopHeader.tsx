@@ -2,43 +2,32 @@
 
 import React from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, Shield } from 'lucide-react';
 
 export default function TopHeader({ title }: { title: string }) {
   const { user, logout } = useAuth();
 
   return (
-    <header className="flex items-center justify-between px-5 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm shrink-0 sticky top-0 z-40 transition-all">
-      <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-mb-accent to-emerald-400 flex items-center justify-center shadow-sm">
-          <span className="text-white font-bold text-xs">MB</span>
+    <header className="flex items-center justify-between px-5 h-14 bg-black/25 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.15)] shrink-0 sticky top-0 z-40 transition-all">
+      <div className="flex items-center space-x-2.5">
+        <div className="w-7 h-7 rounded-full overflow-hidden shadow-lg shadow-mb-accent/20 border border-white/20">
+          <img src="/manobal-logo.jpg" alt="ManoBal" className="w-full h-full object-cover" />
         </div>
-        <h1 className="text-[17px] font-bold text-gray-800 tracking-tight">{title}</h1>
+        <h1 className="text-[15px] font-semibold text-white/95 tracking-tight">{title}</h1>
       </div>
 
       {user && (
         <div className="flex items-center space-x-3">
-          <div className="flex flex-col items-end mr-1 hidden sm:flex">
-            <span className="text-xs font-semibold text-gray-700">{user.username}</span>
-            <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Active</span>
-          </div>
-          <button
-            title="Profile & Options"
-            className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors shadow-inner"
-          >
-            <User className="w-4 h-4" />
-          </button>
+          <span className="text-[11px] font-medium text-white/60 tracking-wide">{user.username}</span>
           <button
             onClick={logout}
             title="Sign Out"
-            className="w-8 h-8 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition-colors shadow-inner"
+            className="w-7 h-7 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center text-white/50 hover:bg-white/20 hover:text-white/80 transition-all"
           >
-            <LogOut className="w-4 h-4 ml-0.5" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
     </header>
   );
 }
-
-
