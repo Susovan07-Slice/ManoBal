@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/lib/AuthContext";
@@ -87,11 +87,11 @@ export default function TrendsRoute() {
   }
 
   return (
-    <div className="p-4 flex flex-col gap-6 animate-in fade-in duration-500 pb-20">
+    <div className="p-4 flex flex-col gap-6 pb-20">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-mb-text-primary">Personal Insights</h2>
-          <p className="text-xs text-mb-text-secondary mt-0.5">Real-time stress and operational telemetry tracking</p>
+          <h2 className="text-2xl font-bold text-mb-text-primary">Personal Insights</h2>
+          <p className="text-sm text-mb-text-secondary mt-0.5">Real-time stress and operational telemetry tracking</p>
         </div>
         <button
           onClick={fetchTrends}
@@ -106,17 +106,16 @@ export default function TrendsRoute() {
       
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-semibold text-mb-text-secondary uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-mb-text-secondary uppercase tracking-wider">
             Assessment Trajectory ({trend.last7Days.length} Records)
           </h3>
-          <span className="text-[10px] text-mb-accent/80 font-mono">Real Backend Data</span>
         </div>
         <TrendChart data={trend.last7Days} />
       </div>
 
       {/* Historical Assessment Log */}
       <div className="mt-4">
-        <h3 className="text-[10px] font-bold text-mb-text-secondary uppercase tracking-widest mb-4">
+        <h3 className="text-xs font-bold text-mb-text-secondary uppercase tracking-widest mb-4">
           Assessment Log
         </h3>
         <div className="space-y-4">
@@ -127,8 +126,8 @@ export default function TrendsRoute() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-mb-text-secondary" />
-                  <span className="text-xs font-semibold tracking-wide text-mb-text-secondary">
+                  <Calendar className="w-5 h-5 text-mb-text-secondary" />
+                  <span className="text-sm font-semibold tracking-wide text-mb-text-secondary">
                     {new Date(a.assessment_timestamp).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
@@ -139,7 +138,7 @@ export default function TrendsRoute() {
                   </span>
                 </div>
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                  className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${
                     a.stress_level === 'High'
                       ? 'bg-rose-500/10 text-mb-saffron border border-rose-500/20'
                       : a.stress_level === 'Medium'
@@ -151,26 +150,26 @@ export default function TrendsRoute() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs pt-3 border-t border-mb-glass-border">
-                <span className="text-mb-text-secondary uppercase font-bold tracking-widest text-[10px]">
-                  Score: <strong className="text-mb-text-secondary text-xs">
+              <div className="flex items-center justify-between text-sm pt-4 border-t border-mb-glass-border">
+                <span className="text-mb-text-secondary uppercase font-bold tracking-widest text-xs">
+                  Score: <strong className="text-mb-text-secondary text-sm">
                     {typeof a.risk_score === 'number' ? a.risk_score.toFixed(1) : a.risk_score}/100
                   </strong>
                 </span>
-                <span className="text-mb-text-secondary uppercase font-bold tracking-widest text-[10px]">
-                  Priority: <strong className="text-mb-text-secondary text-xs">{a.risk_priority}</strong>
+                <span className="text-mb-text-secondary uppercase font-bold tracking-widest text-xs">
+                  Priority: <strong className="text-mb-text-secondary text-sm">{a.risk_priority}</strong>
                 </span>
               </div>
 
 
               {a.key_factors && a.key_factors.length > 0 && (
-                <div className="text-[11px] text-mb-text-secondary pt-3 border-t border-mb-glass-border">
-                  <span className="text-mb-text-muted block text-[9px] uppercase font-bold tracking-widest mb-2">
+                <div className="text-sm text-mb-text-secondary pt-4 border-t border-mb-glass-border">
+                  <span className="text-mb-text-muted block text-[11px] uppercase font-bold tracking-widest mb-2.5">
                     Key Factors
                   </span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2.5">
                     {a.key_factors.slice(0, 3).map((f, i) => (
-                      <span key={i} className="bg-black/20 text-mb-text-secondary text-[10px] font-medium px-2.5 py-1 rounded-lg border border-mb-glass-border">
+                      <span key={i} className="bg-black/20 text-mb-text-secondary text-xs font-medium px-3 py-1.5 rounded-lg border border-mb-glass-border">
                         {f}
                       </span>
                     ))}
@@ -182,13 +181,6 @@ export default function TrendsRoute() {
         </div>
       </div>
 
-      {/* Prototype Notice */}
-      <div className="p-3 bg-[#0a1412]/40 backdrop-blur-md border border-[#1e332c]/50 rounded-xl flex items-start gap-2.5">
-        <ShieldAlert className="w-4 h-4 text-mb-accent/70 shrink-0 mt-0.5" />
-        <p className="text-[11px] text-mb-text-secondary leading-relaxed">
-          <strong>Prototype Notice:</strong> Predictions are decision-support indicators and are not medical diagnoses or disciplinary decisions.
-        </p>
-      </div>
     </div>
   );
 }
