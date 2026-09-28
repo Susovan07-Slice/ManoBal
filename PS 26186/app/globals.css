@@ -2,15 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* 1. Background Colors (60% of UI) */
+  --bg-app: #F1F7F4;          /* Soft Mint main app/body background */
+  --bg-surface: #FAFAFC;      /* Soft off-white for elevated surfaces, cards, containers, modals (No pure #FFFFFF) */
+  --bg-surface-highlight: #E8F0EC; /* Lighter tint of Soft Mint for subtle containers/rows */
+  --bg-surface-muted: #E2EBE5;     /* Subtle tag/inner background */
+  --border-surface: #D5E2D9;       /* Calming soft border */
+
+  /* 2. Secondary & Accent Colors (30% and 10% of UI) */
+  --color-primary: #7BA083;        /* Muted Sage (Brand color, active states, buttons, progress bars) */
+  --color-primary-hover: #698D71;
+  --color-primary-light: rgba(123, 160, 131, 0.12); /* Lighter opacity for secondary backgrounds, highlights */
+  --color-primary-subtle: rgba(123, 160, 131, 0.22);
+  --color-primary-border: rgba(123, 160, 131, 0.38);
+
+  /* 3. Typography (Text Colors) - No pure black (#000000) */
+  --text-primary: #2D3748;        /* Soft dark slate gray (Primary headings and body text) */
+  --text-secondary: #64748B;      /* Lighter muted gray (Captions, placeholders, subtitles) */
+  --text-muted: #8292A2;
+  --text-on-accent: #FAFAFC;      /* Soft off-white for high-contrast legible button text */
+
+  /* 4. Error States / Alerts (Anxiety-Safe, No Saturated Reds) */
+  --color-alert-rose: #C26D6D;         /* Muted dusty rose */
+  --color-alert-rose-bg: #FAF0F0;      /* Soft dusty rose background */
+  --color-alert-rose-border: #E8B4B4;  /* Gentle rose border */
+  --color-alert-rose-text: #964747;    /* Accessible dark rose text */
+
+  --color-alert-coral: #CB7A5C;        /* Soft coral */
+  --color-alert-coral-bg: #FDF2EC;
+  --color-alert-coral-border: #F1C5B3;
+  --color-alert-coral-text: #8F4B33;
+
+  --color-alert-amber: #D99B5C;        /* Soft warm amber */
+  --color-alert-amber-bg: #FDF6EE;
+  --color-alert-amber-border: #F3D2AE;
+  --color-alert-amber-text: #8E5B23;
+
+  --color-alert-sage: #60987A;         /* Calming sage */
+  --color-alert-sage-bg: #EEF6F2;
+  --color-alert-sage-border: #BBD9C7;
+  --color-alert-sage-text: #2D6346;
+
+  --color-alert-slate: #5B88A5;        /* Soft slate blue */
+  --color-alert-slate-bg: #EEF4F8;
+  --color-alert-slate-border: #BCD3E3;
+  --color-alert-slate-text: #3E6580;
+
+  /* Card Shadow - Soothing and gentle */
+  --shadow-card: 0 1px 3px 0 rgba(45, 55, 72, 0.05), 0 1px 2px -1px rgba(45, 55, 72, 0.03);
+  --shadow-elevated: 0 4px 16px -2px rgba(45, 55, 72, 0.07), 0 2px 6px -1px rgba(45, 55, 72, 0.04);
+}
+
 @layer base {
-  body {
-    @apply bg-background text-textPrimary font-sans antialiased;
+  html, body {
+    background-color: var(--bg-app) !important;
+    color: var(--text-primary) !important;
+    @apply font-sans antialiased;
+  }
+
+  /* Accessible selection styling */
+  ::selection {
+    background-color: rgba(123, 160, 131, 0.3);
+    color: var(--text-primary);
+  }
+
+  /* Form input base styling */
+  input, select, textarea {
+    color: var(--text-primary);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--text-secondary);
   }
 }
 
-/* Custom utilities for the military aesthetic */
+/* Custom utilities for soothing mental health UI aesthetic */
 @layer utilities {
   .border-military {
-    @apply border border-surfaceHighlight shadow-card rounded;
+    border-width: 1px;
+    border-color: var(--border-surface);
+    box-shadow: var(--shadow-card);
+    border-radius: 0.5rem;
+    background-color: var(--bg-surface);
+  }
+
+  /* Low-stress alert utilities */
+  .alert-dusty-rose {
+    background-color: var(--color-alert-rose-bg);
+    border-color: var(--color-alert-rose-border);
+    color: var(--color-alert-rose-text);
+  }
+
+  .alert-warm-amber {
+    background-color: var(--color-alert-amber-bg);
+    border-color: var(--color-alert-amber-border);
+    color: var(--color-alert-amber-text);
+  }
+
+  .alert-soft-sage {
+    background-color: var(--color-alert-sage-bg);
+    border-color: var(--color-alert-sage-border);
+    color: var(--color-alert-sage-text);
   }
 }

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, User, ShieldCheck, MapPin } from 'lucide-react';
+import { LogOut, ShieldCheck, MapPin } from 'lucide-react';
 
 export default function Topbar() {
   const { user, role, logout } = useAuth();
@@ -14,14 +14,14 @@ export default function Topbar() {
     : 'Operational Telemetry & Welfare Command';
 
   return (
-    <header className="h-16 border-b border-surfaceHighlight bg-surface flex items-center justify-between px-6 shrink-0">
+    <header className="h-16 border-b border-surfaceBorder bg-surface flex items-center justify-between px-6 shrink-0">
       <div className="flex items-center space-x-3">
         <h2 className="text-sm md:text-base font-semibold text-textPrimary tracking-tight uppercase">
           {scopeTitle}
         </h2>
         {user && (
-          <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-surfaceHighlight border border-surfaceHighlight text-accent">
-            <ShieldCheck className="w-3 h-3 mr-1 text-emerald-400" />
+          <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-surfaceHighlight border border-surfaceBorder text-accent">
+            <ShieldCheck className="w-3 h-3 mr-1 text-[#60987A]" />
             {role.toUpperCase()}
           </span>
         )}
@@ -43,7 +43,7 @@ export default function Topbar() {
             <button
               onClick={logout}
               title="Sign Out"
-              className="p-1.5 px-2.5 hover:bg-surfaceHighlight rounded-lg text-textSecondary hover:text-rose-400 transition-colors flex items-center space-x-1.5 border border-transparent hover:border-surfaceHighlight"
+              className="p-1.5 px-2.5 hover:bg-[#FAF0F0] rounded-lg text-textSecondary hover:text-[#964747] transition-colors flex items-center space-x-1.5 border border-transparent hover:border-[#E8B4B4]"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="text-xs hidden sm:inline">Logout</span>
