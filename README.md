@@ -60,3 +60,4 @@ cd "PS 26186_app"
 npm install
 npm run dev -- -p 3001
 The Mobile App will be available at http://localhost:3001 (Running on port 3001 prevents conflicts with the dashboard).
+.
