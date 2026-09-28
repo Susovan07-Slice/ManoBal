@@ -34,18 +34,7 @@ export function HomeScreen({
 
   const isAssessmentDue = scheduleStatus ? scheduleStatus.assessment_due : !latestAssessment;
 
-  // Calculate ring gauge percentage (inverted: lower score = more filled in green)
   const riskScore = latestAssessment?.risk_score ?? 0;
-  const ringPercentage = typeof riskScore === 'number' ? Math.min(100, Math.max(0, riskScore)) : 0;
-  const circumference = 2 * Math.PI * 54; // radius = 54
-  const strokeDashoffset = circumference - (ringPercentage / 100) * circumference;
-
-  const getRingColor = () => {
-    if (!latestAssessment) return "#9ca3af";
-    if (latestAssessment.stress_level === "High") return "#F0508C";
-    if (latestAssessment.stress_level === "Medium") return "#F5A623";
-    return "#2FBF8F";
-  };
 
   return (
     <div className="flex flex-col gap-5 pb-44 px-4 max-w-md mx-auto w-full min-w-0">
@@ -63,40 +52,63 @@ export function HomeScreen({
       {/* 2. Hero Wellbeing Card */}
       <div className="flex flex-col relative">
         <div className="glass-card p-7 flex flex-col items-center justify-center text-center animate-fade-up">
-          <span className="eyebrow mb-4">
-            Your Wellbeing
+          <span className="eyebrow mb-2">
+            Stress Level
           </span>
 
           {latestAssessment ? (
             <div className="flex flex-col items-center w-full">
-              {/* Circular Ring Gauge */}
-              <div className="relative w-[140px] h-[140px] mb-5">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-                  {/* Background ring */}
-                  <circle
-                    cx="60" cy="60" r="54"
-                    fill="none"
-                    stroke="#BFE3F0"
-                    strokeWidth="8"
-                  />
-                  {/* Colored progress ring */}
-                  <circle
-                    cx="60" cy="60" r="54"
-                    fill="none"
-                    stroke={getRingColor()}
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                {/* Center score */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[44px] font-semibold text-ink leading-none tabular-nums">
-                    {typeof riskScore === "number" ? riskScore.toFixed(1) : riskScore}
-                  </span>
-                  <span className="text-[12px] text-ink-3 font-medium mt-1">/100</span>
+              {/* Emoji Stress Scale */}
+              <div className="flex flex-col w-full px-2 mt-2 mb-4">
+                <div className="flex justify-between items-center relative h-14">
+                  {/* Background connecting track */}
+                  <div className="absolute left-[7%] right-[7%] top-1/2 h-1.5 bg-sky-100 -translate-y-1/2 rounded-full z-0" />
+                  
+                  {(() => {
+                    const score = typeof riskScore === "number" ? riskScore : 0;
+                    // 0-100 mapped to 0-6 index
+                    let activeIdx = 0;
+                    if (score > 14) activeIdx = 1;
+                    if (score > 28) activeIdx = 2;
+                    if (score > 42) activeIdx = 3;
+                    if (score > 57) activeIdx = 4;
+                    if (score > 71) activeIdx = 5;
+                    if (score > 85) activeIdx = 6;
+                    
+                    const emojis = [
+                      { face: '😌', label: 'Very Calm' },
+                      { face: '🙂', label: 'Calm' },
+                      { face: '😐', label: 'Slightly' },
+                      { face: '😕', label: 'Moderate' },
+                      { face: '😟', label: 'Stressed' },
+                      { face: '😰', label: 'Highly' },
+                      { face: '😫', label: 'Extreme' }
+                    ];
+
+                    return emojis.map((item, idx) => {
+                      const isActive = idx === activeIdx;
+                      return (
+                        <div key={idx} className="relative flex flex-col items-center z-10">
+                          <div 
+                            className={`flex items-center justify-center transition-all duration-300 ${
+                              isActive 
+                                ? 'w-11 h-11 bg-white shadow-[0_4px_12px_rgba(31,110,140,0.2)] border-2 border-brand-500 rounded-full scale-110 z-20' 
+                                : 'w-8 h-8 bg-white/80 border border-white rounded-full scale-100 opacity-60'
+                            }`}
+                          >
+                            <span className={`text-[22px] leading-none ${isActive ? '' : 'grayscale-[40%]'}`}>
+                              {item.face}
+                            </span>
+                          </div>
+                          {isActive && (
+                            <span className="absolute -bottom-5 text-[10px] font-bold text-brand-600 whitespace-nowrap animate-fade-up">
+                              {item.label}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
 
