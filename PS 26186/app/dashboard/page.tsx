@@ -9,6 +9,7 @@ import AlertsTable from '@/components/dashboard/AlertsTable';
 import WelfareAlertsPanel from '@/components/dashboard/WelfareAlertsPanel';
 import AdvancedCommanderAnalytics from '@/components/dashboard/AdvancedCommanderAnalytics';
 import EarlyWarningSignalsPanel from '@/components/dashboard/EarlyWarningSignalsPanel';
+import SupportRecommendationsPanel from '@/components/dashboard/SupportRecommendationsPanel';
 import {
   getDashboardSummary,
   getStressDistribution,
@@ -164,6 +165,9 @@ export default function DashboardPage() {
 
         {/* Phase 39: Early-Warning & Welfare Anomaly Detection */}
         <EarlyWarningSignalsPanel />
+
+        {/* Phase 40: Welfare Recommendation & Support Engine */}
+        <SupportRecommendationsPanel />
 
         {/* Phase 38: Advanced Commander Analytics & Unit Welfare Intelligence */}
         <AdvancedCommanderAnalytics />

@@ -17,3 +17,12 @@ export async function getMyWelfareRequests(): Promise<WelfareRequestOut[]> {
     requiresAuth: true,
   });
 }
+
+export async function getMyRecommendations(
+  personnelId: number
+): Promise<{ recommendations: any[] }> {
+  return apiClient<{ recommendations: any[] }>(`/recommendations/personnel/${personnelId}`, {
+    method: 'GET',
+    requiresAuth: true,
+  });
+}

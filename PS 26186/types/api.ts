@@ -500,4 +500,109 @@ export interface CommanderAnomalySummaryResponse {
   data_quality: Record<string, any>;
 }
 
+// Phase 40: Welfare Recommendation & Support Engine Types
+export interface RecommendationEvidence {
+  trigger?: string;
+  evidence_metrics?: Record<string, any>;
+  reason: string;
+  source_signals?: string[];
+  key_factors?: string[];
+  protective_factors?: string[];
+  baseline_deviations?: Record<string, any>;
+  trend_indicators?: Record<string, any>;
+  audit_context?: Record<string, any>;
+}
+
+export type RecommendationType =
+  | 'RECOVERY_REVIEW'
+  | 'DUTY_SCHEDULE_REVIEW'
+  | 'WELFARE_FOLLOW_UP'
+  | 'VOLUNTARY_WELLNESS_CHECKIN'
+  | 'SUPPORT_RESOURCE_REFERRAL'
+  | 'FOLLOW_UP_ASSESSMENT'
+  | 'CONTINUE_MONITORING'
+  | 'HUMAN_REVIEW';
+
+export type RecommendationPriority = 'ROUTINE' | 'ELEVATED' | 'HIGH' | 'CRITICAL';
+
+export type RecommendationStatus =
+  | 'SUGGESTED'
+  | 'ACKNOWLEDGED'
+  | 'ACCEPTED'
+  | 'DEFERRED'
+  | 'DISMISSED'
+  | 'ACTIONED';
+
+export interface WelfareRecommendationOut {
+  id: number;
+  personnel_id: number;
+  personnel_code?: string | null;
+  personnel_name?: string | null;
+  department?: string | null;
+  battalion?: string | null;
+  location?: string | null;
+  assessment_id?: number | null;
+  recommendation_type: RecommendationType | string;
+  recommendation_text: string;
+  title: string;
+  description?: string | null;
+  reason?: string | null;
+  priority: RecommendationPriority;
+  status: RecommendationStatus;
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  evidence: RecommendationEvidence;
+  source_signals: string[];
+  recommended_review_window?: string | null;
+  linked_alert_id?: number | null;
+  linked_anomaly_id?: number | null;
+  linked_intervention_id?: number | null;
+  acknowledged_at?: string | null;
+  acknowledged_by?: number | null;
+  actioned_at?: string | null;
+  actioned_by?: number | null;
+  action_notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PersonnelRecommendationsResponse {
+  personnel_id: number;
+  status: string;
+  message: string;
+  total_recommendations: number;
+  recommendations: WelfareRecommendationOut[];
+}
+
+export interface CommanderRecommendationSummaryResponse {
+  scope_battalion?: string | null;
+  scope_location?: string | null;
+  total_active_recommendations: number;
+  priority_breakdown: Record<string, number>;
+  status_breakdown: Record<string, number>;
+  type_breakdown: Record<string, number>;
+  small_group_suppressed: boolean;
+  recommendations: WelfareRecommendationOut[];
+}
+
+export interface RecommendationAcceptPayload {
+  create_intervention?: boolean;
+  intervention_type?: string;
+  scheduled_date?: string;
+  notes?: string;
+}
+
+export interface RecommendationDeferPayload {
+  defer_days?: number;
+  notes?: string;
+}
+
+export interface RecommendationDismissPayload {
+  reason: string;
+}
+
+export interface RecommendationActionPayload {
+  action_notes: string;
+}
+
+
 

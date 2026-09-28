@@ -140,4 +140,28 @@ export interface WelfareRequestOut {
   resolved_at?: string | null;
 }
 
+export interface WelfareRecommendationOut {
+  id: number;
+  personnel_id: number;
+  recommendation_type: string;
+  recommendation_text: string;
+  title: string;
+  description?: string | null;
+  reason?: string | null;
+  priority: string;
+  status: string;
+  confidence: string;
+  recommended_review_window?: string | null;
+  created_at: string;
+}
+
+export interface PersonnelRecommendationsResponse {
+  personnel_id: number;
+  status: string;
+  message: string;
+  total_recommendations: number;
+  recommendations: WelfareRecommendationOut[];
+}
+
+
 

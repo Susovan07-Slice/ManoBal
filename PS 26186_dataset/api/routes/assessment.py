@@ -360,6 +360,13 @@ def run_personnel_assessment(
     except Exception as e:
         logger.error(f"Non-critical failure evaluating welfare alerts for personnel {personnel.id}: {e}", exc_info=True)
 
+    # Trigger Phase 40 Welfare Recommendations evaluation safely
+    try:
+        from services.welfare_recommendation_service import WelfareRecommendationService
+        WelfareRecommendationService.evaluate_and_generate_recommendations(personnel, db, new_assessment, persist=True)
+    except Exception as re_err:
+        logger.error(f"Non-critical failure evaluating welfare recommendations for personnel {personnel.id}: {re_err}", exc_info=True)
+
     assessment_out = _format_assessment_out(new_assessment, personnel, meta=result)
     return AssessmentResponse(
         message="Stress risk assessment and welfare recommendations successfully generated and persisted.",
@@ -679,6 +686,13 @@ def welfare_assessment_endpoint(
             
             # Trigger Welfare Alerts evaluation
             WelfareAlertService.evaluate_and_generate_alerts(db, personnel.id, new_ass)
+
+            # Trigger Phase 40 Welfare Recommendations evaluation
+            try:
+                from services.welfare_recommendation_service import WelfareRecommendationService
+                WelfareRecommendationService.evaluate_and_generate_recommendations(personnel, db, new_ass, persist=True)
+            except Exception as re_err:
+                logger.warning(f"Could not generate welfare recommendations: {re_err}")
             
         except Exception as e:
             db.rollback()

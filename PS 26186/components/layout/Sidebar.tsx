@@ -13,6 +13,7 @@ import {
   Sliders,
   BarChart3,
   Radar,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -126,6 +127,15 @@ export default function Sidebar() {
                 >
                   <Radar className="w-4 h-4 mr-3 text-rose-400" />
                   Early-Warning Signals
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/dashboard#welfare-recommendations"
+                  className="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-textSecondary hover:bg-surfaceHighlight hover:text-textPrimary transition-colors"
+                >
+                  <Sparkles className="w-4 h-4 mr-3 text-indigo-400" />
+                  Welfare Recommendations
                 </Link>
               </li>
             </ul>
