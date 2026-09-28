@@ -1,4 +1,4 @@
-﻿import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { HTMLAttributes, forwardRef } from "react";
 
 export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
@@ -6,7 +6,7 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     return (
       <div
         ref={ref}
-        className={cn("bg-mb-glass-strong backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] shadow-black/40 border border-mb-glass-border p-6 transition-all duration-300", className)}
+        className={cn("bg-white/75 backdrop-blur-xl rounded-[24px] shadow-[0_10px_30px_rgba(31,110,140,.12)] border border-white/80 p-5 transition-all duration-200", className)}
         {...props}
       />
     );

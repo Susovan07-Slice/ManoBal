@@ -57,12 +57,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware configured for explicit authorized frontend origins
+# CORS middleware configured for explicit authorized frontend origins and local development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

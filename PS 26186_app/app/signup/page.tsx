@@ -146,56 +146,51 @@ export default function JawanSignupPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-transparent text-mb-text-primary p-5 justify-center py-10">
+    <div 
+      className="flex flex-col min-h-screen text-mb-text-primary p-5 py-10 bg-cover bg-center bg-no-repeat absolute inset-0 z-20 overflow-y-auto"
+      style={{ backgroundImage: "url('/login-bg.png')" }}
+    >
       <div className="max-w-md w-full mx-auto space-y-6">
         {/* Back to Login link */}
         <Link
           href="/login"
-          className="inline-flex items-center space-x-1.5 text-xs text-mb-text-secondary hover:text-mb-accent transition-colors"
+          className="inline-flex items-center space-x-1.5 text-xs text-mb-text-secondary hover:text-mb-text-primary font-semibold transition-colors bg-white/30 px-3 py-1.5 rounded-lg border border-gray-300 backdrop-blur-md"
         >
           <ChevronLeft className="w-4 h-4" />
           <span>Back to Sign In</span>
         </Link>
 
-        {/* Prototype Ethical Notice */}
-        <div className="p-3 bg-slate-800/80 border border-slate-700 rounded-lg text-xs text-mb-text-secondary flex items-start space-x-2">
-          <Info className="w-4 h-4 text-mb-accent shrink-0 mt-0.5" />
-          <p>
-            <strong className="text-mb-text-primary">Prototype Notice:</strong> Synthetically augmented research prototype. Does not contain real CRPF records. Supportive decision-support only.
-          </p>
-        </div>
-
         {/* Header */}
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center mb-8 text-center">
           <div className="w-32 h-32 mb-4 drop-shadow-xl flex items-center justify-center">
             <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-mb-text-primary tracking-wider">ManoBal</h1>
-          <p className="text-xs text-mb-accent uppercase tracking-widest font-mono mt-1 font-semibold">
+          <p className="text-xs text-mb-text-primary uppercase tracking-widest font-mono mt-1 font-semibold">
             Jawan Self-Registration
           </p>
-          <p className="text-xs text-mb-text-secondary mt-1">
+          <p className="text-xs text-mb-text-primary mt-1 font-medium">
             Enroll in personal operational wellness and stress telemetry monitoring
           </p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="p-3 bg-red-950/70 border border-red-800/80 rounded-lg text-xs text-red-200 flex items-start space-x-2">
+          <div className="p-3 bg-red-950/80 border border-red-800/80 rounded-lg text-xs text-red-200 flex items-start space-x-2">
             <AlertCircle className="w-4 h-4 text-mb-danger shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 bg-mb-glass-strong backdrop-blur-2xl p-5 rounded-xl border border-mb-glass-border shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+            <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
               Full Name *
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-mb-text-muted">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                 <User className="w-4 h-4" />
               </span>
               <input
@@ -206,7 +201,7 @@ export default function JawanSignupPage() {
                 onChange={handleChange}
                 placeholder="e.g. Rajesh Verma"
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg pl-10 pr-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg pl-10 pr-3 py-2.5 outline-none transition-colors shadow-sm placeholder:text-gray-400"
                 required
               />
             </div>
@@ -215,7 +210,7 @@ export default function JawanSignupPage() {
           {/* Grid: Username & Personnel Code */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Service Username *
               </label>
               <input
@@ -226,13 +221,13 @@ export default function JawanSignupPage() {
                 onChange={handleChange}
                 placeholder="e.g. jawan_rajesh"
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm placeholder:text-gray-400"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Personnel ID *
               </label>
               <input
@@ -243,7 +238,7 @@ export default function JawanSignupPage() {
                 onChange={handleChange}
                 placeholder="e.g. TEST-001"
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors font-mono uppercase"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm placeholder:text-gray-400 font-mono uppercase font-medium"
                 required
               />
             </div>
@@ -252,7 +247,7 @@ export default function JawanSignupPage() {
           {/* Grid: Password & Confirm */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Password *
               </label>
               <input
@@ -263,13 +258,13 @@ export default function JawanSignupPage() {
                 onChange={handleChange}
                 placeholder="Min 6 chars"
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm placeholder:text-gray-400"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Confirm Password *
               </label>
               <input
@@ -280,7 +275,7 @@ export default function JawanSignupPage() {
                 onChange={handleChange}
                 placeholder="Repeat password"
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm placeholder:text-gray-400"
                 required
               />
             </div>
@@ -289,7 +284,7 @@ export default function JawanSignupPage() {
           {/* Grid: Age & Gender */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Age *
               </label>
               <input
@@ -301,13 +296,13 @@ export default function JawanSignupPage() {
                 value={formData.age}
                 onChange={handleChange}
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Gender *
               </label>
               <select
@@ -316,11 +311,11 @@ export default function JawanSignupPage() {
                 value={formData.gender}
                 onChange={handleChange}
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm"
               >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="Male" className="bg-white text-gray-900">Male</option>
+                <option value="Female" className="bg-white text-gray-900">Female</option>
+                <option value="Other" className="bg-white text-gray-900">Other</option>
               </select>
             </div>
           </div>
@@ -328,7 +323,7 @@ export default function JawanSignupPage() {
           {/* Grid: Department & Job Role */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Department *
               </label>
               <select
@@ -337,20 +332,20 @@ export default function JawanSignupPage() {
                 value={formData.department}
                 onChange={handleChange}
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm"
               >
-                <option value="Operations">Operations</option>
-                <option value="Engineering">Engineering</option>
-                <option value="HR">HR</option>
-                <option value="Marketing">Marketing</option>
-                <option value="General Duty">General Duty</option>
-                <option value="Signals">Signals</option>
-                <option value="Logistics">Logistics</option>
+                <option value="Operations" className="bg-white text-gray-900">Operations</option>
+                <option value="Engineering" className="bg-white text-gray-900">Engineering</option>
+                <option value="HR" className="bg-white text-gray-900">HR</option>
+                <option value="Marketing" className="bg-white text-gray-900">Marketing</option>
+                <option value="General Duty" className="bg-white text-gray-900">General Duty</option>
+                <option value="Signals" className="bg-white text-gray-900">Signals</option>
+                <option value="Logistics" className="bg-white text-gray-900">Logistics</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+              <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                 Duty Role / Rank *
               </label>
               <select
@@ -359,21 +354,21 @@ export default function JawanSignupPage() {
                 value={formData.job_role}
                 onChange={handleChange}
                 disabled={loading}
-                className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm"
               >
-                <option value="Constable">Constable</option>
-                <option value="Head Constable">Head Constable</option>
-                <option value="Assistant Sub-Inspector">Assistant Sub-Inspector</option>
-                <option value="Sub-Inspector">Sub-Inspector</option>
-                <option value="Inspector">Inspector</option>
-                <option value="Field Operative">Field Operative</option>
+                <option value="Constable" className="bg-white text-gray-900">Constable</option>
+                <option value="Head Constable" className="bg-white text-gray-900">Head Constable</option>
+                <option value="Assistant Sub-Inspector" className="bg-white text-gray-900">Assistant Sub-Inspector</option>
+                <option value="Sub-Inspector" className="bg-white text-gray-900">Sub-Inspector</option>
+                <option value="Inspector" className="bg-white text-gray-900">Inspector</option>
+                <option value="Field Operative" className="bg-white text-gray-900">Field Operative</option>
               </select>
             </div>
           </div>
 
           {/* Organizational Scope Section */}
-          <div className="pt-2 border-t border-slate-700/60 space-y-3">
-            <div className="flex items-center space-x-1.5 text-xs font-semibold text-mb-accent uppercase tracking-wider">
+          <div className="pt-2 border-t border-gray-300 space-y-3">
+            <div className="flex items-center space-x-1.5 text-xs font-bold text-teal-300 uppercase tracking-wider ">
               <Building2 className="w-3.5 h-3.5" />
               <span>Unit & Posting Assignment</span>
             </div>
@@ -406,7 +401,7 @@ export default function JawanSignupPage() {
               />
 
               <div>
-                <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
+                <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1 ">
                   Experience (Yrs) *
                 </label>
                 <input
@@ -419,7 +414,7 @@ export default function JawanSignupPage() {
                   value={formData.experience_years}
                   onChange={handleChange}
                   disabled={loading}
-                  className="w-full bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border focus:border-mb-accent text-mb-text-primary text-sm rounded-lg px-3 py-2 outline-none transition-colors"
+                  className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg px-3 py-2.5 outline-none transition-colors shadow-sm"
                   required
                 />
               </div>
@@ -427,10 +422,10 @@ export default function JawanSignupPage() {
           </div>
 
           {/* Role Policy Notice */}
-          <div className="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800 text-[11px] text-mb-text-secondary flex items-center space-x-2">
-            <BadgeCheck className="w-4 h-4 text-mb-accent shrink-0" />
+          <div className="p-2.5 bg-white/40 rounded-lg border border-gray-300 text-[11px] text-mb-text-secondary flex items-center space-x-2">
+            <BadgeCheck className="w-4 h-4 text-teal-400 shrink-0" />
             <span>
-              Enrolled automatically in the <strong className="text-mb-accent">Personnel</strong> tier with self-reporting access. Scope is permanent and verified by unit commanders.
+              Enrolled automatically in the <strong className="text-teal-300">Personnel</strong> tier with self-reporting access. Scope is permanent and verified by unit commanders.
             </span>
           </div>
 
@@ -439,17 +434,17 @@ export default function JawanSignupPage() {
             id="jawan-signup-button"
             type="submit"
             disabled={loading}
-            className="w-full bg-mb-accent hover:bg-mb-accent text-mb-text-dark font-bold py-2.5 rounded-lg shadow-lg shadow-teal-500/10 transition-colors mt-2"
+            className="w-full bg-mb-accent hover:bg-mb-accent/90 text-mb-text-dark font-bold py-3 rounded-lg shadow-lg shadow-teal-500/20 transition-all mt-2 text-sm"
           >
             {loading ? 'Creating Account & Enrolling...' : 'Sign Up for ManoBal'}
           </Button>
         </form>
 
         {/* Existing account link */}
-        <div className="text-center">
-          <p className="text-xs text-mb-text-secondary">
+        <div className="text-center pb-6">
+          <p className="text-xs text-mb-text-secondary font-medium ">
             Already have an active service account?{' '}
-            <Link href="/login" className="text-mb-accent hover:underline font-semibold">
+            <Link href="/login" className="text-teal-300 hover:text-teal-200 underline font-bold">
               Sign In
             </Link>
           </p>
@@ -458,5 +453,7 @@ export default function JawanSignupPage() {
     </div>
   );
 }
+
+
 
 

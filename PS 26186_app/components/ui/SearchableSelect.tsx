@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronDown, Check, X } from 'lucide-react';
@@ -88,8 +88,8 @@ export function SearchableSelect({
 
   return (
     <div className="relative" ref={containerRef}>
-      <label className="block text-xs uppercase tracking-wider text-mb-text-secondary font-semibold mb-1">
-        {label} {required && <span className="text-mb-accent">*</span>}
+      <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">
+        {label} {required && <span className="text-brand-500">*</span>}
       </label>
 
       {/* Trigger / Display Box */}
@@ -103,57 +103,57 @@ export function SearchableSelect({
             setIsOpen((prev) => !prev);
           }
         }}
-        className={`w-full bg-mb-glass-strong backdrop-blur-md border ${
-          isOpen ? 'border-mb-accent' : 'border-mb-glass-border'
-        } text-mb-text-primary text-sm rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-colors ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-slate-400'
+        className={`w-full bg-white border h-[52px] rounded-2xl px-4 flex items-center justify-between cursor-pointer transition-all shadow-sm ${
+          isOpen ? 'border-brand-500 ring-2 ring-brand-100' : 'border-sky-200'
+        } ${
+          disabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        <span className={value ? 'text-mb-text-primary font-medium' : 'text-mb-text-muted'}>
+        <span className={value ? 'text-ink font-medium text-sm' : 'text-ink-3 font-medium text-sm'}>
           {value || placeholder}
         </span>
-        <div className="flex items-center space-x-1.5 text-mb-text-secondary">
+        <div className="flex items-center space-x-1.5 text-ink-3">
           {value && !disabled && (
             <button
               type="button"
               onClick={handleClear}
-              className="p-0.5 hover:text-mb-text-secondary transition-colors"
+              className="p-0.5 hover:text-ink transition-colors"
               title="Clear selection"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           )}
           <ChevronDown
-            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-mb-accent' : ''}`}
+            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-brand-500' : ''}`}
           />
         </div>
       </div>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-mb-glass-strong border border-mb-accent/50 rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.12)] overflow-hidden backdrop-blur-xl">
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-sky-200 rounded-2xl shadow-[0_16px_40px_rgba(31,110,140,0.22)] overflow-hidden">
           {/* Search Box */}
-          <div className="p-2 border-b border-slate-700 bg-slate-800/60 flex items-center space-x-2">
-            <Search className="w-3.5 h-3.5 text-mb-text-secondary shrink-0" />
+          <div className="p-3 border-b border-sky-100 bg-sky-50/50 flex items-center space-x-2">
+            <Search className="w-3.5 h-3.5 text-ink-3 shrink-0" />
             <input
               type="text"
               autoFocus
               placeholder={`Search ${label.toLowerCase()}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-mb-text-primary text-xs outline-none placeholder:text-mb-text-muted"
+              className="w-full bg-transparent text-ink text-sm outline-none placeholder:text-ink-3 font-medium"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
 
           {/* Options List */}
-          <div className="max-h-48 overflow-y-auto divide-y divide-slate-800 text-xs">
+          <div className="max-h-48 overflow-y-auto divide-y divide-sky-100 text-sm">
             {isLoading ? (
-              <div className="p-3 text-center text-mb-text-secondary font-mono text-[11px]">
+              <div className="p-3 text-center text-ink-3 font-mono text-[11px]">
                 Loading options...
               </div>
             ) : filteredOptions.length === 0 ? (
-              <div className="p-3 text-center text-mb-text-secondary">
+              <div className="p-3 text-center text-ink-3">
                 No matching {label.toLowerCase()} found
               </div>
             ) : (
@@ -164,14 +164,14 @@ export function SearchableSelect({
                     key={opt}
                     type="button"
                     onClick={() => handleSelect(opt)}
-                    className={`w-full text-left px-3 py-2 flex items-center justify-between transition-colors ${
+                    className={`w-full text-left h-12 px-4 flex items-center justify-between text-sm font-medium transition-colors ${
                       isSelected
-                        ? 'bg-mb-accent/20 text-teal-300 font-semibold'
-                        : 'text-mb-text-secondary hover:bg-slate-800/80'
+                        ? 'bg-brand-100 text-brand-600 font-semibold'
+                        : 'text-ink-2 hover:bg-brand-100'
                     }`}
                   >
                     <span>{opt}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-mb-accent shrink-0" />}
+                    {isSelected && <Check className="w-4 h-4 text-brand-500 shrink-0" />}
                   </button>
                 );
               })

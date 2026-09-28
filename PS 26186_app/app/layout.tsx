@@ -1,18 +1,14 @@
-﻿import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import MobileWrapper from "@/components/layout/MobileWrapper";
 import SosButton from "@/components/layout/SosButton";
 import { AuthProvider } from "@/lib/AuthContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -28,9 +24,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      className={`${outfit.variable} antialiased`}
     >
-      <body className="bg-[#141a22] text-mb-text-secondary min-h-screen">
+      <body className="bg-sky-100 text-ink min-h-screen">
+        {/* Fixed gradient background */}
+        <div className="app-gradient-bg" aria-hidden="true" />
+        
         <AuthProvider>
           <MobileWrapper>
             <SosButton />
@@ -41,5 +40,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-
