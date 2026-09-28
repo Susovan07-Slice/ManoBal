@@ -1,6 +1,6 @@
 from db.base import Base
 from db.session import engine
-from db.models import User, Personnel, StressAssessment, WelfareRecommendation
+import db.models  # Ensures all models are registered with Base.metadata
 from core.config import logger
 
 def init_db():

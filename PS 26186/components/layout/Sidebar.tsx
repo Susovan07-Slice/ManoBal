@@ -11,6 +11,8 @@ import {
   FileText,
   Info,
   Sliders,
+  BarChart3,
+  Radar,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -106,6 +108,24 @@ export default function Sidebar() {
                 >
                   <HeartPulse className="w-4 h-4 mr-3 text-rose-400" />
                   Welfare Alerts
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/dashboard#advanced-analytics"
+                  className="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-textSecondary hover:bg-surfaceHighlight hover:text-textPrimary transition-colors"
+                >
+                  <BarChart3 className="w-4 h-4 mr-3 text-cyan-400" />
+                  Unit Welfare Analytics
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/dashboard#early-warning-signals"
+                  className="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-textSecondary hover:bg-surfaceHighlight hover:text-textPrimary transition-colors"
+                >
+                  <Radar className="w-4 h-4 mr-3 text-rose-400" />
+                  Early-Warning Signals
                 </Link>
               </li>
             </ul>

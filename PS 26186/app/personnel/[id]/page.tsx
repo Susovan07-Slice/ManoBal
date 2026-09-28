@@ -10,11 +10,13 @@ import {
   getPersonnelAssessments,
   runPersonnelAssessment,
   updateRecommendationStatus,
+  getPersonnelTrend,
 } from '@/lib/assessments';
 import {
   PersonnelOut,
   StressAssessmentOut,
   AssessmentOverride,
+  LongitudinalTrendResponse,
 } from '@/types/api';
 import { useAuth } from '@/lib/AuthContext';
 import { ROLE_CONFIG } from '@/lib/rbac';
@@ -34,6 +36,9 @@ import {
   FileText,
   Sliders,
   X,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from 'lucide-react';
 
 export default function PersonnelDetailPage() {
@@ -45,6 +50,7 @@ export default function PersonnelDetailPage() {
 
   const [personnel, setPersonnel] = useState<PersonnelOut | null>(null);
   const [assessments, setAssessments] = useState<StressAssessmentOut[]>([]);
+  const [trendData, setTrendData] = useState<LongitudinalTrendResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
   const [updatingRecId, setUpdatingRecId] = useState<number | null>(null);
@@ -65,12 +71,14 @@ export default function PersonnelDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [pRes, assRes] = await Promise.all([
+      const [pRes, assRes, trendRes] = await Promise.all([
         getPersonnelById(personnelId),
         getPersonnelAssessments(personnelId),
+        getPersonnelTrend(personnelId),
       ]);
       setPersonnel(pRes);
       setAssessments(assRes || []);
+      setTrendData(trendRes || null);
     } catch (err: any) {
       console.error('Failed to load personnel detail:', err);
       setError(err?.message || 'Unable to retrieve personnel record.');
@@ -360,6 +368,113 @@ export default function PersonnelDetailPage() {
             )}
           </div>
         </div>
+
+        {/* Longitudinal Welfare Intelligence Section */}
+        {trendData && trendData.history.data_sufficiency !== 'INSUFFICIENT_DATA' && (
+          <div className="bg-surface p-5 border-military">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xs uppercase tracking-widest font-semibold text-textSecondary flex items-center space-x-2">
+                <Activity className="w-4 h-4 text-accent" />
+                <span>Longitudinal Welfare Trend Intelligence</span>
+              </h3>
+              <span className="text-[10px] font-mono text-textSecondary bg-surfaceHighlight px-2 py-0.5 rounded">
+                Welfare Monitoring Signal
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+              {/* Trend Direction */}
+              <div className="p-3 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
+                <span className="text-textSecondary text-[11px] block mb-1">Trend Direction</span>
+                <div className="flex items-center space-x-2">
+                  {trendData.trend.direction === 'WORSENING' ? (
+                    <TrendingUp className="w-5 h-5 text-red-400" />
+                  ) : trendData.trend.direction === 'IMPROVING' ? (
+                    <TrendingDown className="w-5 h-5 text-emerald-400" />
+                  ) : (
+                    <Minus className="w-5 h-5 text-textPrimary" />
+                  )}
+                  <span className={`text-sm font-bold font-mono ${
+                    trendData.trend.direction === 'WORSENING' ? 'text-red-400' :
+                    trendData.trend.direction === 'IMPROVING' ? 'text-emerald-400' : 'text-textPrimary'
+                  }`}>
+                    {trendData.trend.direction}
+                  </span>
+                </div>
+                <span className="text-[10px] text-textSecondary block mt-1">
+                  Change: {trendData.trend.score_change! > 0 ? '+' : ''}{trendData.trend.score_change} pts
+                </span>
+              </div>
+
+              {/* Persistence */}
+              <div className="p-3 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
+                <span className="text-textSecondary text-[11px] block mb-1">Risk Persistence</span>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-sm font-bold font-mono ${trendData.history.persistent_elevated_risk ? 'text-red-400' : 'text-emerald-400'}`}>
+                    {trendData.history.persistent_elevated_risk ? 'SUSTAINED ELEVATED' : 'NOT SUSTAINED'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-textSecondary block mt-1">
+                  {trendData.history.consecutive_elevated_assessments} consecutive elevated assessments
+                </span>
+              </div>
+
+              {/* Baseline Deviation */}
+              <div className="p-3 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
+                <span className="text-textSecondary text-[11px] block mb-1">Personal Baseline</span>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-sm font-bold font-mono ${
+                    (trendData.baseline.current_deviation || 0) > 5 ? 'text-red-400' :
+                    (trendData.baseline.current_deviation || 0) < -5 ? 'text-emerald-400' : 'text-textPrimary'
+                  }`}>
+                    {(trendData.baseline.current_deviation || 0) > 0 ? '+' : ''}{trendData.baseline.current_deviation} pts
+                  </span>
+                </div>
+                <span className="text-[10px] text-textSecondary block mt-1">
+                  Historical Mean: {trendData.baseline.historical_mean}
+                </span>
+              </div>
+
+              {/* Acceleration */}
+              <div className="p-3 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
+                <span className="text-textSecondary text-[11px] block mb-1">Risk Acceleration</span>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-sm font-bold font-mono ${
+                    trendData.trend.acceleration === 'INCREASING' ? 'text-red-400' :
+                    trendData.trend.acceleration === 'DECREASING' ? 'text-emerald-400' : 'text-textPrimary'
+                  }`}>
+                    {trendData.trend.acceleration}
+                  </span>
+                </div>
+                <span className="text-[10px] text-textSecondary block mt-1">
+                  Recent trajectory vs older history
+                </span>
+              </div>
+            </div>
+
+            {/* Repeated Factors */}
+            {trendData.repeated_factors && trendData.repeated_factors.length > 0 && (
+              <div className="mt-4">
+                <span className="text-textSecondary text-[11px] font-semibold uppercase tracking-wider block mb-2">
+                  Repeated Historical Factors
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {trendData.repeated_factors.map((rf, idx) => (
+                    <div key={idx} className={`px-2 py-1 text-[10px] font-mono rounded border ${
+                      rf.type === 'risk' ? 'bg-red-950/30 text-red-300 border-red-900/50' : 'bg-emerald-950/30 text-emerald-300 border-emerald-900/50'
+                    }`}>
+                      {rf.factor} ({rf.frequency}/{rf.total_assessments})
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <p className="text-[10px] text-textSecondary italic mt-3 text-right">
+              {trendData.disclaimer}
+            </p>
+          </div>
+        )}
 
         {/* Contributing Factors & Recommendations Section */}
         {latestAssessment && (

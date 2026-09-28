@@ -22,6 +22,8 @@ from api.routes.organization import router as organization_router
 from api.routes.hrms import router as hrms_router
 from api.routes.telemetry import router as telemetry_router
 from api.routes.analytics import router as analytics_router
+from api.routes.alerts import router as alerts_router
+from api.routes.anomalies import router as anomalies_router
 from schemas.prediction import PredictionRequest, PredictionResponse
 
 @asynccontextmanager
@@ -95,6 +97,8 @@ app.include_router(organization_router, prefix="/api")
 app.include_router(hrms_router, prefix="/api")
 app.include_router(telemetry_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
+app.include_router(alerts_router, prefix="/api")
+app.include_router(anomalies_router, prefix="/api")
 
 # Also mount prediction and auth at root prefix for direct access
 app.include_router(prediction_router, prefix="")

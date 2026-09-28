@@ -37,3 +37,10 @@ export async function updateRecommendationStatus(
     body: JSON.stringify({ status }),
   });
 }
+
+export async function getPersonnelTrend(
+  personnelId: number
+): Promise<any> {
+  return apiClient<any>(`/personnel/${personnelId}/trend`);
+}
+
