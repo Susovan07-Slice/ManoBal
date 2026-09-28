@@ -167,9 +167,6 @@ export default function EarlyWarningSignalsPanel() {
                 <h2 className="text-base font-bold text-textPrimary uppercase tracking-wider">
                   Early-Warning & Welfare Anomaly Signals
                 </h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-accent/10 text-accent border border-accent/25">
-                  PHASE 39 ACTIVE
-                </span>
               </div>
               <p className="text-xs text-textSecondary font-mono mt-0.5">
                 Baseline-First Personal & Unit-Level Anomaly Detection • Human Decision-Support Only
@@ -397,14 +394,6 @@ export default function EarlyWarningSignalsPanel() {
               ))}
             </div>
           )}
-
-          {/* Ethical Notice Banner */}
-          <div className="p-3 bg-surfaceHighlight/40 border border-surfaceBorder rounded-lg text-[11px] text-textSecondary flex items-start space-x-2">
-            <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              <strong className="text-textPrimary">Human-in-the-Loop Early Warning:</strong> Welfare anomaly signals indicate unexpected statistical or behavioral departures from individual baselines. They are not medical diagnoses and do not replace human welfare officer discretion or compassionate check-ins.
-            </p>
-          </div>
         </div>
       )}
 

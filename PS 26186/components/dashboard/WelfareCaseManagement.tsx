@@ -331,10 +331,10 @@ export default function WelfareCaseManagement({
             </div>
             <div>
               <h2 className="text-xl font-bold tracking-tight text-textPrimary uppercase">
-                Phase 43: Welfare Case Management & Human Review
+                Welfare Case Management & Human Review
               </h2>
               <p className="text-xs text-textSecondary font-mono mt-0.5">
-                Traceable human-review workflow layer operating over authoritative welfare signals (Phases 34–42)
+                Traceable human-review workflow layer operating over authoritative welfare signals
               </p>
             </div>
           </div>
@@ -361,14 +361,6 @@ export default function WelfareCaseManagement({
             <span>Refresh</span>
           </button>
         </div>
-      </div>
-
-      {/* Mandatory Non-Scoring & Human Review Discretion Notice */}
-      <div className="p-3 bg-surfaceHighlight/30 border border-border/60 rounded-lg text-xs text-textSecondary flex items-start space-x-2.5">
-        <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong className="text-textPrimary">Human Review Governance Notice:</strong> Phase 43 provides structured administrative case tracking. It does NOT generate any risk score, rank personnel, diagnose clinical conditions, or replace commander discretion. All status transitions and decisions are explicitly recorded by authorized human reviewers.
-        </p>
       </div>
 
       {/* 2. Aggregate Summary Metrics Cards */}

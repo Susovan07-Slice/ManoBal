@@ -127,12 +127,9 @@ export default function UnifiedWelfareIntelligence() {
                 <h2 className="text-lg font-bold text-textPrimary uppercase tracking-wide">
                   Unified Welfare Intelligence & Decision-Support
                 </h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-950/60 text-indigo-400 border border-indigo-800/40">
-                  PHASE 42
-                </span>
               </div>
               <p className="text-xs text-textSecondary font-mono mt-0.5">
-                Authoritative multi-phase intelligence aggregation (Phases 34–41) • Strictly non-scoring & unranked
+                Authoritative intelligence aggregation • Strictly non-scoring & unranked
               </p>
             </div>
           </div>
@@ -158,14 +155,6 @@ export default function UnifiedWelfareIntelligence() {
             <span>Refresh</span>
           </button>
         </div>
-      </div>
-
-      {/* Mandatory Decision Support Disclaimer */}
-      <div className="p-3 bg-surfaceHighlight/30 border border-border/60 rounded-lg text-xs text-textSecondary flex items-start space-x-2.5">
-        <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong className="text-textPrimary">Command & Clinical Discretion Notice:</strong> This unified dashboard summarizes welfare signals and support workflow states. Phase 42 does NOT compute a composite score, rank personnel, or automate personnel actions. All operational and support decisions remain with authorized human reviewers.
-        </p>
       </div>
 
       {/* Loading & Error States */}
