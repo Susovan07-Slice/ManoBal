@@ -180,9 +180,9 @@ export function StoryOnboarding() {
   const slide = SLIDES[currentSlide];
 
   return (
-    <div className="max-w-md mx-auto min-h-[100dvh] relative bg-[#f1f5f9] md:py-8 flex items-center justify-center overflow-hidden">
+    <div className="max-w-md mx-auto min-h-[100dvh] relative bg-[#f1f5f9] md:py-8 flex items-center justify-center overflow-hidden select-none">
       <div 
-        className="w-full h-[100dvh] md:h-[844px] md:rounded-[40px] relative overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(31,110,140,0.15)] select-none"
+        className="absolute inset-0 md:relative md:w-full md:h-[844px] md:rounded-[40px] overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(31,110,140,0.15)]"
         style={{ background: "linear-gradient(135deg, #9FD3E8 0%, #86C5DF 100%)" }}
         role="region"
         aria-roledescription="carousel"
@@ -193,7 +193,7 @@ export function StoryOnboarding() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-brand-500/10 blur-[80px] rounded-full pointer-events-none" />
 
         {/* Top Progress & Header */}
-        <div className="z-50 px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] flex flex-col gap-3">
+        <div className="absolute top-0 left-0 right-0 z-50 px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] flex flex-col gap-3 pointer-events-none">
           <div className="flex gap-[6px] h-1 w-full">
             {SLIDES.map((s, i) => {
               const isCompleted = i < currentSlide;
@@ -216,7 +216,7 @@ export function StoryOnboarding() {
             </span>
             <button 
               onClick={(e) => { e.stopPropagation(); finishOnboarding(); }}
-              className="text-ink-2 font-semibold text-[14px] px-2 py-1 flex items-center justify-center min-w-[44px] min-h-[44px] hover:text-ink active:opacity-70 transition-colors cursor-pointer z-50"
+              className="text-ink-2 font-semibold text-[14px] px-2 py-1 flex items-center justify-center min-w-[44px] min-h-[44px] hover:text-ink active:opacity-70 transition-colors cursor-pointer z-50 pointer-events-auto"
               aria-label="Skip onboarding"
             >
               Skip
@@ -224,9 +224,9 @@ export function StoryOnboarding() {
           </div>
         </div>
 
-        {/* Main Content Area (Tappable for navigation) */}
+        {/* Main Tappable Area */}
         <div 
-          className="flex-1 flex flex-col relative z-20"
+          className="absolute inset-0 z-20"
           onClick={handleAreaClick}
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
@@ -235,15 +235,15 @@ export function StoryOnboarding() {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Text Content */}
-          <div className="px-6 pt-4 pb-2 relative z-30 min-h-[240px]">
+          {/* Text Content (Fixed position below top bar) */}
+          <div className="absolute top-[calc(5.5rem+env(safe-area-inset-top,0px))] left-0 right-0 z-30 px-6 pointer-events-none">
             {SLIDES.map((s, i) => (
               <div 
                 key={s.id} 
                 className={`absolute left-6 right-6 transition-all duration-250 ease-out ${
                   i === currentSlide 
                     ? "opacity-100 translate-y-0" 
-                    : "opacity-0 translate-y-3 pointer-events-none"
+                    : "opacity-0 translate-y-3"
                 }`}
                 style={{ transitionDuration: reducedMotion ? '0ms' : '250ms' }}
               >
@@ -259,17 +259,17 @@ export function StoryOnboarding() {
             ))}
           </div>
 
-          {/* Hero Visuals */}
-          <div className="flex-1 relative w-full overflow-hidden flex items-center justify-center pointer-events-none">
+          {/* Hero Visuals (Fixed to occupy middle and bottom) */}
+          <div className="absolute top-[35%] bottom-[120px] left-0 right-0 z-20 flex items-center justify-center pointer-events-none">
             {SLIDES.map((s, i) => {
               const isActive = i === currentSlide;
               
               // Decorative Chips
               const chips = s.chips.map((Icon, idx) => {
                 const pos = [
-                  { top: "25%", left: "10%", delay: "0s", dur: "4s" },
-                  { top: "65%", left: "5%", delay: "1.5s", dur: "5s" },
-                  { top: "35%", right: "10%", delay: "0.7s", dur: "4.5s" }
+                  { top: "10%", left: "8%", delay: "0s", dur: "4s" },
+                  { top: "50%", left: "4%", delay: "1.5s", dur: "5s" },
+                  { top: "25%", right: "8%", delay: "0.7s", dur: "4.5s" }
                 ][idx];
                 
                 return (
@@ -308,7 +308,6 @@ export function StoryOnboarding() {
                       <div className="absolute inset-0 rounded-full border border-white/50 scale-125" />
                       <div className={`w-full h-full bg-white/90 rounded-full shadow-[0_0_40px_rgba(255,255,255,0.8)] flex items-center justify-center border-4 border-white ${isActive && !reducedMotion ? 'animate-pulse' : ''}`}>
                         <div className="w-24 h-24 relative opacity-90">
-                          {/* Fallback to text if logo missing, though instructions said use /logo.png */}
                           <Image src="/logo.png" alt="ManoBal Logo" fill className="object-contain" priority onError={(e) => (e.currentTarget.style.display='none')} />
                         </div>
                       </div>
@@ -342,16 +341,16 @@ export function StoryOnboarding() {
 
                   {/* Slide 3 Hero */}
                   {i === 2 && (
-                    <div className="relative w-64 h-64 flex flex-col justify-end pb-4 scale-[0.85] origin-bottom sm:scale-100">
+                    <div className="absolute inset-0 w-full h-full flex flex-col justify-end items-center">
                       {/* Decorative bottom sheet mock */}
-                      <div className="absolute bottom-0 left-0 right-0 h-44 bg-white/70 backdrop-blur-xl rounded-t-[32px] border-t border-white/80 shadow-[0_-10px_40px_rgba(31,110,140,0.1)] p-5 flex flex-col gap-3">
-                        <div className="w-10 h-1 bg-ink-3/30 rounded-full mx-auto mb-1" />
+                      <div className="absolute bottom-[-140px] left-8 right-8 h-64 bg-white/70 backdrop-blur-xl rounded-t-[32px] border-t border-white/80 shadow-[0_-10px_40px_rgba(31,110,140,0.1)] p-5 flex flex-col gap-3">
+                        <div className="w-10 h-1 bg-ink-3/30 rounded-full mx-auto mb-2" />
                         <div className="h-10 rounded-2xl border border-white/60 bg-white/50" />
                         <div className="h-10 rounded-2xl border border-white/60 bg-white/50" />
                         <div className="h-10 rounded-2xl border border-white/60 bg-white/50" />
                       </div>
                       {/* Floating pill */}
-                      <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-[#1E8FC0] rounded-full px-6 py-4 flex items-center gap-3 shadow-[0_16px_40px_rgba(31,110,140,0.3)] border border-white/20">
+                      <div className="absolute top-[10%] left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-[#1E8FC0] rounded-full px-6 py-4 flex items-center gap-3 shadow-[0_16px_40px_rgba(31,110,140,0.3)] border border-white/20">
                         <HeartPulse className="w-6 h-6 text-white" />
                         <span className="text-white font-bold whitespace-nowrap text-[15px]">Welfare Support</span>
                       </div>
@@ -363,11 +362,13 @@ export function StoryOnboarding() {
           </div>
         </div>
 
-        {/* Bottom Button */}
-        <div className="z-30 px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] w-full bg-gradient-to-t from-[#86C5DF]/50 to-transparent pt-8 pointer-events-none">
+        {/* Bottom Area (Gradient + Button) */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#86C5DF] to-transparent z-30 pointer-events-none" />
+        
+        <div className="absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
           <button 
             onClick={(e) => { e.stopPropagation(); currentSlide === 2 ? finishOnboarding() : goToNext(); }}
-            className="w-full h-[60px] bg-white text-ink rounded-full font-bold uppercase tracking-widest text-[14px] shadow-float active:scale-[.97] transition-transform pointer-events-auto flex items-center justify-center cursor-pointer select-none"
+            className="w-full h-[60px] bg-white text-ink rounded-full font-bold uppercase tracking-widest text-[14px] shadow-[0_16px_40px_rgba(31,110,140,0.22)] active:scale-[.97] transition-transform pointer-events-auto flex items-center justify-center cursor-pointer select-none"
           >
             {currentSlide === 2 ? "GET STARTED" : "CONTINUE"}
           </button>
