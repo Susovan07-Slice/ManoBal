@@ -113,26 +113,22 @@ export function SearchableSelect({
         }}
         className={
           isLight
-            ? `w-full bg-gray-50/70 border ${
-                isOpen ? 'border-emerald-600 ring-2 ring-emerald-600/10' : 'border-gray-200'
-              } text-gray-900 text-sm rounded-xl px-3.5 py-2.5 flex items-center justify-between cursor-pointer transition-colors ${
-                disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-emerald-600/40'
+            ? `w-full bg-[#F1F7F4] border ${
+                isOpen ? 'border-accent ring-2 ring-accent/15' : 'border-surfaceBorder'
+              } text-textPrimary text-sm rounded-xl px-3.5 py-2.5 flex items-center justify-between cursor-pointer transition-colors ${
+                disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-accent/50'
               }`
             : `w-full bg-surfaceHighlight border ${
-                isOpen ? 'border-accent' : 'border-surfaceHighlight'
-              } text-textPrimary text-sm rounded px-3 py-2.5 flex items-center justify-between cursor-pointer transition-colors ${
-                disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-accent/60'
+                isOpen ? 'border-accent ring-2 ring-accent/15' : 'border-surfaceBorder'
+              } text-textPrimary text-sm rounded-xl px-3.5 py-2.5 flex items-center justify-between cursor-pointer transition-colors ${
+                disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-accent/50'
               }`
         }
       >
         <span
           className={
             value
-              ? isLight
-                ? 'text-gray-900 font-medium'
-                : 'text-textPrimary font-medium'
-              : isLight
-              ? 'text-gray-400'
+              ? 'text-textPrimary font-medium'
               : 'text-textSecondary'
           }
         >
@@ -140,16 +136,14 @@ export function SearchableSelect({
         </span>
         <div
           className={`flex items-center space-x-1.5 ${
-            isLight ? 'text-gray-400' : 'text-textSecondary'
+            isLight ? 'text-textSecondary' : 'text-textSecondary'
           }`}
         >
           {value && !disabled && (
             <button
               type="button"
               onClick={handleClear}
-              className={`p-0.5 transition-colors ${
-                isLight ? 'hover:text-gray-700' : 'hover:text-textPrimary'
-              }`}
+              className="p-0.5 transition-colors hover:text-textPrimary"
               title="Clear selection"
             >
               <X className="w-3.5 h-3.5" />
@@ -157,11 +151,7 @@ export function SearchableSelect({
           )}
           <ChevronDown
             className={`w-4 h-4 transition-transform duration-200 ${
-              isOpen
-                ? isLight
-                  ? 'rotate-180 text-emerald-700'
-                  : 'rotate-180 text-accent'
-                : ''
+              isOpen ? 'rotate-180 text-accent' : ''
             }`}
           />
         </div>
@@ -170,36 +160,28 @@ export function SearchableSelect({
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className={`absolute z-50 left-0 right-0 mt-1 rounded-xl shadow-2xl overflow-hidden ${
+          className={`absolute z-50 left-0 right-0 mt-1 rounded-xl shadow-elevated overflow-hidden ${
             isLight
-              ? 'bg-white border border-gray-200'
-              : 'bg-surface border border-accent/40 backdrop-blur-md'
+              ? 'bg-[#FAFAFC] border border-surfaceBorder'
+              : 'bg-surface border border-surfaceBorder'
           }`}
         >
           {/* Search Box */}
           <div
             className={`p-2.5 flex items-center space-x-2 border-b ${
               isLight
-                ? 'bg-gray-50 border-gray-100 text-gray-800'
-                : 'bg-surfaceHighlight/50 border-surfaceHighlight text-textPrimary'
+                ? 'bg-[#F1F7F4] border-surfaceBorder text-textPrimary'
+                : 'bg-surfaceHighlight/50 border-surfaceBorder text-textPrimary'
             }`}
           >
-            <Search
-              className={`w-3.5 h-3.5 shrink-0 ${
-                isLight ? 'text-gray-400' : 'text-textSecondary'
-              }`}
-            />
+            <Search className="w-3.5 h-3.5 shrink-0 text-textSecondary" />
             <input
               type="text"
               autoFocus
               placeholder={`Search ${label.toLowerCase()}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full bg-transparent text-xs outline-none font-sans ${
-                isLight
-                  ? 'text-gray-900 placeholder:text-gray-400'
-                  : 'text-textPrimary placeholder:text-textSecondary'
-              }`}
+              className="w-full bg-transparent text-xs outline-none font-sans text-textPrimary placeholder:text-textSecondary"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
@@ -207,23 +189,15 @@ export function SearchableSelect({
           {/* Options List */}
           <div
             className={`max-h-52 overflow-y-auto divide-y text-xs ${
-              isLight ? 'divide-gray-100' : 'divide-surfaceHighlight/30'
+              isLight ? 'divide-surfaceBorder' : 'divide-surfaceBorder'
             }`}
           >
             {isLoading ? (
-              <div
-                className={`p-3 text-center font-mono text-[11px] ${
-                  isLight ? 'text-gray-500' : 'text-textSecondary'
-                }`}
-              >
+              <div className="p-3 text-center font-mono text-[11px] text-textSecondary">
                 Loading options...
               </div>
             ) : filteredOptions.length === 0 ? (
-              <div
-                className={`p-3 text-center ${
-                  isLight ? 'text-gray-500' : 'text-textSecondary'
-                }`}
-              >
+              <div className="p-3 text-center text-textSecondary">
                 No matching {label.toLowerCase()} found
               </div>
             ) : (
@@ -236,21 +210,13 @@ export function SearchableSelect({
                     onClick={() => handleSelect(opt)}
                     className={`w-full text-left px-3 py-2 flex items-center justify-between transition-colors ${
                       isSelected
-                        ? isLight
-                          ? 'bg-emerald-50 text-emerald-800 font-semibold'
-                          : 'bg-accent/20 text-accent font-semibold'
-                        : isLight
-                        ? 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-accent/15 text-accent font-semibold'
                         : 'text-textPrimary hover:bg-surfaceHighlight'
                     }`}
                   >
                     <span>{opt}</span>
                     {isSelected && (
-                      <Check
-                        className={`w-3.5 h-3.5 shrink-0 ${
-                          isLight ? 'text-emerald-700' : 'text-accent'
-                        }`}
-                      />
+                      <Check className="w-3.5 h-3.5 shrink-0 text-accent" />
                     )}
                   </button>
                 );

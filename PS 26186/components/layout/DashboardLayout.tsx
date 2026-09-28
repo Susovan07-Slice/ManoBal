@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
-import { Info, ShieldAlert } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Topbar />
         
         {/* Persistent Prototype Notice */}
-        <div className="bg-surfaceHighlight/50 border-b border-surfaceHighlight px-6 py-1.5 flex items-center justify-between text-[11px] text-textSecondary">
+        <div className="bg-surface/80 border-b border-surfaceBorder px-6 py-1.5 flex items-center justify-between text-[11px] text-textSecondary">
           <div className="flex items-center space-x-2">
             <Info className="w-3.5 h-3.5 text-accent shrink-0" />
             <span>

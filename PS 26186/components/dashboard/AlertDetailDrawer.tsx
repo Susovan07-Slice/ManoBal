@@ -69,8 +69,8 @@ export default function AlertDetailDrawer({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-surface border-l border-military shadow-2xl flex flex-col z-50 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-surfaceHighlight bg-surfaceHighlight/30">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-surface border-l border-surfaceBorder shadow-elevated flex flex-col z-50 overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-surfaceBorder bg-surface">
         <div>
           <h2 className="text-base font-semibold text-textPrimary uppercase tracking-wider">
             Operational Welfare Alert
@@ -95,7 +95,7 @@ export default function AlertDetailDrawer({
           </div>
           <div className="text-right">
             <RiskBadge level={alert.stress_level} />
-            <div className="text-xl font-bold font-mono text-red-400 mt-1">
+            <div className="text-xl font-bold font-mono text-[#C26D6D] mt-1">
               {alert.risk_score}<span className="text-xs text-textSecondary font-normal">/100</span>
             </div>
             <span className="text-[10px] font-mono uppercase text-accent font-semibold">
@@ -110,25 +110,25 @@ export default function AlertDetailDrawer({
             Contributing Operational Telemetry
           </h4>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-surfaceHighlight/20 p-2.5 rounded border border-surfaceHighlight">
+            <div className="bg-surfaceHighlight/40 p-2.5 rounded-lg border border-surfaceBorder">
               <span className="text-textSecondary block">Duty Hours/Wk</span>
               <span className="font-mono text-textPrimary font-bold text-sm">
                 {alert.duty_hours_per_week} hrs
               </span>
             </div>
-            <div className="bg-surfaceHighlight/20 p-2.5 rounded border border-surfaceHighlight">
+            <div className="bg-surfaceHighlight/40 p-2.5 rounded-lg border border-surfaceBorder">
               <span className="text-textSecondary block">Consecutive Duty</span>
               <span className="font-mono text-textPrimary font-bold text-sm">
                 {alert.consecutive_duty_days} days
               </span>
             </div>
-            <div className="bg-surfaceHighlight/20 p-2.5 rounded border border-surfaceHighlight">
+            <div className="bg-surfaceHighlight/40 p-2.5 rounded-lg border border-surfaceBorder">
               <span className="text-textSecondary block">Night Shifts / Mo</span>
               <span className="font-mono text-textPrimary font-bold text-sm">
                 {alert.night_shifts_per_month} shifts
               </span>
             </div>
-            <div className="bg-surfaceHighlight/20 p-2.5 rounded border border-surfaceHighlight">
+            <div className="bg-surfaceHighlight/40 p-2.5 rounded-lg border border-surfaceBorder">
               <span className="text-textSecondary block">Leave Gap Days</span>
               <span className="font-mono text-textPrimary font-bold text-sm">
                 {alert.leave_gap_days} days
@@ -151,7 +151,7 @@ export default function AlertDetailDrawer({
               {alert.key_factors.map((factor, i) => (
                 <li
                   key={i}
-                  className="text-xs text-textPrimary bg-surfaceHighlight/30 p-2.5 rounded border-l-2 border-accent flex items-start space-x-2"
+                  className="text-xs text-textPrimary bg-surfaceHighlight/40 p-2.5 rounded-lg border-l-2 border-accent flex items-start space-x-2"
                 >
                   <AlertTriangle className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
                   <span>{factor}</span>
@@ -159,7 +159,7 @@ export default function AlertDetailDrawer({
               ))}
             </ul>
           ) : (
-            <div className="text-xs text-textSecondary p-3 bg-surfaceHighlight/30 rounded">
+            <div className="text-xs text-textSecondary p-3 bg-surfaceHighlight/40 rounded-lg border border-surfaceBorder">
               Standard operational baselines observed.
             </div>
           )}
@@ -179,21 +179,21 @@ export default function AlertDetailDrawer({
               {assessment.recommendations.map((rec) => (
                 <div
                   key={rec.id}
-                  className="p-3 bg-surfaceHighlight/30 rounded border border-surfaceHighlight text-xs space-y-2"
+                  className="p-3 bg-surfaceHighlight/40 rounded-lg border border-surfaceBorder text-xs space-y-2"
                 >
                   <div className="flex justify-between items-start">
                     <span className="font-semibold text-accent uppercase tracking-wider text-[10px]">
                       {rec.recommendation_type}
                     </span>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-mono font-bold ${
+                      className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-mono font-bold border ${
                         rec.status === 'pending'
-                          ? 'bg-amber-500/20 text-amber-300'
+                          ? 'bg-[#FDF6EE] text-[#8E5B23] border-[#F3D2AE]'
                           : rec.status === 'acknowledged'
-                          ? 'bg-blue-500/20 text-blue-300'
+                          ? 'bg-[#EEF4F8] text-[#3E6580] border-[#BCD3E3]'
                           : rec.status === 'completed'
-                          ? 'bg-emerald-500/20 text-emerald-300'
-                          : 'bg-surfaceHighlight text-textSecondary'
+                          ? 'bg-[#EEF6F2] text-[#2D6346] border-[#BBD9C7]'
+                          : 'bg-surfaceHighlight text-textSecondary border-surfaceBorder'
                       }`}
                     >
                       {rec.status}

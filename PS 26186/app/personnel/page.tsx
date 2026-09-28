@@ -165,7 +165,7 @@ export default function PersonnelDirectoryPage() {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-950/40 border border-red-800/60 rounded text-red-300 text-xs">
+          <div className="p-3 bg-[#FAF0F0] border border-[#E8B4B4] rounded text-[#964747] text-xs">
             {error}
           </div>
         )}
@@ -233,8 +233,8 @@ export default function PersonnelDirectoryPage() {
                       <td className="px-4 py-3 font-mono">
                         {p.latest_risk_score !== null && p.latest_risk_score !== undefined ? (
                           <span className={`font-bold ${
-                            p.latest_risk_score >= 70 ? 'text-rose-400' :
-                            p.latest_risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400'
+                            p.latest_risk_score >= 70 ? 'text-[#C26D6D]' :
+                            p.latest_risk_score >= 40 ? 'text-[#D99B5C]' : 'text-[#7BA083]'
                           }`}>
                             {p.latest_risk_score}
                           </span>
@@ -295,7 +295,7 @@ export default function PersonnelDirectoryPage() {
                         <span className="text-[11px] text-textSecondary italic">Unassessed</span>
                       )}
                       {p.latest_risk_score !== null && p.latest_risk_score !== undefined && (
-                        <div className="text-xs font-mono font-bold text-rose-400 mt-1">
+                        <div className="text-xs font-mono font-bold text-[#C26D6D] mt-1">
                           Risk {p.latest_risk_score}/100
                         </div>
                       )}

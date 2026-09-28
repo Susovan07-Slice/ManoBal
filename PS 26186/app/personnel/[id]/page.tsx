@@ -143,8 +143,8 @@ export default function PersonnelDetailPage() {
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to Personnel Directory
           </Link>
-          <div className="p-6 bg-surface border border-red-800/40 rounded-lg text-center">
-            <h2 className="text-lg font-bold text-red-400">Record Unavailable</h2>
+          <div className="p-6 bg-surface border border-[#E8B4B4] rounded-lg text-center">
+            <h2 className="text-lg font-bold text-[#C26D6D]">Record Unavailable</h2>
             <p className="text-sm text-textSecondary mt-1">{error || 'Personnel record not found.'}</p>
           </div>
         </div>
@@ -227,8 +227,8 @@ export default function PersonnelDetailPage() {
                 <div className="flex justify-between py-1">
                   <span className="text-textSecondary">Operational Exposure</span>
                   <span className={`font-mono font-medium ${
-                    personnel.operational_exposure === 'High' ? 'text-red-400' :
-                    personnel.operational_exposure === 'Medium' ? 'text-amber-400' : 'text-emerald-400'
+                    personnel.operational_exposure === 'High' ? 'text-[#C26D6D]' :
+                    personnel.operational_exposure === 'Medium' ? 'text-[#D99B5C]' : 'text-[#7BA083]'
                   }`}>
                     {personnel.operational_exposure}
                   </span>
@@ -295,10 +295,10 @@ export default function PersonnelDetailPage() {
                     <span className="text-xs text-textSecondary font-mono">/ 100 Risk Index</span>
                     <span className={`text-xs uppercase font-mono font-bold px-2 py-0.5 rounded ml-auto ${
                       latestAssessment.risk_priority === 'Priority'
-                        ? 'bg-red-950/60 text-red-300 border border-red-800'
+                        ? 'bg-[#FAF0F0] text-[#964747] border border-[#E8B4B4]'
                         : latestAssessment.risk_priority === 'Preventive'
-                        ? 'bg-amber-950/60 text-amber-300 border border-amber-800'
-                        : 'bg-emerald-950/60 text-emerald-300 border border-emerald-800'
+                        ? 'bg-[#FDF6EE] text-[#9A622A] border border-[#EACDAE]'
+                        : 'bg-[#EEF6F2] text-[#3F6649] border border-[#BACFC2]'
                     }`}>
                       {latestAssessment.risk_priority}
                     </span>
@@ -316,9 +316,9 @@ export default function PersonnelDetailPage() {
                       <span className="text-[11px] text-textSecondary">Trend:</span>
                       <span className={`font-mono font-semibold ${
                         latestAssessment.risk_trend === 'Worsening'
-                          ? 'text-red-400'
+                          ? 'text-[#C26D6D]'
                           : latestAssessment.risk_trend === 'Improving'
-                          ? 'text-emerald-400'
+                          ? 'text-[#7BA083]'
                           : 'text-textPrimary'
                       }`}>
                         {latestAssessment.risk_trend || 'Stable'}
@@ -335,19 +335,19 @@ export default function PersonnelDetailPage() {
                     <div className="grid grid-cols-3 gap-1.5 text-center text-xs font-mono">
                       <div className="p-1.5 bg-surfaceHighlight/50 rounded">
                         <span className="text-[10px] text-textSecondary block">Low</span>
-                        <span className="text-emerald-400 font-bold">
+                        <span className="text-[#7BA083] font-bold">
                           {(latestAssessment.low_probability * 100).toFixed(0)}%
                         </span>
                       </div>
                       <div className="p-1.5 bg-surfaceHighlight/50 rounded">
                         <span className="text-[10px] text-textSecondary block">Medium</span>
-                        <span className="text-amber-400 font-bold">
+                        <span className="text-[#D99B5C] font-bold">
                           {(latestAssessment.medium_probability * 100).toFixed(0)}%
                         </span>
                       </div>
                       <div className="p-1.5 bg-surfaceHighlight/50 rounded">
                         <span className="text-[10px] text-textSecondary block">High</span>
-                        <span className="text-red-400 font-bold">
+                        <span className="text-[#C26D6D] font-bold">
                           {(latestAssessment.high_probability * 100).toFixed(0)}%
                         </span>
                       </div>
@@ -388,15 +388,15 @@ export default function PersonnelDetailPage() {
                 <span className="text-textSecondary text-[11px] block mb-1">Trend Direction</span>
                 <div className="flex items-center space-x-2">
                   {trendData.trend.direction === 'WORSENING' ? (
-                    <TrendingUp className="w-5 h-5 text-red-400" />
+                    <TrendingUp className="w-5 h-5 text-[#C26D6D]" />
                   ) : trendData.trend.direction === 'IMPROVING' ? (
-                    <TrendingDown className="w-5 h-5 text-emerald-400" />
+                    <TrendingDown className="w-5 h-5 text-[#7BA083]" />
                   ) : (
                     <Minus className="w-5 h-5 text-textPrimary" />
                   )}
                   <span className={`text-sm font-bold font-mono ${
-                    trendData.trend.direction === 'WORSENING' ? 'text-red-400' :
-                    trendData.trend.direction === 'IMPROVING' ? 'text-emerald-400' : 'text-textPrimary'
+                    trendData.trend.direction === 'WORSENING' ? 'text-[#C26D6D]' :
+                    trendData.trend.direction === 'IMPROVING' ? 'text-[#7BA083]' : 'text-textPrimary'
                   }`}>
                     {trendData.trend.direction}
                   </span>
@@ -410,7 +410,7 @@ export default function PersonnelDetailPage() {
               <div className="p-3 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
                 <span className="text-textSecondary text-[11px] block mb-1">Risk Persistence</span>
                 <div className="flex items-center space-x-2">
-                  <span className={`text-sm font-bold font-mono ${trendData.history.persistent_elevated_risk ? 'text-red-400' : 'text-emerald-400'}`}>
+                  <span className={`text-sm font-bold font-mono ${trendData.history.persistent_elevated_risk ? 'text-[#C26D6D]' : 'text-[#7BA083]'}`}>
                     {trendData.history.persistent_elevated_risk ? 'SUSTAINED ELEVATED' : 'NOT SUSTAINED'}
                   </span>
                 </div>
@@ -424,8 +424,8 @@ export default function PersonnelDetailPage() {
                 <span className="text-textSecondary text-[11px] block mb-1">Personal Baseline</span>
                 <div className="flex items-center space-x-2">
                   <span className={`text-sm font-bold font-mono ${
-                    (trendData.baseline.current_deviation || 0) > 5 ? 'text-red-400' :
-                    (trendData.baseline.current_deviation || 0) < -5 ? 'text-emerald-400' : 'text-textPrimary'
+                    (trendData.baseline.current_deviation || 0) > 5 ? 'text-[#C26D6D]' :
+                    (trendData.baseline.current_deviation || 0) < -5 ? 'text-[#7BA083]' : 'text-textPrimary'
                   }`}>
                     {(trendData.baseline.current_deviation || 0) > 0 ? '+' : ''}{trendData.baseline.current_deviation} pts
                   </span>
@@ -440,8 +440,8 @@ export default function PersonnelDetailPage() {
                 <span className="text-textSecondary text-[11px] block mb-1">Risk Acceleration</span>
                 <div className="flex items-center space-x-2">
                   <span className={`text-sm font-bold font-mono ${
-                    trendData.trend.acceleration === 'INCREASING' ? 'text-red-400' :
-                    trendData.trend.acceleration === 'DECREASING' ? 'text-emerald-400' : 'text-textPrimary'
+                    trendData.trend.acceleration === 'INCREASING' ? 'text-[#C26D6D]' :
+                    trendData.trend.acceleration === 'DECREASING' ? 'text-[#7BA083]' : 'text-textPrimary'
                   }`}>
                     {trendData.trend.acceleration}
                   </span>
@@ -461,7 +461,7 @@ export default function PersonnelDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   {trendData.repeated_factors.map((rf, idx) => (
                     <div key={idx} className={`px-2 py-1 text-[10px] font-mono rounded border ${
-                      rf.type === 'risk' ? 'bg-red-950/30 text-red-300 border-red-900/50' : 'bg-emerald-950/30 text-emerald-300 border-emerald-900/50'
+                      rf.type === 'risk' ? 'bg-[#FAF0F0] text-[#964747] border-[#E8B4B4]' : 'bg-[#EEF6F2] text-[#3F6649] border-[#BACFC2]'
                     }`}>
                       {rf.factor} ({rf.frequency}/{rf.total_assessments})
                     </div>
@@ -532,11 +532,11 @@ export default function PersonnelDetailPage() {
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
                             rec.status === 'pending'
-                              ? 'bg-amber-500/20 text-amber-300'
+                              ? 'bg-[#FDF6EE] text-[#9A622A]'
                               : rec.status === 'acknowledged'
-                              ? 'bg-blue-500/20 text-blue-300'
+                              ? 'bg-[#EBF3FB] text-[#2F6196]'
                               : rec.status === 'completed'
-                              ? 'bg-emerald-500/20 text-emerald-300'
+                              ? 'bg-[#EEF6F2] text-[#3F6649]'
                               : 'bg-surfaceHighlight text-textSecondary'
                           }`}
                         >
@@ -552,7 +552,7 @@ export default function PersonnelDetailPage() {
                             <button
                               disabled={updatingRecId === rec.id}
                               onClick={() => handleRecommendationStatus(rec.id, 'acknowledged')}
-                              className="px-2 py-1 bg-surfaceHighlight hover:bg-surfaceHighlight/80 text-[10px] text-blue-300 rounded font-medium transition-colors"
+                              className="px-2 py-1 bg-[#EBF3FB] hover:bg-[#D7E8F7] text-[10px] text-[#2F6196] rounded font-medium transition-colors"
                             >
                               Acknowledge
                             </button>
@@ -561,7 +561,7 @@ export default function PersonnelDetailPage() {
                             <button
                               disabled={updatingRecId === rec.id}
                               onClick={() => handleRecommendationStatus(rec.id, 'completed')}
-                              className="px-2 py-1 bg-emerald-950/60 hover:bg-emerald-900/60 text-[10px] text-emerald-300 rounded font-medium border border-emerald-800/40 transition-colors"
+                              className="px-2 py-1 bg-[#EEF6F2] hover:bg-[#DCEAE0] text-[10px] text-[#3F6649] rounded font-medium border border-[#BACFC2] transition-colors"
                             >
                               Mark Completed
                             </button>
@@ -641,7 +641,7 @@ export default function PersonnelDetailPage() {
 
       {/* Override Telemetry Modal */}
       {showOverrideModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface border border-surfaceHighlight max-w-md w-full rounded-lg p-6 space-y-4">
             <div className="flex justify-between items-center border-b border-surfaceHighlight pb-3">
               <h3 className="text-sm font-semibold text-textPrimary uppercase tracking-wider">
