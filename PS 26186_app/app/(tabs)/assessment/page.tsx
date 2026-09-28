@@ -449,8 +449,8 @@ function AssessmentContent() {
         <div className="w-9 h-9" />
       </div>
 
-      {/* Main Content Area (bottom-aligned) */}
-      <div className="mt-auto p-5 pb-8 z-10 flex flex-col gap-5 w-full">
+      {/* Main Content Area (center-aligned) */}
+      <div className="flex-1 flex flex-col justify-center p-5 pb-24 z-10 w-full">
         {screen.type === "intro" ? (
           <div className="glass-card p-8 text-center flex flex-col items-center animate-fade-up">
             <h2 className="text-2xl font-bold text-ink">{screen.title}</h2>
