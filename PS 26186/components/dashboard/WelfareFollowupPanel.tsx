@@ -284,7 +284,7 @@ export default function WelfareFollowupPanel() {
             </div>
             <div>
               <h2 className="text-lg font-bold text-textPrimary uppercase tracking-wide flex items-center gap-2">
-                Phase 41: Welfare Follow-Up & Support Effectiveness
+                Welfare Follow-Up & Support Effectiveness
                 <span className="text-[10px] px-2 py-0.5 bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 rounded font-mono">
                   CLOSED-LOOP MONITORING
                 </span>
@@ -316,14 +316,6 @@ export default function WelfareFollowupPanel() {
             <span>Sync</span>
           </button>
         </div>
-      </div>
-
-      {/* Ethical Guidance Banner */}
-      <div className="p-3 bg-surfaceHighlight/30 border border-surfaceHighlight rounded-lg text-xs text-textSecondary flex items-start space-x-2.5">
-        <Info className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong className="text-textPrimary">Observational Monitoring Protocol:</strong> Follow-up outcome states are descriptive data observations derived from subsequent validated assessments. They do not constitute clinical recovery, fitness-for-duty decisions, or personnel performance appraisals.
-        </p>
       </div>
 
       {/* KPI Summary Cards */}

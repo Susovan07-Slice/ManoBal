@@ -474,14 +474,6 @@ export default function AdvancedCommanderAnalytics() {
               </div>
             )}
           </div>
-
-          {/* Ethical Governance Footer */}
-          <div className="p-3 bg-surfaceHighlight/30 border border-surfaceHighlight rounded-lg text-[11px] text-textSecondary flex items-start space-x-2">
-            <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              <strong className="text-textPrimary">Human-in-the-Loop Welfare Intelligence:</strong> All aggregates are synthesized for supportive commander decision-support. Individual rankings or disciplinary penalties are strictly prohibited. Records analyzed: {data.data_quality.records_analyzed}.
-            </p>
-          </div>
         </div>
       )}
     </div>
