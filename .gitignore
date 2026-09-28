@@ -14,5 +14,7 @@ __pycache__/
 .env.*.local
 catboost_info/
 *.tsbuildinfo
+*.db
+*.sqlite3
 .DS_Store
 Thumbs.db

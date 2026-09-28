@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import Sidebar from './Sidebar';
@@ -10,20 +10,49 @@ import { Info, ShieldAlert } from 'lucide-react';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
-    }
-  }, [isLoading, user, router]);
+    setMounted(true);
+  }, []);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (mounted && !isLoading && !user) {
+      router.replace('/login');
+    }
+  }, [mounted, isLoading, user, router]);
+
+  // Safety fallback: if authentication resolution takes > 2.5 seconds, redirect to /login
+  useEffect(() => {
+    if (!mounted) return;
+    const timer = setTimeout(() => {
+      if (!user) {
+        window.location.href = '/login';
+      }
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [mounted, user]);
+
+  if (!mounted || isLoading) {
     return (
-      <div className="h-screen w-screen bg-background flex flex-col items-center justify-center space-y-4">
-        <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-mono text-textSecondary uppercase tracking-widest">
+      <div
+        className="h-screen w-screen bg-[#070b09] flex flex-col items-center justify-center space-y-4 text-white"
+        style={{ backgroundColor: '#070b09', color: '#ffffff', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <div
+          className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"
+          style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #10b981', borderTopColor: 'transparent' }}
+        />
+        <p className="text-sm font-mono text-zinc-400 uppercase tracking-widest" style={{ color: '#a1a1aa', fontFamily: 'monospace' }}>
           Authenticating Command Session...
         </p>
+        <a
+          href="/login"
+          className="mt-2 text-xs font-mono text-emerald-400 hover:text-emerald-300 underline cursor-pointer"
+          style={{ color: '#34d399', fontSize: '12px', textDecoration: 'underline', marginTop: '8px' }}
+        >
+          Click here if not redirected automatically
+        </a>
       </div>
     );
   }

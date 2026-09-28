@@ -43,8 +43,8 @@ class WelfareRecommendationOut(BaseModel):
     actioned_at: Optional[datetime] = None
     actioned_by: Optional[int] = None
     action_notes: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 class RecommendationAcknowledgeRequest(BaseModel):
     notes: Optional[str] = Field(None, description="Optional notes upon acknowledging recommendation")
@@ -64,6 +64,10 @@ class RecommendationDismissRequest(BaseModel):
 
 class RecommendationActionRequest(BaseModel):
     action_notes: str = Field(..., min_length=3, description="Specific actions taken to address the supportive recommendation")
+
+class RecommendationStatusUpdateRequest(BaseModel):
+    status: str = Field(..., description="Target status: e.g. ACCEPTED, ACKNOWLEDGED, ACTIONED, DISMISSED, DEFERRED")
+    notes: Optional[str] = Field(None, description="Optional notes or operational rationale")
 
 class PersonnelRecommendationsResponse(BaseModel):
     personnel_id: int

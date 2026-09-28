@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { UserRole } from '@/types/rbac';
 import { UserOut, CommanderSignupData } from '@/types/api';
 import { getCurrentUser, login as authLogin, logout as authLogout, registerCommander, isAuthenticated } from './auth';
-import { setStoredToken, getStoredToken } from './api';
+import { setStoredToken, getStoredToken, getStoredUser, setStoredUser } from './api';
 
 interface AuthContextType {
   user: UserOut | null;
@@ -25,23 +25,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Initialize auth state on mount
+  // Initialize auth state on client mount to guarantee SSR-client hydration parity
   useEffect(() => {
     async function initAuth() {
       const storedToken = getStoredToken();
+      const storedUser = getStoredUser();
+
       if (!storedToken) {
         setIsLoading(false);
+        setUser(null);
+        setToken(null);
         return;
       }
 
       setToken(storedToken);
+      if (storedUser) {
+        setUser(storedUser);
+        setRole((storedUser.role as UserRole) || 'officer');
+        setIsLoading(false);
+      }
+
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
         setRole(currentUser.role as UserRole);
+        setStoredUser(currentUser);
       } catch (err) {
         console.warn('Stored session could not be restored:', err);
         setStoredToken(null);
+        setStoredUser(null);
         setUser(null);
         setToken(null);
       } finally {
@@ -60,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
       setRole(currentUser.role as UserRole);
+      setStoredUser(currentUser);
     } finally {
       setIsLoading(false);
     }
@@ -73,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
       setRole(currentUser.role as UserRole);
+      setStoredUser(currentUser);
     } finally {
       setIsLoading(false);
     }
@@ -82,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
     setRole('officer');
+    setStoredUser(null);
     authLogout();
   }, []);
 

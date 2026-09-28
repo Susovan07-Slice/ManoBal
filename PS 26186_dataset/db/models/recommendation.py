@@ -68,6 +68,8 @@ class WelfareRecommendation(Base):
     linked_intervention = relationship("WelfareIntervention")
     acknowledged_user = relationship("User", foreign_keys=[acknowledged_by])
     actioned_user = relationship("User", foreign_keys=[actioned_by])
+    followups = relationship("WelfareFollowup", back_populates="recommendation")
+
 
     __table_args__ = (
         Index("ix_welfare_recommendations_personnel_type_status", "personnel_id", "recommendation_type", "status"),

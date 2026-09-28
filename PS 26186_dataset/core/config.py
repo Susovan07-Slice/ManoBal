@@ -22,8 +22,25 @@ class Settings:
     MODEL_PATH: str = os.path.join(BASE_DIR, "models", "final_stress_prediction_pipeline.pkl")
     
     def __init__(self):
+        # Environment & Debug Configuration
+        self.ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development").strip().lower()
+        self.DEBUG: bool = os.getenv("DEBUG", "false").strip().lower() in ("true", "1", "yes")
+        self.ALLOW_LOCAL_CORS_IN_PROD: bool = os.getenv("ALLOW_LOCAL_CORS_IN_PROD", "false").strip().lower() in ("true", "1", "yes")
+        self.ENABLE_DOCS: bool = os.getenv(
+            "ENABLE_DOCS",
+            "true" if self.ENVIRONMENT != "production" else "false"
+        ).strip().lower() in ("true", "1", "yes")
+
         # Database Settings (PostgreSQL primary with fallback)
-        self.DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./personnel_welfare.db")
+        raw_db_url = os.getenv("DATABASE_URL", "sqlite:///./personnel_welfare.db")
+        if raw_db_url.startswith("sqlite:///") and not raw_db_url.startswith("sqlite:////") and not (len(raw_db_url) > 11 and raw_db_url[10] == ":"):
+            clean_rel = raw_db_url.replace("sqlite:///", "")
+            if clean_rel.startswith("./") or clean_rel.startswith(".\\"):
+                clean_rel = clean_rel[2:]
+            abs_db_path = os.path.join(self.BASE_DIR, clean_rel).replace("\\", "/")
+            self.DATABASE_URL = f"sqlite:///{abs_db_path}"
+        else:
+            self.DATABASE_URL = raw_db_url
         
         # JWT Authentication Security Settings
         # Must be supplied via environment variable; no hardcoded fallback allowed.
@@ -33,6 +50,27 @@ class Settings:
                 "JWT secret environment variable is required. "
                 "Please set 'SECRET_KEY' or 'JWT_SECRET' in your environment or .env file."
             )
+
+        # In production, disallow known development placeholders or short weak secrets
+        if self.ENVIRONMENT == "production":
+            known_insecure_secrets = {
+                "replace-with-a-long-random-secret",
+                "secret",
+                "secretkey",
+                "admin",
+                "password",
+                "changeme",
+                "test",
+                "sih_personnel_stress_monitoring_secret_key_2026_secure"
+            }
+            if _raw_secret.strip().lower() in known_insecure_secrets or len(_raw_secret.strip()) < 32:
+                raise RuntimeError(
+                    "Insecure SECRET_KEY configured for production environment. "
+                    "A cryptographically strong secret of at least 32 characters is required in production."
+                )
+            if self.DEBUG:
+                raise RuntimeError("DEBUG mode cannot be enabled in a production environment.")
+
         self.SECRET_KEY: str = _raw_secret
         self.ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
         self.ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))

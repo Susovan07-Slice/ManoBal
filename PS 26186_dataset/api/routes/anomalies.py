@@ -279,6 +279,8 @@ def acknowledge_anomaly(
         anom = WelfareAnomalyService.acknowledge_anomaly(anomaly_id, current_user, db)
         return _serialize_anomaly(anom, db)
     except ValueError as ve:
+        if "not found" in str(ve).lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except PermissionError as pe:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(pe))
@@ -298,6 +300,8 @@ def start_review_anomaly(
         anom = WelfareAnomalyService.review_anomaly(anomaly_id, current_user, db)
         return _serialize_anomaly(anom, db)
     except ValueError as ve:
+        if "not found" in str(ve).lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except PermissionError as pe:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(pe))
@@ -323,6 +327,8 @@ def resolve_anomaly(
         )
         return _serialize_anomaly(anom, db)
     except ValueError as ve:
+        if "not found" in str(ve).lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except PermissionError as pe:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(pe))

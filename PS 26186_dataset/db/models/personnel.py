@@ -34,4 +34,7 @@ class Personnel(Base):
     welfare_requests = relationship("WelfareRequest", back_populates="personnel", cascade="all, delete-orphan")
     hrms_record = relationship("HrmsServiceRecord", back_populates="personnel", uselist=False, cascade="all, delete-orphan")
     wearable_telemetry = relationship("WearableTelemetry", back_populates="personnel", cascade="all, delete-orphan")
+    followups = relationship("WelfareFollowup", back_populates="personnel", cascade="all, delete-orphan")
+    cases = relationship("WelfareCase", back_populates="personnel", cascade="all, delete-orphan")
+
 
