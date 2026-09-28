@@ -11,6 +11,7 @@ import { TrendChart } from "@/components/screens/TrendChart";
 import { TrendSummaryCard } from "@/components/screens/TrendSummaryCard";
 import Link from "next/link";
 import { Activity, AlertCircle, Calendar, RefreshCw, ShieldAlert, ArrowRight } from "lucide-react";
+import { formatAssessmentDateTime } from "@/lib/utils";
 
 export default function TrendsRoute() {
   const { user } = useAuth();
@@ -132,13 +133,7 @@ export default function TrendsRoute() {
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-gray-600" />
                   <span className="text-sm font-semibold tracking-wide text-gray-600">
-                    {new Date(a.assessment_timestamp).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {formatAssessmentDateTime(a.assessment_timestamp)}
                   </span>
                 </div>
                 <span

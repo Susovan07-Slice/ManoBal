@@ -1,4 +1,5 @@
 import json
+from datetime import timezone
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -253,7 +254,11 @@ def get_recent_assessments(
             stress_level=a.stress_level,
             risk_score=a.risk_score,
             risk_priority=a.risk_priority,
-            assessment_timestamp=a.assessment_timestamp
+            assessment_timestamp=(
+                a.assessment_timestamp.replace(tzinfo=timezone.utc)
+                if a.assessment_timestamp and a.assessment_timestamp.tzinfo is None
+                else a.assessment_timestamp
+            )
         ))
     return results
 
@@ -320,7 +325,11 @@ def get_high_risk_personnel(
             leave_gap_days=p.leave_gap_days,
             key_factors=key_factors,
             pending_recommendations_count=pending_recs,
-            latest_assessment_date=a.assessment_timestamp
+            latest_assessment_date=(
+                a.assessment_timestamp.replace(tzinfo=timezone.utc)
+                if a.assessment_timestamp and a.assessment_timestamp.tzinfo is None
+                else a.assessment_timestamp
+            )
         ))
 
     return results

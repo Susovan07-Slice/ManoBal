@@ -55,7 +55,7 @@ def _format_assessment_out(
             recommendation_text=r.recommendation_text,
             priority=r.priority,
             status=r.status,
-            created_at=r.created_at
+            created_at=r.created_at.replace(tzinfo=timezone.utc) if r.created_at and r.created_at.tzinfo is None else r.created_at
         ) for r in a.recommendations
     ]
 
@@ -107,7 +107,11 @@ def _format_assessment_out(
         ood_reasons=ood_reasons,
         key_factors=key_factors_parsed,
         model_version=a.model_version,
-        assessment_timestamp=a.assessment_timestamp,
+        assessment_timestamp=(
+            a.assessment_timestamp.replace(tzinfo=timezone.utc)
+            if a.assessment_timestamp and a.assessment_timestamp.tzinfo is None
+            else a.assessment_timestamp
+        ),
         recommendations=recs_out
     )
 
