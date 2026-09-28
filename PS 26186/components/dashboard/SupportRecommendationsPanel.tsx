@@ -241,9 +241,6 @@ export default function SupportRecommendationsPanel() {
                 <h2 className="text-lg font-bold text-textPrimary tracking-tight">
                   Welfare Recommendations & Support Actions
                 </h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-950/60 text-indigo-400 border border-indigo-800/40">
-                  PHASE 40
-                </span>
                 <span className="hidden sm:inline-flex px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-surfaceHighlight text-textSecondary">
                   {totalActive} Active
                 </span>
@@ -263,14 +260,6 @@ export default function SupportRecommendationsPanel() {
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
-          </div>
-        </div>
-
-        {/* Ethical Non-Coercive Semantics Banner */}
-        <div className="mt-4 p-3 bg-indigo-950/20 border border-indigo-800/30 rounded-lg text-xs text-indigo-200/90 flex items-start space-x-2.5">
-          <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <strong className="text-indigo-200">Decision-Support Governance:</strong> Recommendations are advisory suggestions intended to assist commanders in providing proactive welfare, rest, and voluntary resources. They do not constitute clinical diagnoses or automated personnel sanctions.
           </div>
         </div>
 
