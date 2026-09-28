@@ -19,6 +19,15 @@ export default function MobileLoginPage() {
   useEffect(() => {
     if (user) {
       router.push('/');
+      return;
+    }
+    // Onboarding guard
+    try {
+      if (!localStorage.getItem('manobal_onboarding_seen')) {
+        router.replace('/welcome');
+      }
+    } catch (e) {
+      // Ignore storage errors, default to allowing login
     }
   }, [user, router]);
 
