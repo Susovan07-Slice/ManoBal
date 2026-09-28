@@ -64,11 +64,13 @@ export function StoryOnboarding() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mediaQuery.matches);
+    if (mediaQuery.matches !== reducedMotion) {
+      setReducedMotion(mediaQuery.matches);
+    }
     const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
+  }, [reducedMotion]);
 
   const goToNext = useCallback(() => {
     if (currentSlide < SLIDES.length - 1) {
@@ -193,7 +195,7 @@ export function StoryOnboarding() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-brand-500/10 blur-[80px] rounded-full pointer-events-none" />
 
         {/* Top Progress & Header */}
-        <div className="absolute top-0 left-0 right-0 z-50 px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] flex flex-col gap-3 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 z-50 px-4 pt-12 flex flex-col gap-3 pointer-events-none">
           <div className="flex gap-[6px] h-1 w-full">
             {SLIDES.map((s, i) => {
               const isCompleted = i < currentSlide;
@@ -236,7 +238,7 @@ export function StoryOnboarding() {
           onTouchEnd={handleTouchEnd}
         >
           {/* Text Content (Fixed position below top bar) */}
-          <div className="absolute top-[calc(5.5rem+env(safe-area-inset-top,0px))] left-0 right-0 z-30 px-6 pointer-events-none">
+          <div className="absolute top-[120px] left-0 right-0 z-30 px-6 pointer-events-none">
             {SLIDES.map((s, i) => (
               <div 
                 key={s.id} 
@@ -365,7 +367,7 @@ export function StoryOnboarding() {
         {/* Bottom Area (Gradient + Button) */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#86C5DF] to-transparent z-30 pointer-events-none" />
         
-        <div className="absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-6 right-6 z-40">
+        <div className="absolute bottom-10 left-6 right-6 z-40">
           <button 
             onClick={(e) => { e.stopPropagation(); currentSlide === 2 ? finishOnboarding() : goToNext(); }}
             className="w-full h-[60px] bg-white text-ink rounded-full font-bold uppercase tracking-widest text-[14px] shadow-[0_16px_40px_rgba(31,110,140,0.22)] active:scale-[.97] transition-transform pointer-events-auto flex items-center justify-center cursor-pointer select-none"
