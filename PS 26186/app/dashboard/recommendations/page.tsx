@@ -35,14 +35,6 @@ export default function RecommendationsPage() {
           </div>
         </div>
 
-        {/* Ethical Framework Banner */}
-        <div className="p-3 bg-surface border border-surfaceBorder rounded-xl text-xs text-textSecondary flex items-start space-x-2.5 shadow-card">
-          <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            <strong className="text-textPrimary">Command Authority Protocol:</strong> Interventions generated here are algorithmic decision-support recommendations designed to protect troop well-being. Action statuses require explicit Welfare Officer or Commander acknowledgment and follow defense welfare standard operating procedures.
-          </p>
-        </div>
-
         {/* Full Support Recommendations Panel */}
         <SupportRecommendationsPanel />
       </div>

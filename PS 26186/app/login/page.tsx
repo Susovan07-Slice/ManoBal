@@ -281,13 +281,7 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* Prototype Notice */}
-          <div className="relative z-10 mt-6 pt-3 border-t border-[#D0DFD5] text-[11px] text-[#64748B] leading-snug flex items-start space-x-1.5">
-            <Info className="w-3.5 h-3.5 text-[#7BA083] shrink-0 mt-0.5" />
-            <p>
-              <strong className="text-[#2D3748]">Notice:</strong> System uses synthetic dataset for research & demonstration. Decisions are advisory indicators.
-            </p>
-          </div>
+
         </div>
       </div>
     </div>

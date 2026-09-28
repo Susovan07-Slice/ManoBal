@@ -35,14 +35,6 @@ export default function EarlyWarningSignalsPage() {
           </div>
         </div>
 
-        {/* Ethical Framework Banner */}
-        <div className="p-3 bg-surface border border-surfaceBorder rounded-xl text-xs text-textSecondary flex items-start space-x-2.5 shadow-card">
-          <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            <strong className="text-textPrimary">Preventive Screening Notice:</strong> Early warning indicators analyze statistical shifts in duty patterns, sleep deprivation metrics, and self-reported surveys. Signals serve as early supportive indicators to trigger non-punitive welfare outreach before clinical burnout develops.
-          </p>
-        </div>
-
         {/* Full Interactive Radar & Anomaly Signals Panel */}
         <EarlyWarningSignalsPanel />
       </div>

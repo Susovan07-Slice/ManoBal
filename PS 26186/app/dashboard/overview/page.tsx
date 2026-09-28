@@ -121,14 +121,6 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Prototype Ethical Notice Banner */}
-        <div className="p-3 bg-surface border border-surfaceBorder rounded-xl text-xs text-textSecondary flex items-start space-x-2.5 shadow-card">
-          <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            <strong className="text-textPrimary">Command Summary Cockpit:</strong> Synthetically augmented prototype data. AI stress classifications are non-punitive decision-support indicators designed to protect troop well-being and identify operational fatigue early.
-          </p>
-        </div>
-
         {error && (
           <div className="p-4 bg-alert-roseBg border border-alert-roseBorder rounded-xl flex items-center space-x-3 text-alert-roseText text-sm">
             <AlertCircle className="w-5 h-5 shrink-0 text-alert-rose" />

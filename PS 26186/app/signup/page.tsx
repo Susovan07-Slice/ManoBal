@@ -427,13 +427,7 @@ export default function CommanderSignupPage() {
             </form>
           </div>
 
-          {/* Prototype Notice */}
-          <div className="mt-4 pt-3 border-t border-[#D0DFD5] text-[11px] text-[#64748B] leading-snug flex items-start space-x-1.5">
-            <Info className="w-3.5 h-3.5 text-[#7BA083] shrink-0 mt-0.5" />
-            <p>
-              <strong className="text-[#2D3748]">Research Prototype:</strong> Unit associations ensure strict cross-unit privacy and access control demonstration.
-            </p>
-          </div>
+
         </div>
       </div>
     </div>
