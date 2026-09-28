@@ -10,6 +10,10 @@ import WelfareAlertsPanel from '@/components/dashboard/WelfareAlertsPanel';
 import AdvancedCommanderAnalytics from '@/components/dashboard/AdvancedCommanderAnalytics';
 import EarlyWarningSignalsPanel from '@/components/dashboard/EarlyWarningSignalsPanel';
 import SupportRecommendationsPanel from '@/components/dashboard/SupportRecommendationsPanel';
+import WelfareFollowupPanel from '@/components/dashboard/WelfareFollowupPanel';
+import UnifiedWelfareIntelligence from '@/components/dashboard/UnifiedWelfareIntelligence';
+import WelfareCaseManagement from '@/components/dashboard/WelfareCaseManagement';
+
 import {
   getDashboardSummary,
   getStressDistribution,
@@ -136,6 +140,14 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Phase 42: Unified Welfare Intelligence & Decision-Support Dashboard */}
+        <UnifiedWelfareIntelligence />
+
+        {/* Phase 43: Welfare Case Management & Human Review Workspace */}
+        <div id="welfare-case-management">
+          <WelfareCaseManagement />
+        </div>
+
         {/* Real KPI metric cards (Section 3) */}
         <MainMetricsRow summary={summary} isLoading={loading} />
 
@@ -168,6 +180,10 @@ export default function DashboardPage() {
 
         {/* Phase 40: Welfare Recommendation & Support Engine */}
         <SupportRecommendationsPanel />
+
+        {/* Phase 41: Welfare Follow-Up, Outcome Tracking & Support Effectiveness */}
+        <WelfareFollowupPanel />
+
 
         {/* Phase 38: Advanced Commander Analytics & Unit Welfare Intelligence */}
         <AdvancedCommanderAnalytics />

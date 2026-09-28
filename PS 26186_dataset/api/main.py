@@ -1,10 +1,11 @@
 import os
 import sys
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # Ensure dataset root directory is on PYTHONPATH
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,7 +26,10 @@ from api.routes.analytics import router as analytics_router
 from api.routes.alerts import router as alerts_router
 from api.routes.anomalies import router as anomalies_router
 from api.routes.recommendations import router as recommendations_router
+from api.routes.followups import router as followups_router
+from api.routes.cases import router as cases_router
 from schemas.prediction import PredictionRequest, PredictionResponse
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -52,15 +56,17 @@ app = FastAPI(
         "and role-based access control (Admin, Officer, Welfare, Personnel)."
     ),
     version=settings.VERSION,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/docs" if settings.ENABLE_DOCS else None,
+    redoc_url="/redoc" if settings.ENABLE_DOCS else None,
     lifespan=lifespan
 )
 
-# CORS middleware configured for explicit authorized frontend origins
+# CORS middleware configured for explicit authorized frontend origins and controlled localhost regex
+cors_regex = r"https?://(localhost|127\.0\.0\.1)(:\d+)?" if (settings.ENVIRONMENT != "production" or settings.ALLOW_LOCAL_CORS_IN_PROD) else None
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origin_regex=cors_regex,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -85,6 +91,27 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         }
     )
 
+# Global unhandled exception handler: prevents internal stack trace and database query leakage
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    if isinstance(exc, (HTTPException, StarletteHTTPException)):
+        headers = getattr(exc, "headers", None)
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=headers
+        )
+    logger.critical(f"Unhandled server exception on {request.method} {request.url.path}: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": "Internal Server Error",
+            "message": "An unexpected server error occurred. Please contact the system administrator.",
+            "path": request.url.path
+        }
+    )
+
+
 from fastapi.responses import JSONResponse, HTMLResponse, Response
 
 # Include all modular routers under /api
@@ -101,10 +128,26 @@ app.include_router(analytics_router, prefix="/api")
 app.include_router(alerts_router, prefix="/api")
 app.include_router(anomalies_router, prefix="/api")
 app.include_router(recommendations_router, prefix="/api")
+app.include_router(followups_router, prefix="/api")
+app.include_router(cases_router, prefix="/api")
 
-# Also mount prediction and auth at root prefix for direct access
+# Also mount modular routers at root prefix for direct access
 app.include_router(prediction_router, prefix="")
 app.include_router(auth_router, prefix="")
+app.include_router(personnel_router, prefix="")
+app.include_router(assessment_router, prefix="")
+app.include_router(dashboard_router, prefix="")
+app.include_router(welfare_request_router, prefix="")
+app.include_router(organization_router, prefix="")
+app.include_router(hrms_router, prefix="")
+app.include_router(telemetry_router, prefix="")
+app.include_router(analytics_router, prefix="")
+app.include_router(alerts_router, prefix="")
+app.include_router(anomalies_router, prefix="")
+app.include_router(recommendations_router, prefix="")
+app.include_router(followups_router, prefix="")
+app.include_router(cases_router, prefix="")
+
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def root_dashboard():
@@ -230,22 +273,49 @@ def submit_checkin(
     service = get_prediction_service()
     assessment = service.predict(checkin_data)
 
-    # Resolve target personnel ID from Authorization header or request body
+    # Resolve target personnel ID from Authorization header with strict Anti-IDOR validation
     target_personnel_id = None
     auth_header = request.headers.get("Authorization")
+    user_record = None
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
         try:
             payload = decode_access_token(token)
             if payload:
                 user_record = db.query(User).filter(User.username == payload.get("sub")).first()
-                if user_record and user_record.personnel_id:
-                    target_personnel_id = user_record.personnel_id
         except Exception as e:
             logger.debug(f"Optional token decode in submit_checkin: {e}")
 
-    if not target_personnel_id and checkin_data.personnel_id:
-        target_personnel_id = checkin_data.personnel_id
+    if user_record:
+        if user_record.role == "personnel":
+            # Jawan role: strictly locked to own personnel ID
+            if checkin_data.personnel_id and user_record.personnel_id and checkin_data.personnel_id != user_record.personnel_id:
+                logger.warning(
+                    f"IDOR Violation: Jawan '{user_record.username}' (Personnel #{user_record.personnel_id}) "
+                    f"attempted to submit checkin for Personnel #{checkin_data.personnel_id}"
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Access denied: Personnel accounts may only submit check-ins for their own linked profile."
+                )
+            target_personnel_id = user_record.personnel_id
+        elif user_record.role in ["officer", "welfare"]:
+            target_personnel_id = checkin_data.personnel_id
+            if target_personnel_id:
+                p = db.query(Personnel).filter(Personnel.id == target_personnel_id).first()
+                if p and user_record.battalion:
+                    if (p.battalion or "").strip().lower() != user_record.battalion.strip().lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Access denied: Target personnel is outside your assigned Battalion scope."
+                        )
+        elif user_record.role == "admin":
+            target_personnel_id = checkin_data.personnel_id
+    else:
+        # Unauthenticated request: allow inference calculation but DO NOT mutate database records
+        target_personnel_id = None
+        if checkin_data.personnel_id:
+            logger.info("Unauthenticated check-in evaluated without database persistence to prevent unauthorized mutation.")
 
     # If personnel record is found, persist the assessment & welfare recommendations to PostgreSQL
     if target_personnel_id:

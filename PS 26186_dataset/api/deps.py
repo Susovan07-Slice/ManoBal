@@ -135,7 +135,21 @@ def check_personnel_access(
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied: Target personnel is outside your assigned Battalion scope."
+                detail="Access denied: Target personnel is outside your assigned Battalion and Location scope."
+            )
+
+        # If user has an assigned location, personnel must belong to the same location
+        user_location = (current_user.location or "").strip().lower()
+        p_location = (personnel.location or "").strip().lower()
+        if user_location and p_location and user_location != p_location:
+            logger.warning(
+                f"Scope Violation: User '{current_user.username}' (Location: '{current_user.location}') "
+                f"attempted to access out-of-scope Personnel ID {target_personnel_id} "
+                f"(Location: '{personnel.location}')"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Target personnel is outside your assigned Battalion and Location scope."
             )
         return personnel
 

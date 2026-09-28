@@ -4,27 +4,11 @@ import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function DashboardLoading() {
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-4 w-48" />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Skeleton className="h-[104px] w-full" />
-          <Skeleton className="h-[104px] w-full" />
-          <Skeleton className="h-[104px] w-full" />
-          <Skeleton className="h-[104px] w-full" />
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Skeleton className="lg:col-span-2 h-[350px] w-full" />
-          <Skeleton className="h-[350px] w-full" />
-        </div>
-        
-        <Skeleton className="h-[450px] w-full" />
-      </div>
-    </DashboardLayout>
+    <div className="h-screen w-screen bg-[#070b09] flex flex-col items-center justify-center space-y-4 text-white">
+      <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      <p className="text-sm font-mono text-zinc-400 uppercase tracking-widest">
+        Authenticating Command Session...
+      </p>
+    </div>
   );
 }

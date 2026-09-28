@@ -9,8 +9,13 @@ from db.models.user import User
 from api.deps import get_current_user, check_personnel_access, require_roles
 from schemas.features import PersonnelFeatureSnapshotResponse
 from schemas.commander_analytics import CommanderAnalyticsResponse
+from schemas.unified_intelligence import (
+    PersonnelWelfareSnapshotResponse,
+    UnitWelfareIntelligenceResponse,
+)
 from services.feature_engineering.snapshot_service import FeatureSnapshotService
 from services.commander_analytics_service import CommanderAnalyticsService
+from services.unified_welfare_intelligence_service import UnifiedWelfareIntelligenceService
 
 router = APIRouter(prefix="/analytics", tags=["Personnel Analytics & Feature Engineering"])
 
@@ -170,4 +175,77 @@ def get_commander_analytics(
         reference_time=parsed_ref
     )
     return analytics
+
+
+# -----------------------------------------------------------------------------
+# PHASE 42: UNIFIED WELFARE INTELLIGENCE & DECISION SUPPORT ENDPOINTS
+# -----------------------------------------------------------------------------
+@router.get(
+    "/welfare-intelligence/personnel/{personnel_id}",
+    response_model=PersonnelWelfareSnapshotResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get Unified Personnel Welfare Snapshot (Phase 42)",
+    description=(
+        "Assembles a unified, explainable decision-support snapshot for a single personnel member "
+        "aggregating authoritative Phase 34 risk, Phase 36 longitudinal trend, Phase 37 alerts/interventions, "
+        "Phase 39 anomalies, Phase 40 recommendations, and Phase 41 follow-up outcomes. "
+        "Strictly enforces Anti-IDOR and Battalion/Location scoping."
+    ),
+)
+def get_unified_personnel_welfare_snapshot(
+    personnel_id: int,
+    reference_time: Optional[str] = Query(None, description="Optional ISO reference time anchor"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> PersonnelWelfareSnapshotResponse:
+    parsed_ref = _parse_reference_time(reference_time)
+    try:
+        data = UnifiedWelfareIntelligenceService.get_personnel_welfare_snapshot(
+            db=db,
+            current_user=current_user,
+            personnel_id=personnel_id,
+            reference_time=parsed_ref,
+        )
+        return PersonnelWelfareSnapshotResponse(**data)
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
+@router.get(
+    "/welfare-intelligence/unit",
+    response_model=UnitWelfareIntelligenceResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get Unified Unit-Level Welfare Intelligence (Phase 42)",
+    description=(
+        "Retrieves aggregate unit-level welfare intelligence and decision support for commanders. "
+        "Aggregates risk, trend, alert, anomaly, recommendation, intervention, and follow-up distributions. "
+        "Strictly enforces k-anonymity privacy (min group size 5) and organizational scoping."
+    ),
+)
+def get_unified_unit_welfare_intelligence(
+    battalion: Optional[str] = Query(None, description="Organizational battalion filter"),
+    location: Optional[str] = Query(None, description="Organizational location filter"),
+    time_filter: Optional[str] = Query("30d", description="Time filter: 7d, 30d, 90d, all"),
+    reference_time: Optional[str] = Query(None, description="Optional ISO reference time anchor"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin", "officer", "welfare")),
+) -> UnitWelfareIntelligenceResponse:
+    parsed_ref = _parse_reference_time(reference_time)
+    try:
+        data = UnifiedWelfareIntelligenceService.get_unit_welfare_intelligence(
+            db=db,
+            current_user=current_user,
+            battalion=battalion,
+            location=location,
+            time_filter=time_filter or "30d",
+            reference_time=parsed_ref,
+        )
+        return UnitWelfareIntelligenceResponse(**data)
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
 

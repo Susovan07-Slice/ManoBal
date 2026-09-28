@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import TopHeader from '@/components/layout/TopHeader';
 import BottomTabBar from '@/components/layout/BottomTabBar';
 import { usePathname, useRouter } from 'next/navigation';
@@ -15,19 +15,42 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
   if (pathname === "/assessment") title = "Daily Assessment";
   if (pathname === "/trends") title = "Personal Trends";
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
-    }
-  }, [isLoading, user, router]);
+  const [mounted, setMounted] = useState(false);
 
-  if (isLoading) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isLoading && !user) {
+      router.replace('/login');
+    }
+  }, [mounted, isLoading, user, router]);
+
+  // Safety fallback: if authentication resolution takes > 2 seconds, redirect to /login
+  useEffect(() => {
+    if (!mounted) return;
+    const timer = setTimeout(() => {
+      if (!user) {
+        window.location.href = '/login';
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [mounted, user]);
+
+  if (!mounted || isLoading) {
     return (
       <div className="flex flex-col h-full items-center justify-center bg-transparent backdrop-blur-sm text-mb-text-secondary p-6 space-y-3">
         <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin" />
         <span className="text-xs font-mono tracking-widest uppercase">
           Verifying Service Token...
         </span>
+        <a
+          href="/login"
+          className="text-xs font-mono text-emerald-400 hover:text-emerald-300 underline mt-2"
+        >
+          Click here if not redirected automatically
+        </a>
       </div>
     );
   }
