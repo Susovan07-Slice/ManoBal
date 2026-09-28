@@ -83,9 +83,19 @@ class PersonnelWelfarePredictor:
         if self.is_v2:
             # Welfare Risk Engine V2 assessment
             if hasattr(self.predictor, 'assess'):
-                assessment = self.predictor.assess(record_dict, past_assessments=past_assessments)
+                import inspect
+                sig = inspect.signature(self.predictor.assess)
+                if 'past_assessments' in sig.parameters:
+                    assessment = self.predictor.assess(record_dict, past_assessments=past_assessments)
+                else:
+                    assessment = self.predictor.assess(record_dict)
             else:
-                assessment = self.predictor.evaluate(record_dict, past_history=past_assessments)
+                import inspect
+                sig = inspect.signature(self.predictor.evaluate)
+                if 'past_history' in sig.parameters:
+                    assessment = self.predictor.evaluate(record_dict, past_history=past_assessments)
+                else:
+                    assessment = self.predictor.evaluate(record_dict)
 
             # If insufficient evidence
             if assessment.get("risk_score") is None:

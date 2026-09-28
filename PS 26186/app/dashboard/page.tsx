@@ -6,6 +6,10 @@ import MainMetricsRow from '@/components/dashboard/MainMetricsRow';
 import StressDistributionCard from '@/components/dashboard/StressDistributionCard';
 import RiskDistributionCard from '@/components/dashboard/RiskDistributionCard';
 import AlertsTable from '@/components/dashboard/AlertsTable';
+import WelfareAlertsPanel from '@/components/dashboard/WelfareAlertsPanel';
+import AdvancedCommanderAnalytics from '@/components/dashboard/AdvancedCommanderAnalytics';
+import EarlyWarningSignalsPanel from '@/components/dashboard/EarlyWarningSignalsPanel';
+import SupportRecommendationsPanel from '@/components/dashboard/SupportRecommendationsPanel';
 import {
   getDashboardSummary,
   getStressDistribution,
@@ -155,6 +159,18 @@ export default function DashboardPage() {
             />
           </div>
         </div>
+
+        {/* Welfare Alerts */}
+        <WelfareAlertsPanel />
+
+        {/* Phase 39: Early-Warning & Welfare Anomaly Detection */}
+        <EarlyWarningSignalsPanel />
+
+        {/* Phase 40: Welfare Recommendation & Support Engine */}
+        <SupportRecommendationsPanel />
+
+        {/* Phase 38: Advanced Commander Analytics & Unit Welfare Intelligence */}
+        <AdvancedCommanderAnalytics />
 
         {/* High-Risk Personnel Intervention & Alerts Table (Section 6) */}
         <div className="min-h-[420px]" id="risk-alerts-table">

@@ -87,3 +87,48 @@ class AssessmentResponse(BaseModel):
         "Assessments indicate statistical model associations and are strictly intended "
         "for supportive welfare intervention, not disciplinary action or clinical diagnosis."
     )
+
+class LongitudinalCurrentState(BaseModel):
+    risk_score: float
+    risk_category: str
+    assessment_timestamp: datetime
+
+class LongitudinalTrendState(BaseModel):
+    direction: Literal["IMPROVING", "STABLE", "WORSENING", "INSUFFICIENT_DATA"]
+    score_change: Optional[float]
+    slope: Optional[float]
+    acceleration: Literal["INCREASING", "DECREASING", "STABLE", "INSUFFICIENT_DATA"]
+
+class LongitudinalHistoryState(BaseModel):
+    assessment_count: int
+    data_sufficiency: Literal["INSUFFICIENT_DATA", "LIMITED_HISTORY", "SUFFICIENT_HISTORY"]
+    persistent_elevated_risk: bool
+    consecutive_elevated_assessments: int
+    recent_average_score: Optional[float]
+    highest_recent_score: Optional[float]
+
+class LongitudinalBaselineState(BaseModel):
+    historical_mean: Optional[float]
+    historical_median: Optional[float]
+    historical_std: Optional[float]
+    current_deviation: Optional[float]
+
+class RepeatedFactor(BaseModel):
+    factor: str
+    type: Literal["risk", "protective"]
+    frequency: int
+    total_assessments: int
+    most_recent_occurrence: str
+    description: str
+
+class LongitudinalTrendResponse(BaseModel):
+    personnel_id: int
+    current: Optional[LongitudinalCurrentState]
+    trend: LongitudinalTrendState
+    history: LongitudinalHistoryState
+    baseline: LongitudinalBaselineState
+    repeated_factors: List[RepeatedFactor]
+    disclaimer: str = (
+        "Longitudinal analytics are administrative welfare-monitoring signals "
+        "and are not clinical diagnoses or causal conclusions."
+    )

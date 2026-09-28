@@ -1,7 +1,7 @@
 {
   "model_version": "risk_engine_v2",
   "architecture": "Personnel Welfare Risk Engine V2 (Calibrated Ordinal Multilayer Ensemble)",
-  "timestamp": "2026-09-27T11:50:41.563166+00:00",
+  "timestamp": "2026-09-27T12:34:49.131637+00:00",
   "artifact_path": "models/welfare_risk_engine_v2.pkl",
   "artifact_checksum_sha256": "2628d08d7a2068f94ce0d66c551cf16f665de0c188e0ea8f8d984efae6499d93",
   "feature_count": 20,
