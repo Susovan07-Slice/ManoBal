@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { CheckCircle2, ChevronLeft, ArrowRight, HeartPulse, AlertTriangle, Sparkles, Clock } from "lucide-react";
 import Link from "next/link";
 import { apiClient } from "@/lib/api";
+import { StressEmojiScale } from "@/components/ui/StressEmojiScale";
 
 const SCREENS = [
   { id: "intro", type: "intro", bg: "/assessment_pics/1.png", cardTopColor: "#d3d8cd", title: "Daily Assessment", subtitle: "Single unified operational duty, recovery, and wellness reporting." },
@@ -341,12 +342,14 @@ function AssessmentContent() {
           </div>
 
           {/* Continuous Progress Bar */}
-          <div className="w-full bg-sky-200 rounded-full h-2 overflow-hidden relative">
+          <div className="w-full bg-sky-200 rounded-full h-2 overflow-hidden relative mb-2">
             <div
               className={`h-full rounded-full transition-all duration-1000 ease-out ${barColor}`}
               style={{ width: `${Math.min(100, Math.max(5, scoreVal))}%` }}
             />
           </div>
+
+          <StressEmojiScale score={scoreVal} />
         </div>
 
         {/* What is Contributing (Risk Factors) */}
