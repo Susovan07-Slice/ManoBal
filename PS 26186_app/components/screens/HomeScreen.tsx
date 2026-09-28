@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PersonalTrend } from "@/types/trends";
 import { StressAssessmentOut, AssessmentScheduleStatus, WelfareRequestOut } from "@/types/api";
 import { WelfareSupportSheet } from "./WelfareSupportSheet";
 import { TrendChart } from "./TrendChart";
 import Link from "next/link";
-import { Activity, ArrowRight, CheckCircle2, Briefcase, Moon, FileText } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, Briefcase, Moon, FileText, Clock } from "lucide-react";
+import { formatAssessmentDateTime, formatAssessmentCountdown } from "@/lib/utils";
 
 export function HomeScreen({
   scheduleStatus,
@@ -24,6 +25,14 @@ export function HomeScreen({
   onRefresh?: () => void;
 }) {
   const [showSupportSheet, setShowSupportSheet] = useState(false);
+  const [currentTime, setCurrentTime] = useState<number>(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 15000); // 15-second tick for responsive countdown
+    return () => clearInterval(timer);
+  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -201,21 +210,14 @@ export function HomeScreen({
             <span className="text-gray-500 font-medium">Last assessment</span>
             <span className="text-gray-800 font-semibold">
               {latestAssessment
-                ? new Date(latestAssessment.assessment_timestamp).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
+                ? formatAssessmentDateTime(latestAssessment.assessment_timestamp)
                 : "None"}
             </span>
           </div>
           <div className="flex justify-between items-center text-[13px] border-b border-gray-200 pb-4">
             <span className="text-gray-500 font-medium">Next assessment</span>
-            <span className="text-gray-800 font-semibold">
-              {scheduleStatus?.hours_since_last_assessment != null
-                ? `${Math.max(0, 24 - scheduleStatus.hours_since_last_assessment)}h remaining`
-                : "Now"}
+            <span className={`font-semibold ${isAssessmentDue ? "text-amber-600 font-bold" : "text-gray-800"}`}>
+              {formatAssessmentCountdown(scheduleStatus, currentTime)}
             </span>
           </div>
           <div className="flex justify-between items-center text-[13px]">
