@@ -23,7 +23,7 @@ export function computePersonalTrend(assessments: StressAssessmentOut[]): Person
   const recent = sorted.slice(-7);
 
   const days: TrendDay[] = recent.map((item) => {
-    const date = item.assessment_timestamp.split('T')[0];
+    const date = item.assessment_timestamp.split(/[T ]/)[0];
     const stressIndex = Math.round(item.risk_score);
     // Derived telemetry indicators consistent with stress tier
     const sleepHours = item.stress_level === 'Low' ? 7.2 : item.stress_level === 'Medium' ? 5.8 : 4.5;

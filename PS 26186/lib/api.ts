@@ -28,6 +28,25 @@ export function setStoredToken(token: string | null): void {
   }
 }
 
+export function getStoredUser(): any | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem('manobal_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredUser(user: any | null): void {
+  if (typeof window === 'undefined') return;
+  if (user) {
+    localStorage.setItem('manobal_user', JSON.stringify(user));
+  } else {
+    localStorage.removeItem('manobal_user');
+  }
+}
+
 interface RequestOptions extends RequestInit {
   requiresAuth?: boolean;
 }
@@ -56,10 +75,14 @@ export async function apiClient<T>(
 
   let response: Response;
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     response = await fetch(url, {
       ...rest,
       headers: requestHeaders,
+      signal: rest.signal || controller.signal,
     });
+    clearTimeout(timeoutId);
   } catch (err: any) {
     throw new ApiError(
       0,

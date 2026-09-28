@@ -395,6 +395,7 @@ def seed_database():
             else:
                 existing_u.battalion = u_data["battalion"]
                 existing_u.location = u_data["location"]
+                existing_u.hashed_password = hash_password(u_data["password"])
 
         db.commit()
 

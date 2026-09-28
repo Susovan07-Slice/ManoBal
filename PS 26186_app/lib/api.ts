@@ -24,6 +24,26 @@ export function setStoredToken(token: string | null): void {
     localStorage.setItem('manobal_jawan_token', token);
   } else {
     localStorage.removeItem('manobal_jawan_token');
+    localStorage.removeItem('manobal_jawan_user');
+  }
+}
+
+export function getStoredUser(): any | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem('manobal_jawan_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredUser(user: any | null): void {
+  if (typeof window === 'undefined') return;
+  if (user) {
+    localStorage.setItem('manobal_jawan_user', JSON.stringify(user));
+  } else {
+    localStorage.removeItem('manobal_jawan_user');
   }
 }
 

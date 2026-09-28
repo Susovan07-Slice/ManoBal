@@ -524,3 +524,8 @@ export default function AssessmentPage() {
     </Suspense>
   );
 }
+
+
+
+
+    {/* This is a comment inside TSX markup */}

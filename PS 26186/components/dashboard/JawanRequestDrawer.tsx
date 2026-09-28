@@ -37,9 +37,9 @@ export default function JawanRequestDrawer({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-surface border-l border-military shadow-2xl flex flex-col z-50 overflow-hidden">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-surface border-l border-surfaceBorder shadow-elevated flex flex-col z-50 overflow-hidden">
       {/* Top Header */}
-      <div className="flex items-center justify-between p-4 border-b border-surfaceHighlight bg-surfaceHighlight/30">
+      <div className="flex items-center justify-between p-4 border-b border-surfaceBorder bg-surface">
         <div>
           <div className="flex items-center space-x-2">
             <LifeBuoy className="w-4 h-4 text-accent" />
@@ -60,18 +60,18 @@ export default function JawanRequestDrawer({
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Source Badge */}
         <div className="flex items-center justify-between">
-          <span className="px-2.5 py-1 rounded text-xs font-mono font-bold uppercase bg-teal-950/60 text-teal-300 border border-teal-800/60">
+          <span className="px-2.5 py-1 rounded text-xs font-mono font-bold uppercase bg-accent/15 text-accent border border-accent/30">
             Source: Jawan Request
           </span>
           <span
-            className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase ${
+            className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase border ${
               currentReq.status === 'resolved'
-                ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/50'
+                ? 'bg-[#EEF6F2] text-[#2D6346] border-[#BBD9C7]'
                 : currentReq.status === 'in_progress'
-                ? 'bg-purple-950/60 text-purple-300 border border-purple-800/50'
+                ? 'bg-[#F4EFF8] text-[#69428E] border-[#DCCBEA]'
                 : currentReq.status === 'acknowledged'
-                ? 'bg-blue-950/60 text-blue-300 border border-blue-800/50'
-                : 'bg-amber-950/60 text-amber-300 border border-amber-800/50'
+                ? 'bg-[#EEF4F8] text-[#3E6580] border-[#BCD3E3]'
+                : 'bg-[#FDF6EE] text-[#8E5B23] border-[#F3D2AE]'
             }`}
           >
             {currentReq.status === 'in_progress' ? 'In Progress' : currentReq.status}
@@ -79,7 +79,7 @@ export default function JawanRequestDrawer({
         </div>
 
         {/* Personnel Card */}
-        <div className="p-4 bg-surfaceHighlight/30 rounded border border-surfaceHighlight flex justify-between items-start">
+        <div className="p-4 bg-surfaceHighlight/40 rounded-lg border border-surfaceBorder flex justify-between items-start">
           <div>
             <h3 className="font-semibold text-textPrimary text-base">{currentReq.personnel_name}</h3>
             <p className="text-xs text-textSecondary">{currentReq.job_role} • {currentReq.department}</p>
@@ -90,7 +90,7 @@ export default function JawanRequestDrawer({
               {currentReq.current_stress_level && (
                 <RiskBadge level={currentReq.current_stress_level} />
               )}
-              <div className="text-xl font-bold font-mono text-amber-400 mt-1">
+              <div className="text-xl font-bold font-mono text-[#8E5B23] mt-1">
                 {currentReq.current_risk_score}
                 <span className="text-xs text-textSecondary font-normal">/100</span>
               </div>
@@ -100,7 +100,7 @@ export default function JawanRequestDrawer({
         </div>
 
         {/* Request Details */}
-        <div className="p-4 bg-surfaceHighlight/20 rounded border border-surfaceHighlight space-y-3">
+        <div className="p-4 bg-surfaceHighlight/30 rounded-lg border border-surfaceBorder space-y-3">
           <div className="flex justify-between items-center text-xs">
             <span className="text-textSecondary">Concern Category:</span>
             <span className="font-semibold text-textPrimary">{currentReq.category}</span>
@@ -109,12 +109,12 @@ export default function JawanRequestDrawer({
           <div className="flex justify-between items-center text-xs">
             <span className="text-textSecondary">Self-Reported Urgency:</span>
             <span
-              className={`font-mono font-bold px-2 py-0.5 rounded text-xs ${
+              className={`font-mono font-bold px-2 py-0.5 rounded text-xs border ${
                 currentReq.urgency === 'High'
-                  ? 'bg-rose-950/60 text-rose-300 border border-rose-800/50'
+                  ? 'bg-[#FAF0F0] text-[#964747] border-[#E8B4B4]'
                   : currentReq.urgency === 'Medium'
-                  ? 'bg-amber-950/60 text-amber-300 border border-amber-800/50'
-                  : 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/50'
+                  ? 'bg-[#FDF6EE] text-[#8E5B23] border-[#F3D2AE]'
+                  : 'bg-[#EEF6F2] text-[#2D6346] border-[#BBD9C7]'
               }`}
             >
               {currentReq.urgency}

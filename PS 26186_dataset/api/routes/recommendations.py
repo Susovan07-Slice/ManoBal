@@ -18,6 +18,7 @@ from schemas.recommendation import (
     RecommendationDeferRequest,
     RecommendationDismissRequest,
     RecommendationActionRequest,
+    RecommendationStatusUpdateRequest,
     PersonnelRecommendationsResponse,
     CommanderRecommendationSummaryResponse,
 )
@@ -90,8 +91,8 @@ def _serialize_recommendation(rec: WelfareRecommendation, db: Session) -> Welfar
         actioned_at=rec.actioned_at,
         actioned_by=rec.actioned_by,
         action_notes=rec.action_notes,
-        created_at=rec.created_at,
-        updated_at=rec.updated_at,
+        created_at=rec.created_at or datetime.now(timezone.utc),
+        updated_at=rec.updated_at or rec.created_at or datetime.now(timezone.utc),
     )
 
 def _verify_personnel_access(personnel_id: int, user: User, db: Session) -> Personnel:
@@ -394,3 +395,4 @@ def action_recommendation(
         action_notes=payload.action_notes
     )
     return _serialize_recommendation(updated, db)
+

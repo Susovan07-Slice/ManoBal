@@ -1,0 +1,8 @@
+{
+  "python.analysis.extraPaths": [
+    "./PS 26186_dataset"
+  ],
+  "python.autoComplete.extraPaths": [
+    "./PS 26186_dataset"
+  ]
+}

@@ -55,7 +55,7 @@ def _format_assessment_out(
             recommendation_text=r.recommendation_text,
             priority=r.priority,
             status=r.status,
-            created_at=r.created_at
+            created_at=r.created_at.replace(tzinfo=timezone.utc) if r.created_at and r.created_at.tzinfo is None else r.created_at
         ) for r in a.recommendations
     ]
 
@@ -107,7 +107,11 @@ def _format_assessment_out(
         ood_reasons=ood_reasons,
         key_factors=key_factors_parsed,
         model_version=a.model_version,
-        assessment_timestamp=a.assessment_timestamp,
+        assessment_timestamp=(
+            a.assessment_timestamp.replace(tzinfo=timezone.utc)
+            if a.assessment_timestamp and a.assessment_timestamp.tzinfo is None
+            else a.assessment_timestamp
+        ),
         recommendations=recs_out
     )
 
@@ -555,18 +559,17 @@ def get_assessment_by_id(
 @router.patch(
     "/recommendations/{recommendation_id}/status",
     response_model=RecommendationOut,
-    summary="Update welfare recommendation status (Welfare / Officer / Admin)"
+    summary="Update welfare recommendation status (Welfare / Officer / Admin / Personnel)"
 )
 def update_recommendation_status(
     recommendation_id: int,
     status_update: RecommendationStatusUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "officer", "welfare"))
+    current_user: User = Depends(require_roles("admin", "officer", "welfare", "personnel"))
 ):
     """
-    Updates the lifecycle status of a welfare recommendation
-    (pending, acknowledged, completed, dismissed).
-    Restricted to Welfare Counselor, Officer, and Admin roles.
+    Updates the lifecycle status of a welfare recommendation.
+    Restricted to Welfare Counselor, Officer, Admin, or the assigned Personnel themselves.
     """
     rec = db.query(WelfareRecommendation).filter(WelfareRecommendation.id == recommendation_id).first()
     if not rec:
@@ -575,7 +578,18 @@ def update_recommendation_status(
             detail=f"Welfare recommendation ID {recommendation_id} not found."
         )
 
-    # Organizational scope verification
+    # Anti-IDOR check for personnel role
+    if current_user.role == "personnel":
+        if current_user.personnel_id != rec.personnel_id:
+            logger.warning(
+                f"IDOR Violation: Personnel '{current_user.username}' attempted to update recommendation #{recommendation_id} belonging to personnel #{rec.personnel_id}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: You can only update recommendations assigned to your own record."
+            )
+
+    # Organizational scope verification for officers/welfare
     if current_user.role in ["officer", "welfare"]:
         user_battalion = (current_user.battalion or "").strip().lower()
         p_battalion = (rec.personnel.battalion or "").strip().lower()
@@ -613,7 +627,12 @@ def welfare_assessment_endpoint(
     personnel_id = payload.get("personnel_id")
     personnel = None
     if personnel_id:
-        personnel = db.query(Personnel).filter(Personnel.id == personnel_id).first()
+        if current_user:
+            # Anti-IDOR & Scope enforcement: validates Jawan ownership or Officer battalion scope
+            personnel = check_personnel_access(current_user, personnel_id, db)
+        else:
+            # Unauthenticated requests cannot bind and persist assessments to arbitrary personnel profiles
+            personnel = None
     elif current_user and getattr(current_user, "personnel_id", None):
         personnel = db.query(Personnel).filter(Personnel.id == current_user.personnel_id).first()
 

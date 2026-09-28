@@ -129,6 +129,7 @@ def health_check(service: WelfarePredictionService = Depends(get_prediction_serv
         "status": "healthy" if (service.predictor is not None and db_connected) else "degraded",
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT,
         "model_loaded": service.predictor is not None,
         "database": {
             "connected": db_connected,

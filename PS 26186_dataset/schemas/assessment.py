@@ -45,8 +45,8 @@ class RecommendationOut(BaseModel):
         from_attributes = True
 
 class RecommendationStatusUpdate(BaseModel):
-    status: Literal["pending", "acknowledged", "completed", "dismissed"] = Field(
-        ..., description="New welfare recommendation status"
+    status: str = Field(
+        ..., description="New welfare recommendation status (e.g. pending, acknowledged, completed, dismissed, accepted, actioned)"
     )
 
 class StressAssessmentOut(BaseModel):

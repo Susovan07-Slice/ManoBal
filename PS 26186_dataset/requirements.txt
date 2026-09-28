@@ -10,7 +10,7 @@ psycopg2-binary
 psycopg[binary]
 passlib[bcrypt]
 bcrypt
-python-jose[cryptography]
+python-jose
 python-multipart
 httpx
 pydantic

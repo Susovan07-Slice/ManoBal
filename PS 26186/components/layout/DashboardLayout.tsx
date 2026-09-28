@@ -1,29 +1,51 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
-import { Info, ShieldAlert } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
-    }
-  }, [isLoading, user, router]);
+    setMounted(true);
+  }, []);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (mounted && !isLoading && !user) {
+      router.replace('/login');
+    }
+  }, [mounted, isLoading, user, router]);
+
+  // Safety fallback: if authentication resolution takes > 2.5 seconds, redirect to /login
+  useEffect(() => {
+    if (!mounted) return;
+    const timer = setTimeout(() => {
+      if (!user) {
+        window.location.href = '/login';
+      }
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [mounted, user]);
+
+  if (!mounted || isLoading) {
     return (
-      <div className="h-screen w-screen bg-background flex flex-col items-center justify-center space-y-4">
+      <div className="h-screen w-screen bg-background flex flex-col items-center justify-center space-y-4 text-textPrimary">
         <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
         <p className="text-sm font-mono text-textSecondary uppercase tracking-widest">
           Authenticating Command Session...
         </p>
+        <a
+          href="/login"
+          className="mt-2 text-xs font-mono text-accent hover:underline cursor-pointer"
+        >
+          Click here if not redirected automatically
+        </a>
       </div>
     );
   }
@@ -37,17 +59,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Topbar />
-        
-        {/* Persistent Prototype Notice */}
-        <div className="bg-surfaceHighlight/50 border-b border-surfaceHighlight px-6 py-1.5 flex items-center justify-between text-[11px] text-textSecondary">
-          <div className="flex items-center space-x-2">
-            <Info className="w-3.5 h-3.5 text-accent shrink-0" />
-            <span>
-              <strong className="text-textPrimary">Research Prototype:</strong> Synthetically augmented data only. Not actual CRPF records. Operational decision-support only.
-            </span>
-          </div>
-          <span className="font-mono text-accent hidden sm:inline-block">ENV: LOCAL_SECURE</span>
-        </div>
 
         <main className="flex-1 overflow-y-auto p-6">
           {children}

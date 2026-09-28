@@ -67,7 +67,19 @@ def sync_hrms_record(
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied: Target personnel is outside your assigned Battalion scope."
+                detail="Access denied: Target personnel is outside your assigned Battalion and Location scope."
+            )
+
+        user_location = (current_user.location or "").strip().lower()
+        p_location = (personnel.location or "").strip().lower()
+        if user_location and p_location and user_location != p_location:
+            logger.warning(
+                f"HRMS_LOCATION_VIOLATION: User '{current_user.username}' ({user_location}) "
+                f"attempted to sync personnel ID {personnel.id} ({p_location})"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Target personnel is outside your assigned Battalion and Location scope."
             )
 
     now = datetime.now(timezone.utc)
