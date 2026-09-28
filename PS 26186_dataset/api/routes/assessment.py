@@ -17,10 +17,13 @@ from schemas.assessment import (
     RecommendationOut,
     RecommendationStatusUpdate,
     AssessmentResponse,
-    AssessmentScheduleStatus
+    AssessmentScheduleStatus,
+    LongitudinalTrendResponse
 )
 from api.deps import get_current_user, get_current_user_optional, require_roles, check_personnel_access
 from services.prediction_service import get_prediction_service
+from services.longitudinal_analytics_service import LongitudinalAnalyticsService
+from services.welfare_alert_service import WelfareAlertService
 
 router = APIRouter(tags=["Stress Assessments & Welfare Recommendations"])
 
@@ -351,6 +354,12 @@ def run_personnel_assessment(
         f"Continuous Risk Score={result['risk_score']} ({new_assessment.risk_priority})"
     )
 
+    # Trigger Welfare Alerts evaluation safely without blocking assessment response
+    try:
+        WelfareAlertService.evaluate_and_generate_alerts(db, personnel.id, new_assessment)
+    except Exception as e:
+        logger.error(f"Non-critical failure evaluating welfare alerts for personnel {personnel.id}: {e}", exc_info=True)
+
     assessment_out = _format_assessment_out(new_assessment, personnel, meta=result)
     return AssessmentResponse(
         message="Stress risk assessment and welfare recommendations successfully generated and persisted.",
@@ -483,6 +492,35 @@ def get_personnel_assessments(
 
 
 @router.get(
+    "/personnel/{personnel_id}/trend",
+    response_model=LongitudinalTrendResponse,
+    summary="Get longitudinal welfare trend intelligence for personnel"
+)
+def get_personnel_trend(
+    personnel_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves longitudinal trend analytics for a given personnel.
+    Protected by RBAC.
+    """
+    personnel = check_personnel_access(current_user, personnel_id, db)
+
+    # Fetch all past assessments for the personnel
+    assessments = (
+        db.query(StressAssessment)
+        .filter(StressAssessment.personnel_id == personnel_id)
+        .order_by(desc(StressAssessment.assessment_timestamp))
+        .all()
+    )
+
+    return LongitudinalAnalyticsService.calculate_longitudinal_trend(
+        personnel_id=personnel_id,
+        assessments=assessments
+    )
+
+@router.get(
     "/assessments/{assessment_id}",
     response_model=StressAssessmentOut,
     summary="Retrieve individual assessment details by ID"
@@ -600,6 +638,16 @@ def welfare_assessment_endpoint(
     service = get_prediction_service()
     res = service.predictor.assess_personnel(eval_record, past_assessments=past_list)
 
+    if res.get("risk_score") is None and res.get("error"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": res["error"],
+                "validation_errors": res.get("validation_errors", [res["error"]]),
+                "risk_category": res.get("risk_category", "Invalid Input")
+            }
+        )
+
     if personnel and res.get("risk_score") is not None:
         try:
             probas = res.get("probabilities", {})
@@ -627,6 +675,11 @@ def welfare_assessment_endpoint(
             )
             db.add(new_ass)
             db.commit()
+            db.refresh(new_ass)
+            
+            # Trigger Welfare Alerts evaluation
+            WelfareAlertService.evaluate_and_generate_alerts(db, personnel.id, new_ass)
+            
         except Exception as e:
             db.rollback()
             logger.warning(f"Could not persist welfare assessment: {e}")

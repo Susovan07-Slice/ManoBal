@@ -287,7 +287,13 @@ def get_high_risk_personnel(
         key_factors = []
         if a.key_factors:
             try:
-                key_factors = json.loads(a.key_factors)
+                parsed = json.loads(a.key_factors)
+                if isinstance(parsed, dict) and "top_risk_factors" in parsed:
+                    key_factors = parsed["top_risk_factors"]
+                elif isinstance(parsed, list):
+                    key_factors = parsed
+                else:
+                    key_factors = []
             except Exception:
                 key_factors = [a.key_factors]
 

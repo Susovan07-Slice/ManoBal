@@ -38,7 +38,7 @@ def get_json(endpoint, token):
 
 def run_tests():
     print('=== 1. COMMANDER LOGIN (officer_sharma) ===')
-    cmd_token_data = post_json('/auth/login', {'username': 'officer_sharma', 'password': 'officer123'})
+    cmd_token_data = post_json('/auth/login', {'username': 'officer_sharma', 'password': 'OfficerPassword123!'})
     cmd_token = cmd_token_data['access_token']
     print(f"Logged in as: {cmd_token_data['username']}, role: {cmd_token_data['role']}, battalion: {cmd_token_data['battalion']}")
 
@@ -54,7 +54,7 @@ def run_tests():
     print(f"Commander Initial Welfare Requests count: {len(cmd_welfare)}")
 
     print('\n=== 2. JAWAN LOGIN (jawan_verma) ===')
-    jwn_token_data = post_json('/auth/login', {'username': 'jawan_verma', 'password': 'jawan123'})
+    jwn_token_data = post_json('/auth/login', {'username': 'jawan_verma', 'password': 'PersonnelPassword123!'})
     jwn_token = jwn_token_data['access_token']
     jwn_id = jwn_token_data['personnel_id']
     print(f"Logged in as: {jwn_token_data['username']}, role: {jwn_token_data['role']}, linked personnel_id: {jwn_id}")

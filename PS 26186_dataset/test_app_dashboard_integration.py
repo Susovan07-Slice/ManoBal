@@ -22,7 +22,7 @@ def make_req(path, method="GET", data=None, token=None):
             return e.code, err_body
 
 print("--- 1. Login as Admin / Commander (admin / admin123) ---")
-st, admin_login = make_req("/auth/login", "POST", {"username": "admin", "password": "admin123"})
+st, admin_login = make_req("/auth/login", "POST", {"username": "admin", "password": "AdminPassword123!"})
 print(f"Admin login status: {st}")
 admin_token = admin_login.get("access_token")
 

@@ -51,6 +51,113 @@ class PersonnelWelfareRiskEngineV2:
         self.validation_metrics = validation_metrics or {}
         self.reference_scores = None
 
+    def validate_inputs(self, record: Dict[str, Any]) -> List[str]:
+        """
+        Validates individual assessment fields against plausible operational and questionnaire boundaries.
+        Rejects impossible values (e.g. negative hours, duty > 120, sleep > 24, ratings not in 1-5,
+        NaN, inf, or invalid categorical values).
+        """
+        errors = []
+
+        def check_num(val, min_val, max_val, name):
+            if val is None:
+                return
+            if isinstance(val, (int, float)):
+                if np.isnan(val) or np.isinf(val):
+                    errors.append(f"{name} cannot be NaN or Infinite")
+                elif val < min_val or val > max_val:
+                    errors.append(f"{name} must be between {min_val} and {max_val}, got {val}")
+            elif isinstance(val, str):
+                s = val.strip()
+                if s == '':
+                    return
+                try:
+                    num = float(s)
+                    if np.isnan(num) or np.isinf(num):
+                        errors.append(f"{name} cannot be NaN or Infinite")
+                    elif num < min_val or num > max_val:
+                        errors.append(f"{name} must be between {min_val} and {max_val}, got {num}")
+                except ValueError:
+                    errors.append(f"{name} must be a valid number, got '{val}'")
+            else:
+                errors.append(f"{name} must be numeric, got {type(val).__name__}")
+
+        # Duty hours (0 - 120)
+        duty = record.get('duty_hours_per_week')
+        if duty is None:
+            duty = record.get('Duty_Hours_Per_Week', record.get('Working_Hours_per_Week'))
+        check_num(duty, 0.0, 120.0, "Duty hours per week")
+
+        # Sleep hours (0 - 24)
+        sleep = record.get('sleep_hours')
+        if sleep is None:
+            sleep = record.get('Sleep_Hours')
+        check_num(sleep, 0.0, 24.0, "Sleep hours")
+
+        # Physical fatigue (1 - 5)
+        check_num(record.get('physical_fatigue'), 1.0, 5.0, "Physical fatigue")
+
+        # Mood score (1 - 5)
+        mood = record.get('mood_score')
+        if mood is None:
+            mood = record.get('JobSatisfaction')
+        check_num(mood, 1.0, 5.0, "Mood score")
+
+        # Consecutive duty days (0 - 60)
+        consec = record.get('consecutive_duty_days')
+        if consec is None:
+            consec = record.get('Consecutive_Duty_Days')
+        check_num(consec, 0.0, 60.0, "Consecutive duty days")
+
+        # Night shifts (0 - 31)
+        night = record.get('night_shifts_per_month')
+        if night is None:
+            night = record.get('Night_Shifts_Per_Month')
+        check_num(night, 0.0, 31.0, "Night shifts per month")
+
+        # Physical activity hours (0 - 50)
+        phys = record.get('physical_activity_hours_per_week')
+        if phys is None:
+            phys = record.get('Physical_Activity_Hours_per_Week')
+        check_num(phys, 0.0, 50.0, "Physical activity hours")
+
+        # Leave gap days (>= 0, <= 730)
+        leave = record.get('leave_gap_days')
+        if leave is None:
+            leave = record.get('Leave_Gap_Days')
+        check_num(leave, 0.0, 730.0, "Leave gap days")
+
+        # Psychometric questionnaire items (0 - 3)
+        check_num(record.get('interest_score'), 0.0, 3.0, "Interest score")
+        check_num(record.get('discouraged_score'), 0.0, 3.0, "Discouraged score")
+        check_num(record.get('concentration_score'), 0.0, 3.0, "Concentration score")
+
+        # Burnout symptoms
+        burnout = record.get('burnout_symptoms')
+        if burnout is None:
+            burnout = record.get('Burnout_Symptoms')
+        if burnout is not None and str(burnout).strip() != '':
+            if str(burnout).strip().lower() not in ['rarely', 'sometimes', 'often']:
+                errors.append(f"Burnout symptoms must be one of ['Rarely', 'Sometimes', 'Often'], got '{burnout}'")
+
+        # Operational exposure
+        op_exp = record.get('operational_exposure')
+        if op_exp is None:
+            op_exp = record.get('Operational_Exposure')
+        if op_exp is not None and str(op_exp).strip() != '':
+            if str(op_exp).strip().lower() not in ['low', 'medium', 'high']:
+                errors.append(f"Operational exposure must be one of ['Low', 'Medium', 'High'], got '{op_exp}'")
+
+        # Remote posting
+        remote = record.get('remote_posting')
+        if remote is None:
+            remote = record.get('Remote_Posting')
+        if remote is not None and str(remote).strip() != '':
+            if str(remote).strip().lower() not in ['yes', 'no']:
+                errors.append(f"Remote posting must be one of ['Yes', 'No'], got '{remote}'")
+
+        return errors
+
     def assess(
         self,
         record: Union[Dict[str, Any], Any],
@@ -74,8 +181,23 @@ class PersonnelWelfareRiskEngineV2:
                 record = dict(record)
 
         # -------------------------------------------------------------
-        # 1. Assessment Completeness Check (Section 14)
+        # 1. Assessment Validation & Completeness Check (Section 4 & 14)
         # -------------------------------------------------------------
+        validation_errors = self.validate_inputs(record)
+        if validation_errors:
+            return {
+                "error": "Validation failed: " + "; ".join(validation_errors),
+                "validation_errors": validation_errors,
+                "completeness": 0.0,
+                "assessment_completeness": 0.0,
+                "risk_score": None,
+                "risk_category": "Invalid Input",
+                "probabilities": None,
+                "confidence": 0.0,
+                "uncertainty": 1.0,
+                "model_version": self.version
+            }
+
         required_fields = ['duty_hours_per_week', 'sleep_hours', 'mood_score', 'physical_fatigue']
         present_count = 0
         for f in required_fields:
@@ -270,9 +392,28 @@ class PersonnelWelfareRiskEngineV2:
         temporal_adjustment = 0.0
 
         if past_history and len(past_history) > 0:
-            valid_past = [p for p in past_history if p.get("risk_score") is not None]
+            valid_past = []
+            for p in past_history:
+                if isinstance(p, dict):
+                    sc = p.get("risk_score")
+                    ts = p.get("assessment_timestamp")
+                else:
+                    sc = getattr(p, "risk_score", None)
+                    ts = getattr(p, "assessment_timestamp", None)
+                if sc is not None:
+                    try:
+                        sc_f = float(sc)
+                        if not (np.isnan(sc_f) or np.isinf(sc_f)):
+                            valid_past.append({"risk_score": sc_f, "timestamp": str(ts) if ts else ""})
+                    except (ValueError, TypeError):
+                        pass
+
             if valid_past:
-                prev_score = float(valid_past[0]["risk_score"])
+                # If timestamps exist across items, preserve strictly chronological descending order
+                if any(p.get("timestamp") for p in valid_past):
+                    valid_past.sort(key=lambda x: x["timestamp"], reverse=True)
+
+                prev_score = valid_past[0]["risk_score"]
                 risk_change = round(continuous_score - prev_score, 1)
 
                 if risk_change >= 6.0:
@@ -283,7 +424,7 @@ class PersonnelWelfareRiskEngineV2:
                     temporal_adjustment -= min(3.5, abs(risk_change) * 0.20)
 
                 for past in valid_past:
-                    if float(past.get("risk_score", 0.0)) >= 65.0:
+                    if past["risk_score"] >= 65.0:
                         consecutive_high_risk += 1
                     else:
                         break

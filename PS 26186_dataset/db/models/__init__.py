@@ -5,6 +5,8 @@ from db.models.recommendation import WelfareRecommendation
 from db.models.welfare_request import WelfareRequest
 from db.models.hrms import HrmsServiceRecord
 from db.models.telemetry import WearableTelemetry
+from db.models.alert import WelfareAlert, WelfareIntervention, WelfareAlertAudit
+from db.models.anomaly import WelfareAnomaly
 
 __all__ = [
     "User",
@@ -13,6 +15,9 @@ __all__ = [
     "WelfareRecommendation",
     "WelfareRequest",
     "HrmsServiceRecord",
-    "WearableTelemetry"
+    "WearableTelemetry",
+    "WelfareAlert",
+    "WelfareIntervention",
+    "WelfareAlertAudit",
+    "WelfareAnomaly"
 ]
-
