@@ -236,7 +236,7 @@ export function StoryOnboarding() {
           onTouchEnd={handleTouchEnd}
         >
           {/* Text Content */}
-          <div className="px-6 pt-4 pb-2 relative z-30 min-h-[140px]">
+          <div className="px-6 pt-4 pb-2 relative z-30 min-h-[240px]">
             {SLIDES.map((s, i) => (
               <div 
                 key={s.id} 
@@ -267,9 +267,9 @@ export function StoryOnboarding() {
               // Decorative Chips
               const chips = s.chips.map((Icon, idx) => {
                 const pos = [
-                  { top: "15%", left: "15%", delay: "0s", dur: "4s" },
-                  { top: "60%", left: "10%", delay: "1.5s", dur: "5s" },
-                  { top: "25%", right: "15%", delay: "0.7s", dur: "4.5s" }
+                  { top: "25%", left: "10%", delay: "0s", dur: "4s" },
+                  { top: "65%", left: "5%", delay: "1.5s", dur: "5s" },
+                  { top: "35%", right: "10%", delay: "0.7s", dur: "4.5s" }
                 ][idx];
                 
                 return (
@@ -342,16 +342,16 @@ export function StoryOnboarding() {
 
                   {/* Slide 3 Hero */}
                   {i === 2 && (
-                    <div className="relative w-64 h-72 flex flex-col justify-end pb-8">
+                    <div className="relative w-64 h-64 flex flex-col justify-end pb-4 scale-[0.85] origin-bottom sm:scale-100">
                       {/* Decorative bottom sheet mock */}
-                      <div className="absolute bottom-0 left-0 right-0 h-48 bg-white/70 backdrop-blur-xl rounded-t-[32px] border-t border-white/80 shadow-[0_-10px_40px_rgba(31,110,140,0.1)] p-5 flex flex-col gap-3">
-                        <div className="w-10 h-1 bg-ink-3/30 rounded-full mx-auto mb-2" />
-                        <div className="h-12 rounded-2xl border border-white/60 bg-white/50" />
-                        <div className="h-12 rounded-2xl border border-white/60 bg-white/50" />
-                        <div className="h-12 rounded-2xl border border-white/60 bg-white/50" />
+                      <div className="absolute bottom-0 left-0 right-0 h-44 bg-white/70 backdrop-blur-xl rounded-t-[32px] border-t border-white/80 shadow-[0_-10px_40px_rgba(31,110,140,0.1)] p-5 flex flex-col gap-3">
+                        <div className="w-10 h-1 bg-ink-3/30 rounded-full mx-auto mb-1" />
+                        <div className="h-10 rounded-2xl border border-white/60 bg-white/50" />
+                        <div className="h-10 rounded-2xl border border-white/60 bg-white/50" />
+                        <div className="h-10 rounded-2xl border border-white/60 bg-white/50" />
                       </div>
                       {/* Floating pill */}
-                      <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-[#1E8FC0] rounded-full px-6 py-4 flex items-center gap-3 shadow-[0_16px_40px_rgba(31,110,140,0.3)] border border-white/20">
+                      <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-[#1E8FC0] rounded-full px-6 py-4 flex items-center gap-3 shadow-[0_16px_40px_rgba(31,110,140,0.3)] border border-white/20">
                         <HeartPulse className="w-6 h-6 text-white" />
                         <span className="text-white font-bold whitespace-nowrap text-[15px]">Welfare Support</span>
                       </div>
