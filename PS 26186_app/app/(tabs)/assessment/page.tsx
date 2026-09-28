@@ -293,26 +293,23 @@ function AssessmentContent() {
     return (
       <div className="p-5 flex flex-col gap-5 pb-32 relative min-h-screen">
         {/* Status Confirmation Banner */}
-        <div className="p-4 bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl flex items-center space-x-3 mt-2 shadow-lg">
+        <div className="p-4 bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl flex items-center space-x-3 mt-2 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
           <CheckCircle2 className="w-7 h-7 text-[#00A896] shrink-0" />
           <div>
-            <h3 className="text-sm font-bold text-white tracking-wide">Daily Assessment Completed</h3>
-            <p className="text-xs text-white/60">
-              Evaluated via Welfare Risk Engine V2 • Confidential & Non-Punitive
-            </p>
+            <h3 className="text-sm font-bold text-gray-800 tracking-wide">Daily Assessment Completed</h3>
           </div>
         </div>
 
         {/* Welfare Risk Score Card */}
-        <div className="flex flex-col items-center bg-[rgba(15,35,27,0.45)] backdrop-blur-[20px] border border-white/15 rounded-[32px] p-7 shadow-2xl text-center">
-          <span className="text-[11px] uppercase font-bold tracking-[0.2em] text-white/60 mb-2">
+        <div className="flex flex-col items-center bg-white/85 backdrop-blur-[20px] border border-white/60 rounded-[32px] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.06)] text-center">
+          <span className="text-[11px] uppercase font-bold tracking-[0.2em] text-gray-500 mb-2">
             Continuous Welfare Risk
           </span>
           <div className="flex items-baseline justify-center gap-1 my-2">
-            <span className="text-[72px] font-light text-white tracking-tight leading-none">
+            <span className="text-[72px] font-light text-gray-800 tracking-tight leading-none">
               {scoreVal.toFixed(1)}
             </span>
-            <span className="text-2xl font-normal text-white/60">/ 100</span>
+            <span className="text-2xl font-normal text-gray-500">/ 100</span>
           </div>
 
           <div className={`px-5 py-1.5 rounded-full border text-sm font-bold mt-2 mb-5 ${categoryColor}`}>
@@ -320,7 +317,7 @@ function AssessmentContent() {
           </div>
 
           {/* Continuous Progress Bar */}
-          <div className="w-full max-w-xs h-2.5 bg-white/10 rounded-full overflow-hidden relative">
+          <div className="w-full max-w-xs h-2.5 bg-gray-200 rounded-full overflow-hidden relative">
             <div
               className={`h-full rounded-full transition-all duration-1000 ease-out ${barColor}`}
               style={{ width: `${Math.min(100, Math.max(5, scoreVal))}%` }}
@@ -330,15 +327,15 @@ function AssessmentContent() {
 
         {/* What is Contributing (Risk Factors) */}
         {topFactors.length > 0 && (
-          <div className="bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl p-5 shadow-lg">
-            <h4 className="text-xs uppercase font-bold tracking-wider text-white/70 mb-3 flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <div className="bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+            <h4 className="text-xs uppercase font-bold tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4 text-amber-500" />
               What is contributing?
             </h4>
-            <ul className="space-y-2 text-sm text-white/90">
+            <ul className="space-y-2 text-sm text-gray-800">
               {topFactors.map((factor, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <span className="text-amber-400 shrink-0 font-bold">•</span>
+                  <span className="text-amber-500 shrink-0 font-bold">•</span>
                   <span>{factor}</span>
                 </li>
               ))}
@@ -348,15 +345,15 @@ function AssessmentContent() {
 
         {/* Protective Factors */}
         {protective.length > 0 && (
-          <div className="bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl p-5 shadow-lg">
-            <h4 className="text-xs uppercase font-bold tracking-wider text-white/70 mb-3 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-400" />
+          <div className="bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+            <h4 className="text-xs uppercase font-bold tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-500" />
               Protective Factors
             </h4>
-            <ul className="space-y-2 text-sm text-white/90">
+            <ul className="space-y-2 text-sm text-gray-800">
               {protective.map((factor, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <span className="text-emerald-400 shrink-0 font-bold">•</span>
+                  <span className="text-emerald-500 shrink-0 font-bold">•</span>
                   <span>{factor}</span>
                 </li>
               ))}
@@ -366,14 +363,14 @@ function AssessmentContent() {
 
         {/* Recommended Action */}
         {assessmentResult.recommendations && assessmentResult.recommendations.length > 0 && (
-          <div className="bg-[rgba(15,35,27,0.45)] backdrop-blur-[16px] border border-white/10 rounded-2xl p-5 shadow-lg">
+          <div className="bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
             <h4 className="text-xs uppercase font-bold tracking-wider text-[#00A896] mb-3 flex items-center gap-1.5">
               <HeartPulse className="w-4 h-4 text-[#00A896]" />
               Recommended Guidance
             </h4>
             <div className="space-y-2">
               {assessmentResult.recommendations.slice(0, 2).map((rec: any, idx: number) => (
-                <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/5 text-sm text-white/90">
+                <div key={idx} className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-800">
                   <div className="font-semibold text-xs text-[#00A896] mb-0.5">{rec.recommendation_type || rec.type || "Welfare Action"}</div>
                   <div>{rec.recommendation_text || rec.action || String(rec)}</div>
                 </div>
@@ -386,7 +383,7 @@ function AssessmentContent() {
         <div className="flex gap-4 mt-auto w-full pt-2">
           <Link
             href="/"
-            className="flex-1 py-4 bg-[rgba(255,255,255,0.12)] backdrop-blur-md border border-white/20 hover:bg-white/20 rounded-2xl text-[15px] font-bold text-white text-center transition-colors"
+            className="flex-1 py-4 bg-white/85 backdrop-blur-md border border-white/60 hover:bg-white rounded-2xl text-[15px] font-bold text-gray-800 text-center transition-colors shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
           >
             Dashboard
           </Link>

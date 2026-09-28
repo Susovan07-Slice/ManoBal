@@ -76,9 +76,9 @@ function LoginForm() {
         {/* Left Side: Indian Army Insignia Hero Panel (matching Image 1 layout with Image 2) */}
         <div className="relative bg-black p-8 md:p-10 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-black">
           {/* Top Brand Watermark */}
-          <div className="relative z-10 flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-700/40 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <div className="relative z-10 flex items-center space-x-3">
+            <div className="w-14 h-14 flex items-center justify-center">
+              <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain drop-shadow-md" />
             </div>
             <div>
               <span className="text-xs uppercase tracking-widest font-bold text-emerald-400">ManoBal</span>
