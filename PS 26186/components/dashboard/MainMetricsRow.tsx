@@ -15,13 +15,13 @@ export default function MainMetricsRow({ summary, isLoading = false }: MainMetri
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="bg-surface p-4 border border-surfaceHighlight rounded-lg flex items-center justify-between animate-pulse h-24"
+            className="bg-surface p-4 border border-surfaceBorder rounded-xl flex items-center justify-between animate-pulse h-24 shadow-card"
           >
             <div className="space-y-2">
               <div className="h-3 w-20 bg-surfaceHighlight rounded" />
               <div className="h-6 w-10 bg-surfaceHighlight rounded" />
             </div>
-            <div className="h-10 w-10 bg-surfaceHighlight rounded" />
+            <div className="h-10 w-10 bg-surfaceHighlight rounded-lg" />
           </div>
         ))}
       </div>
@@ -62,7 +62,7 @@ export default function MainMetricsRow({ summary, isLoading = false }: MainMetri
         delta={highRiskPct}
         icon={ShieldAlert}
         variant="high"
-        subtext="Urgent intervention"
+        subtext="Supportive intervention"
       />
       <MetricCard
         label="Assessed Force"
@@ -81,4 +81,3 @@ export default function MainMetricsRow({ summary, isLoading = false }: MainMetri
     </div>
   );
 }
-

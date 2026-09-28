@@ -91,7 +91,7 @@ export default function AdvancedCommanderAnalytics() {
                 onClick={() => handleFilterChange(f)}
                 className={`px-2.5 py-1 rounded transition-colors uppercase ${
                   timeFilter === f
-                    ? 'bg-accent text-background font-semibold shadow-xs'
+                    ? 'bg-accent text-[#FAFAFC] font-semibold shadow-xs'
                     : 'text-textSecondary hover:text-textPrimary hover:bg-surfaceHighlight'
                 }`}
               >
@@ -103,7 +103,7 @@ export default function AdvancedCommanderAnalytics() {
           <button
             onClick={fetchAnalytics}
             disabled={loading}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-surfaceHighlight hover:bg-surfaceHighlight/80 text-textPrimary rounded-lg text-xs font-mono transition-colors border border-surfaceHighlight disabled:opacity-50"
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-surfaceHighlight hover:bg-surfaceHighlight/80 text-textPrimary rounded-lg text-xs font-mono transition-colors border border-surfaceBorder disabled:opacity-50"
             title="Refresh Unit Analytics"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -114,25 +114,25 @@ export default function AdvancedCommanderAnalytics() {
 
       {/* Custom Date Range Picker */}
       {showCustomRange && (
-        <div className="flex flex-wrap items-center gap-3 p-3 bg-surfaceHighlight/30 border border-surfaceHighlight rounded-lg text-xs font-mono">
+        <div className="flex flex-wrap items-center gap-3 p-3 bg-surfaceHighlight/40 border border-surfaceBorder rounded-lg text-xs font-mono">
           <Calendar className="w-4 h-4 text-accent" />
           <span className="text-textSecondary">Custom Range:</span>
           <input
             type="date"
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
-            className="bg-surface border border-surfaceHighlight rounded px-2 py-1 text-textPrimary"
+            className="bg-surface border border-surfaceBorder rounded px-2 py-1 text-textPrimary"
           />
           <span className="text-textSecondary">to</span>
           <input
             type="date"
             value={customEnd}
             onChange={(e) => setCustomEnd(e.target.value)}
-            className="bg-surface border border-surfaceHighlight rounded px-2 py-1 text-textPrimary"
+            className="bg-surface border border-surfaceBorder rounded px-2 py-1 text-textPrimary"
           />
           <button
             onClick={fetchAnalytics}
-            className="px-3 py-1 bg-accent text-background font-semibold rounded hover:bg-accent/90"
+            className="px-3 py-1 bg-accent text-[#FAFAFC] font-semibold rounded hover:bg-accent/90"
           >
             Apply
           </button>
@@ -156,27 +156,27 @@ export default function AdvancedCommanderAnalytics() {
 
       {/* Error Message */}
       {!loading && error && (
-        <div className="p-4 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center space-x-3 text-red-200 text-sm">
-          <AlertCircle className="w-5 h-5 shrink-0 text-red-400" />
+        <div className="p-4 bg-[#FAF0F0] border border-[#E8B4B4] rounded-lg flex items-center space-x-3 text-[#964747] text-sm">
+          <AlertCircle className="w-5 h-5 shrink-0 text-[#C26D6D]" />
           <div>
             <p className="font-semibold">Analytics Sync Error</p>
-            <p className="text-xs text-red-300 mt-0.5">{error}</p>
+            <p className="text-xs text-[#964747] mt-0.5">{error}</p>
           </div>
         </div>
       )}
 
       {/* Privacy Protection Notice (INSUFFICIENT_GROUP_SIZE) */}
       {!loading && data?.status === 'INSUFFICIENT_GROUP_SIZE' && (
-        <div className="p-5 bg-amber-950/30 border border-amber-800/50 rounded-lg space-y-3">
+        <div className="p-5 bg-[#FDF6EE] border border-[#F3D2AE] rounded-lg space-y-3">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-amber-900/50 border border-amber-700/60 flex items-center justify-center shrink-0">
-              <Lock className="w-4 h-4 text-amber-400" />
+            <div className="w-8 h-8 rounded-full bg-[#FDF6EE] border border-[#F3D2AE] flex items-center justify-center shrink-0">
+              <Lock className="w-4 h-4 text-[#8E5B23]" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-amber-200 uppercase tracking-wide">
+              <h3 className="text-sm font-semibold text-[#8E5B23] uppercase tracking-wide">
                 Privacy Protection Activated (k-Anonymity)
               </h3>
-              <p className="text-xs text-amber-300/80 font-mono mt-0.5">
+              <p className="text-xs text-[#8E5B23]/80 font-mono mt-0.5">
                 Authorized Personnel in Scope: {data.scope.total_authorized_personnel} (Minimum required: {data.scope.min_group_size_threshold})
               </p>
             </div>
@@ -219,12 +219,12 @@ export default function AdvancedCommanderAnalytics() {
             </div>
 
             {/* Active Alerts */}
-            <div className="p-4 bg-surfaceHighlight/30 border border-surfaceHighlight rounded-lg space-y-1">
+            <div className="p-4 bg-surfaceHighlight/40 border border-surfaceBorder rounded-lg space-y-1">
               <div className="flex items-center justify-between text-xs text-textSecondary font-mono">
                 <span>Open Alerts</span>
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <AlertTriangle className="w-4 h-4 text-[#D99B5C]" />
               </div>
-              <div className="text-xl font-bold text-amber-300 font-mono">
+              <div className="text-xl font-bold text-[#8E5B23] font-mono">
                 {data.summary.open_alerts_count}
               </div>
               <p className="text-[11px] text-textSecondary font-mono">
@@ -233,12 +233,12 @@ export default function AdvancedCommanderAnalytics() {
             </div>
 
             {/* Worsening Trajectory */}
-            <div className="p-4 bg-surfaceHighlight/30 border border-surfaceHighlight rounded-lg space-y-1">
+            <div className="p-4 bg-surfaceHighlight/40 border border-surfaceBorder rounded-lg space-y-1">
               <div className="flex items-center justify-between text-xs text-textSecondary font-mono">
                 <span>Worsening Trend</span>
-                <TrendingUp className="w-4 h-4 text-rose-400" />
+                <TrendingUp className="w-4 h-4 text-[#C26D6D]" />
               </div>
-              <div className="text-xl font-bold text-rose-400 font-mono">
+              <div className="text-xl font-bold text-[#C26D6D] font-mono">
                 {data.summary.worsening_trend_pct}%
               </div>
               <p className="text-[11px] text-textSecondary font-mono">
@@ -247,12 +247,12 @@ export default function AdvancedCommanderAnalytics() {
             </div>
 
             {/* Persistent Elevated Risk */}
-            <div className="p-4 bg-surfaceHighlight/30 border border-surfaceHighlight rounded-lg space-y-1">
+            <div className="p-4 bg-surfaceHighlight/40 border border-surfaceBorder rounded-lg space-y-1">
               <div className="flex items-center justify-between text-xs text-textSecondary font-mono">
                 <span>Persistent Elevated</span>
-                <Clock className="w-4 h-4 text-orange-400" />
+                <Clock className="w-4 h-4 text-[#CB7A5C]" />
               </div>
-              <div className="text-xl font-bold text-orange-400 font-mono">
+              <div className="text-xl font-bold text-[#CB7A5C] font-mono">
                 {data.summary.persistent_elevated_pct}%
               </div>
               <p className="text-[11px] text-textSecondary font-mono">
@@ -261,10 +261,10 @@ export default function AdvancedCommanderAnalytics() {
             </div>
 
             {/* Scope Average Risk Score */}
-            <div className="p-4 bg-surfaceHighlight/30 border border-surfaceHighlight rounded-lg space-y-1">
+            <div className="p-4 bg-surfaceHighlight/40 border border-surfaceBorder rounded-lg space-y-1">
               <div className="flex items-center justify-between text-xs text-textSecondary font-mono">
                 <span>Mean Risk Score</span>
-                <Activity className="w-4 h-4 text-teal-400" />
+                <Activity className="w-4 h-4 text-accent" />
               </div>
               <div className="text-xl font-bold text-textPrimary font-mono">
                 {data.summary.average_risk_score !== null ? data.summary.average_risk_score : '—'}
@@ -280,7 +280,7 @@ export default function AdvancedCommanderAnalytics() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Risk Distribution Card */}
             {data.risk_distribution && (
-              <div className="p-4 bg-surfaceHighlight/20 border border-surfaceHighlight rounded-lg space-y-4">
+              <div className="p-4 bg-surface border border-surfaceBorder rounded-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-xs font-bold text-textPrimary uppercase tracking-wider">
@@ -295,11 +295,11 @@ export default function AdvancedCommanderAnalytics() {
                 <div className="space-y-3 pt-2">
                   {data.risk_distribution.categories.map((cat) => {
                     const colorMap: Record<string, { bg: string; text: string; bar: string }> = {
-                      Low: { bg: 'bg-emerald-950/40', text: 'text-emerald-400', bar: 'bg-emerald-500' },
-                      Moderate: { bg: 'bg-blue-950/40', text: 'text-blue-400', bar: 'bg-blue-500' },
-                      Elevated: { bg: 'bg-amber-950/40', text: 'text-amber-400', bar: 'bg-amber-500' },
-                      High: { bg: 'bg-orange-950/40', text: 'text-orange-400', bar: 'bg-orange-500' },
-                      Critical: { bg: 'bg-rose-950/40', text: 'text-rose-400', bar: 'bg-rose-500' },
+                      Low: { bg: 'bg-[#EEF6F2]', text: 'text-[#2D6346]', bar: 'bg-[#7BA083]' },
+                      Moderate: { bg: 'bg-[#EEF4F8]', text: 'text-[#3E6580]', bar: 'bg-[#5B88A5]' },
+                      Elevated: { bg: 'bg-[#FDF6EE]', text: 'text-[#8E5B23]', bar: 'bg-[#D99B5C]' },
+                      High: { bg: 'bg-[#FDF2EC]', text: 'text-[#8F4B33]', bar: 'bg-[#CB7A5C]' },
+                      Critical: { bg: 'bg-[#FAF0F0]', text: 'text-[#964747]', bar: 'bg-[#C26D6D]' },
                     };
                     const styling = colorMap[cat.label] || { bg: 'bg-surfaceHighlight', text: 'text-textPrimary', bar: 'bg-accent' };
 
@@ -326,7 +326,7 @@ export default function AdvancedCommanderAnalytics() {
 
             {/* Longitudinal Trend Card */}
             {data.trend && (
-              <div className="p-4 bg-surfaceHighlight/20 border border-surfaceHighlight rounded-lg space-y-4">
+              <div className="p-4 bg-surface border border-surfaceBorder rounded-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-xs font-bold text-textPrimary uppercase tracking-wider">
@@ -339,10 +339,10 @@ export default function AdvancedCommanderAnalytics() {
                   <span
                     className={`px-2 py-0.5 rounded text-[11px] font-mono font-semibold uppercase ${
                       data.trend.direction === 'IMPROVING'
-                        ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40'
+                        ? 'bg-[#EEF6F2] text-[#2D6346] border border-[#BBD9C7]'
                         : data.trend.direction === 'WORSENING'
-                        ? 'bg-rose-950/60 text-rose-400 border border-rose-800/40'
-                        : 'bg-surfaceHighlight text-textSecondary border border-surfaceHighlight'
+                        ? 'bg-[#FAF0F0] text-[#964747] border border-[#E8B4B4]'
+                        : 'bg-surfaceHighlight text-textSecondary border border-surfaceBorder'
                     }`}
                   >
                     {data.trend.direction}
@@ -350,19 +350,19 @@ export default function AdvancedCommanderAnalytics() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-center pt-2">
-                  <div className="p-2.5 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
+                  <div className="p-2.5 bg-[#EEF6F2]/70 rounded-lg border border-[#BBD9C7]">
                     <span className="text-[10px] text-textSecondary font-mono block">Improving</span>
-                    <span className="text-base font-bold text-emerald-400 font-mono">{data.trend.improving_pct}%</span>
+                    <span className="text-base font-bold text-[#2D6346] font-mono">{data.trend.improving_pct}%</span>
                     <span className="text-[10px] text-textSecondary block font-mono">{data.trend.improving_count} personnel</span>
                   </div>
-                  <div className="p-2.5 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
+                  <div className="p-2.5 bg-[#EEF4F8]/70 rounded-lg border border-[#BCD3E3]">
                     <span className="text-[10px] text-textSecondary font-mono block">Stable</span>
-                    <span className="text-base font-bold text-blue-400 font-mono">{data.trend.stable_pct}%</span>
+                    <span className="text-base font-bold text-[#3E6580] font-mono">{data.trend.stable_pct}%</span>
                     <span className="text-[10px] text-textSecondary block font-mono">{data.trend.stable_count} personnel</span>
                   </div>
-                  <div className="p-2.5 bg-surfaceHighlight/30 rounded border border-surfaceHighlight">
+                  <div className="p-2.5 bg-[#FAF0F0] rounded-lg border border-[#E8B4B4]">
                     <span className="text-[10px] text-textSecondary font-mono block">Worsening</span>
-                    <span className="text-base font-bold text-rose-400 font-mono">{data.trend.worsening_pct}%</span>
+                    <span className="text-base font-bold text-[#964747] font-mono">{data.trend.worsening_pct}%</span>
                     <span className="text-[10px] text-textSecondary block font-mono">{data.trend.worsening_count} personnel</span>
                   </div>
                 </div>

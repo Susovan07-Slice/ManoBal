@@ -189,33 +189,33 @@ export default function SupportRecommendationsPanel() {
   const getPriorityBadge = (p: RecommendationPriority) => {
     switch (p) {
       case 'CRITICAL':
-        return 'bg-red-500/20 text-red-400 border-red-500/40';
+        return 'bg-[#FAF0F0] text-[#964747] border-[#E8B4B4]';
       case 'HIGH':
-        return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+        return 'bg-[#FDF2EC] text-[#8F4B33] border-[#F1C5B3]';
       case 'ELEVATED':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        return 'bg-[#FDF6EE] text-[#8E5B23] border-[#F3D2AE]';
       case 'ROUTINE':
       default:
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/40';
+        return 'bg-[#EEF6F2] text-[#2D6346] border-[#BBD9C7]';
     }
   };
 
   const getStatusBadge = (s: RecommendationStatus) => {
     switch (s) {
       case 'SUGGESTED':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+        return 'bg-[#F4EFF8] text-[#69428E] border-[#DCCBEA]';
       case 'ACKNOWLEDGED':
-        return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
+        return 'bg-[#EEF4F8] text-[#3E6580] border-[#BCD3E3]';
       case 'ACCEPTED':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+        return 'bg-[#EEF6F2] text-[#2D6346] border-[#BBD9C7]';
       case 'ACTIONED':
-        return 'bg-teal-500/20 text-teal-300 border-teal-500/40';
+        return 'bg-[#E6EFE8] text-[#4F6E56] border-[#B5CFBB]';
       case 'DEFERRED':
-        return 'bg-slate-500/20 text-slate-300 border-slate-500/40';
+        return 'bg-[#F1F5F9] text-[#64748B] border-[#CBD5E1]';
       case 'DISMISSED':
-        return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/40';
+        return 'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]';
       default:
-        return 'bg-surfaceHighlight text-textSecondary border-surfaceHighlight';
+        return 'bg-surfaceHighlight text-textSecondary border-surfaceBorder';
     }
   };
 
@@ -368,9 +368,9 @@ export default function SupportRecommendationsPanel() {
                 {(data.status_breakdown?.['ACCEPTED'] || 0) + (data.status_breakdown?.['ACTIONED'] || 0)}
               </p>
             </div>
-            <div className="p-2 rounded-lg bg-surfaceHighlight/20">
+            <div className="p-2 rounded-lg bg-surfaceHighlight/40 border border-surfaceBorder">
               <span className="text-[10px] font-mono uppercase text-textSecondary">High/Critical Priority</span>
-              <p className="text-base font-bold text-rose-400">
+              <p className="text-base font-bold text-[#C26D6D]">
                 {(data.priority_breakdown?.['HIGH'] || 0) + (data.priority_breakdown?.['CRITICAL'] || 0)}
               </p>
             </div>
@@ -380,8 +380,8 @@ export default function SupportRecommendationsPanel() {
 
       {/* Error Display */}
       {error && (
-        <div className="p-4 bg-red-950/40 border border-red-800/60 rounded-xl flex items-center space-x-3 text-red-200 text-sm">
-          <AlertTriangle className="w-5 h-5 shrink-0 text-red-400" />
+        <div className="p-4 bg-[#FAF0F0] border border-[#E8B4B4] rounded-xl flex items-center space-x-3 text-[#964747] text-sm">
+          <AlertTriangle className="w-5 h-5 shrink-0 text-[#C26D6D]" />
           <p>{error}</p>
         </div>
       )}
@@ -640,11 +640,11 @@ export default function SupportRecommendationsPanel() {
 
       {/* ACCEPT & PLAN MODAL */}
       {acceptModalRec && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
           <div className="bg-surface border border-surfaceHighlight rounded-xl max-w-lg w-full p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-surfaceHighlight">
               <h3 className="font-semibold text-textPrimary text-sm flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-[#7BA083]" />
                 <span>Accept Recommendation & Initiate Support</span>
               </h3>
               <button
@@ -738,7 +738,7 @@ export default function SupportRecommendationsPanel() {
 
       {/* DEFER MODAL */}
       {deferModalRec && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
           <div className="bg-surface border border-surfaceHighlight rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-surfaceHighlight">
               <h3 className="font-semibold text-textPrimary text-sm flex items-center space-x-2">
@@ -803,11 +803,11 @@ export default function SupportRecommendationsPanel() {
 
       {/* DISMISS MODAL */}
       {dismissModalRec && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface border border-surfaceHighlight rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-surfaceHighlight">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-surface border border-surfaceBorder rounded-xl max-w-md w-full p-5 space-y-4 shadow-elevated">
+            <div className="flex items-center justify-between pb-3 border-b border-surfaceBorder">
               <h3 className="font-semibold text-textPrimary text-sm flex items-center space-x-2">
-                <XCircle className="w-4 h-4 text-zinc-400" />
+                <XCircle className="w-4 h-4 text-textSecondary" />
                 <span>Dismiss Recommendation</span>
               </h3>
               <button
@@ -819,7 +819,7 @@ export default function SupportRecommendationsPanel() {
             </div>
 
             {dismissError && (
-              <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-xs text-red-200">
+              <div className="p-3 bg-[#FAF0F0] border border-[#E8B4B4] rounded-lg text-xs text-[#964747]">
                 {dismissError}
               </div>
             )}
@@ -838,22 +838,22 @@ export default function SupportRecommendationsPanel() {
                   value={dismissReason}
                   onChange={(e) => setDismissReason(e.target.value)}
                   placeholder="e.g., Personnel currently on sanctioned leave; telemetry anomaly verified as sensor charging gap."
-                  className="w-full h-24 bg-surfaceHighlight/40 border border-surfaceHighlight rounded-lg p-2.5 text-xs text-textPrimary focus:outline-none focus:border-accent resize-none"
+                  className="w-full h-24 bg-[#F1F7F4] border border-surfaceBorder rounded-lg p-2.5 text-xs text-textPrimary focus:outline-none focus:border-accent resize-none placeholder:text-textSecondary"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-surfaceHighlight">
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-surfaceBorder">
               <button
                 onClick={() => setDismissModalRec(null)}
-                className="px-3 py-1.5 text-xs font-mono text-textSecondary hover:bg-surfaceHighlight rounded-lg"
+                className="px-3 py-1.5 text-xs font-mono text-textSecondary hover:bg-surfaceHighlight rounded-lg border border-surfaceBorder"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDismissSubmit}
                 disabled={actionLoadingId === dismissModalRec.id}
-                className="px-4 py-1.5 bg-zinc-600 hover:bg-zinc-500 text-white rounded-lg text-xs font-mono font-medium disabled:opacity-50"
+                className="px-4 py-1.5 bg-[#64748B] hover:bg-[#475569] text-[#FAFAFC] rounded-lg text-xs font-mono font-medium disabled:opacity-50"
               >
                 Confirm Dismissal
               </button>
@@ -864,11 +864,11 @@ export default function SupportRecommendationsPanel() {
 
       {/* RECORD ACTION MODAL */}
       {actionModalRec && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface border border-surfaceHighlight rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-surfaceHighlight">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-surface border border-surfaceBorder rounded-xl max-w-md w-full p-5 space-y-4 shadow-elevated">
+            <div className="flex items-center justify-between pb-3 border-b border-surfaceBorder">
               <h3 className="font-semibold text-textPrimary text-sm flex items-center space-x-2">
-                <Send className="w-4 h-4 text-teal-400" />
+                <Send className="w-4 h-4 text-accent" />
                 <span>Record Supportive Action Taken</span>
               </h3>
               <button
@@ -880,7 +880,7 @@ export default function SupportRecommendationsPanel() {
             </div>
 
             {actionError && (
-              <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-xs text-red-200">
+              <div className="p-3 bg-[#FAF0F0] border border-[#E8B4B4] rounded-lg text-xs text-[#964747]">
                 {actionError}
               </div>
             )}
@@ -898,22 +898,22 @@ export default function SupportRecommendationsPanel() {
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="e.g., Met with personnel during morning muster; scheduled 48-hour recovery rotation and assigned peer buddy."
-                  className="w-full h-24 bg-surfaceHighlight/40 border border-surfaceHighlight rounded-lg p-2.5 text-xs text-textPrimary focus:outline-none focus:border-accent resize-none"
+                  className="w-full h-24 bg-[#F1F7F4] border border-surfaceBorder rounded-lg p-2.5 text-xs text-textPrimary focus:outline-none focus:border-accent resize-none placeholder:text-textSecondary"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-surfaceHighlight">
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-surfaceBorder">
               <button
                 onClick={() => setActionModalRec(null)}
-                className="px-3 py-1.5 text-xs font-mono text-textSecondary hover:bg-surfaceHighlight rounded-lg"
+                className="px-3 py-1.5 text-xs font-mono text-textSecondary hover:bg-surfaceHighlight rounded-lg border border-surfaceBorder"
               >
                 Cancel
               </button>
               <button
                 onClick={handleActionSubmit}
                 disabled={actionLoadingId === actionModalRec.id}
-                className="px-4 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-mono font-medium disabled:opacity-50"
+                className="px-4 py-1.5 bg-accent hover:bg-accent/90 text-[#FAFAFC] rounded-lg text-xs font-mono font-medium disabled:opacity-50"
               >
                 Save & Complete Action
               </button>
