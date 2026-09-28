@@ -71,10 +71,10 @@ function LoginForm() {
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-950/30 rounded-full blur-3xl pointer-events-none translate-x-1/2 translate-y-1/2" />
 
       {/* Main Split Container */}
-      <div className="relative z-10 max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 border border-emerald-950/20">
+      <div className="relative z-10 max-w-4xl w-full bg-[#0a120c] rounded-3xl shadow-2xl shadow-black/80 overflow-hidden grid grid-cols-1 md:grid-cols-2 border border-emerald-900/40">
         
-        {/* Left Side: Indian Army Insignia Hero Panel (matching Image 1 layout with Image 2) */}
-        <div className="relative bg-black p-8 md:p-10 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-black">
+        {/* Left Side: Indian Armed Forces Hero Section */}
+        <div className="relative bg-black p-6 sm:p-8 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-emerald-950/20 min-h-[580px]">
           {/* Top Brand Watermark */}
           <div className="relative z-10 flex items-center space-x-3">
             <div className="w-14 h-14 flex items-center justify-center">
@@ -86,44 +86,45 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* Center: Image 2 (Indian Army Insignia on seamless pure black) */}
-          <div className="relative z-10 my-auto py-6 flex flex-col items-center justify-center">
-            <div
-              className="relative w-48 h-60 sm:w-56 sm:h-72 transition-transform duration-500 hover:scale-105"
-              style={{ position: 'relative', width: '220px', height: '280px', maxWidth: '100%' }}
-            >
-              <Image
-                src={armyInsignia}
-                alt="Indian Army Insignia - भारतीय सेना"
-                fill
-                priority
-                sizes="(max-width: 768px) 192px, 224px"
-                className="object-contain mix-blend-screen"
-                style={{ objectFit: 'contain' }}
+          {/* Center: Complete Logo Filling the Section without any cropping */}
+          <div className="relative z-10 flex-1 my-auto w-full flex items-center justify-center py-2 px-2">
+            <div className="w-full h-full max-h-[460px] relative transition-transform duration-500 hover:scale-[1.02] flex items-center justify-center">
+              <img
+                src="/armed_forces_badges.png"
+                alt="Indian Armed Forces Insignia"
+                className="w-full h-full object-contain"
               />
             </div>
           </div>
 
-          {/* Bottom Heading & Subtext (typography matching Image 1) */}
-          <div className="relative z-10 mt-auto">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Sign in to your <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-white to-teal-200">
-                Command Account
-              </span>
+          {/* Bottom Heading & Subtext */}
+          <div className="relative z-10 mt-auto pt-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+              Indian Armed Forces
             </h1>
-            <p className="text-gray-300 text-xs sm:text-sm mt-3 font-normal leading-relaxed">
-              Personnel Stress & Welfare Decision-Support System. Official authorized access for Indian Armed Forces command personnel.
+            <p className="text-gray-400 text-xs mt-1 font-normal leading-relaxed">
+              Personnel Stress & Welfare Decision-Support System. Official authorized access for Command personnel.
             </p>
           </div>
         </div>
 
-        {/* Right Side: Clean Form Panel (matching Image 1 right column) */}
-        <div className="bg-white p-8 sm:p-10 flex flex-col justify-between">
-          <div>
+        {/* Right Side: Army Tactical Camouflage Form Panel */}
+        <div className="relative p-8 sm:p-10 flex flex-col justify-between overflow-hidden bg-[#111c13] border-t md:border-t-0 md:border-l border-emerald-900/40">
+          {/* Subtle military camouflage pattern overlay */}
+          <div 
+            className="absolute inset-0 bg-repeat opacity-25 mix-blend-overlay pointer-events-none"
+            style={{ 
+              backgroundImage: "url('/army_camo.png')",
+              backgroundSize: '360px 360px'
+            }}
+          />
+          {/* Tactical atmospheric dark gradient vignette */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#142318]/90 via-[#0e1710]/92 to-[#09100a]/96 pointer-events-none" />
+
+          <div className="relative z-10">
             {/* Top Bar: Language / Region Selector */}
             <div className="flex justify-end mb-4">
-              <div className="inline-flex items-center space-x-1 text-xs text-gray-500 font-medium cursor-pointer hover:text-gray-800 transition-colors">
+              <div className="inline-flex items-center space-x-1 text-xs text-emerald-400/80 font-mono font-medium cursor-pointer hover:text-emerald-300 transition-colors">
                 <span>Restricted (IND)</span>
                 <ChevronDown className="w-3.5 h-3.5" />
               </div>
@@ -131,33 +132,33 @@ function LoginForm() {
 
             {/* Header */}
             <div className="mb-6">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+              <h2 className="text-3xl font-extrabold tracking-tight text-white font-sans">
                 Sign in
               </h2>
-              <p className="text-sm text-gray-500 mt-1.5">
+              <p className="text-sm text-emerald-200/70 mt-1.5 font-normal">
                 Don&apos;t have an account?{' '}
-                <Link href="/signup" className="text-emerald-700 font-semibold hover:underline">
+                <Link href="/signup" className="text-emerald-400 font-semibold hover:underline hover:text-emerald-300">
                   Sign Up
                 </Link>
               </p>
             </div>
 
-            {/* Role Pills (matching the radio pill selectors from Image 1) */}
+            {/* Role Pills (Tactical Military Selectors) */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               <button
                 type="button"
                 onClick={() => selectRolePill('officer', 'officer_sharma', 'OfficerPassword123!')}
                 className={`flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all ${
                   activeRole === 'officer'
-                    ? 'border-emerald-600 bg-emerald-50/70 text-emerald-950 ring-2 ring-emerald-600/15'
-                    : 'border-gray-200 bg-gray-50/50 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                    ? 'border-emerald-500 bg-emerald-950/80 text-emerald-200 ring-2 ring-emerald-500/30 shadow-md shadow-emerald-950/50'
+                    : 'border-emerald-900/50 bg-black/40 text-gray-300 hover:bg-black/60 hover:border-emerald-700'
                 }`}
               >
                 <span
                   className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
                     activeRole === 'officer'
-                      ? 'border-emerald-700 bg-emerald-700'
-                      : 'border-gray-300 bg-white'
+                      ? 'border-emerald-400 bg-emerald-500'
+                      : 'border-gray-600 bg-transparent'
                   }`}
                 >
                   {activeRole === 'officer' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -170,15 +171,15 @@ function LoginForm() {
                 onClick={() => selectRolePill('counselor', 'counselor_priya', 'WelfarePassword123!')}
                 className={`flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all ${
                   activeRole === 'counselor'
-                    ? 'border-emerald-600 bg-emerald-50/70 text-emerald-950 ring-2 ring-emerald-600/15'
-                    : 'border-gray-200 bg-gray-50/50 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                    ? 'border-emerald-500 bg-emerald-950/80 text-emerald-200 ring-2 ring-emerald-500/30 shadow-md shadow-emerald-950/50'
+                    : 'border-emerald-900/50 bg-black/40 text-gray-300 hover:bg-black/60 hover:border-emerald-700'
                 }`}
               >
                 <span
                   className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
                     activeRole === 'counselor'
-                      ? 'border-emerald-700 bg-emerald-700'
-                      : 'border-gray-300 bg-white'
+                      ? 'border-emerald-400 bg-emerald-500'
+                      : 'border-gray-600 bg-transparent'
                   }`}
                 >
                   {activeRole === 'counselor' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -189,8 +190,8 @@ function LoginForm() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-5 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-2 text-xs text-red-700">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+              <div className="mb-5 p-3 bg-red-950/60 border border-red-800/80 rounded-xl flex items-center space-x-2 text-xs text-red-200">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                 <span>{error}</span>
               </div>
             )}
@@ -198,11 +199,11 @@ function LoginForm() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs uppercase tracking-wider text-gray-600 font-semibold mb-1.5">
+                <label className="block text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1.5 font-mono">
                   Service Username
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-500/70">
                     <User className="w-4 h-4" />
                   </span>
                   <input
@@ -215,7 +216,7 @@ function LoginForm() {
                     }}
                     placeholder="e.g. officer_sharma"
                     disabled={isLoading}
-                    className="w-full bg-gray-50/70 border border-gray-200 focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 text-gray-900 text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all placeholder:text-gray-400"
+                    className="w-full bg-black/50 border border-emerald-900/60 focus:bg-black/75 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/20 text-white text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all placeholder:text-gray-500"
                     autoComplete="username"
                     required
                   />
@@ -223,11 +224,11 @@ function LoginForm() {
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider text-gray-600 font-semibold mb-1.5">
+                <label className="block text-xs uppercase tracking-wider text-emerald-400 font-bold mb-1.5 font-mono">
                   Password
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-500/70">
                     <Lock className="w-4 h-4" />
                   </span>
                   <input
@@ -240,19 +241,19 @@ function LoginForm() {
                     }}
                     placeholder="••••••••••••"
                     disabled={isLoading}
-                    className="w-full bg-gray-50/70 border border-gray-200 focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 text-gray-900 text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all placeholder:text-gray-400"
+                    className="w-full bg-black/50 border border-emerald-900/60 focus:bg-black/75 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/20 text-white text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none transition-all placeholder:text-gray-500"
                     autoComplete="current-password"
                     required
                   />
                 </div>
               </div>
 
-              {/* Submit Button (matching Image 1 dark button) */}
+              {/* Submit Button */}
               <button
                 id="login-button"
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 bg-[#1b332b] hover:bg-[#142821] active:bg-[#0f1f1a] text-white font-medium py-3 px-4 rounded-xl text-sm transition-all duration-150 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg disabled:opacity-50"
+                className="w-full mt-2 bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 hover:from-emerald-700 hover:to-teal-700 active:from-emerald-900 active:to-teal-900 text-white font-bold py-3 px-4 rounded-xl text-sm transition-all duration-150 flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950/60 border border-emerald-600/40 disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
@@ -266,36 +267,36 @@ function LoginForm() {
             </form>
 
             {/* Quick Demo Switcher */}
-            <div className="mt-5 pt-4 border-t border-gray-100">
-              <p className="text-[11px] uppercase tracking-wider font-semibold text-gray-400 mb-2">
+            <div className="mt-5 pt-4 border-t border-emerald-900/40">
+              <p className="text-[11px] uppercase tracking-wider font-semibold text-emerald-400/70 mb-2 font-mono">
                 All Demo Roles:
               </p>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => fillCredentials('admin', 'AdminPassword123!')}
-                  className="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 text-left transition-colors"
+                  className="px-2.5 py-1.5 bg-black/40 hover:bg-black/60 rounded-lg border border-emerald-900/50 hover:border-emerald-700 text-left transition-colors"
                 >
-                  <div className="font-semibold text-gray-800 text-[11px]">Administrator</div>
-                  <div className="text-gray-400 font-mono text-[9px]">admin</div>
+                  <div className="font-semibold text-gray-200 text-[11px]">Administrator</div>
+                  <div className="text-emerald-400/80 font-mono text-[9px]">admin</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => fillCredentials('jawan_verma', 'PersonnelPassword123!')}
-                  className="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 text-left transition-colors"
+                  className="px-2.5 py-1.5 bg-black/40 hover:bg-black/60 rounded-lg border border-emerald-900/50 hover:border-emerald-700 text-left transition-colors"
                 >
-                  <div className="font-semibold text-gray-800 text-[11px]">Personnel / Jawan</div>
-                  <div className="text-gray-400 font-mono text-[9px]">jawan_verma</div>
+                  <div className="font-semibold text-gray-200 text-[11px]">Personnel / Jawan</div>
+                  <div className="text-emerald-400/80 font-mono text-[9px]">jawan_verma</div>
                 </button>
               </div>
             </div>
           </div>
 
           {/* Prototype Notice */}
-          <div className="mt-6 pt-3 border-t border-gray-100 text-[11px] text-gray-400 leading-snug flex items-start space-x-1.5">
-            <Info className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+          <div className="relative z-10 mt-6 pt-3 border-t border-emerald-900/40 text-[11px] text-emerald-300/60 leading-snug flex items-start space-x-1.5">
+            <Info className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
             <p>
-              <strong className="text-gray-600">Notice:</strong> System uses synthetic dataset for research & demonstration. Decisions are advisory indicators.
+              <strong className="text-emerald-300">Notice:</strong> System uses synthetic dataset for research & demonstration. Decisions are advisory indicators.
             </p>
           </div>
         </div>
