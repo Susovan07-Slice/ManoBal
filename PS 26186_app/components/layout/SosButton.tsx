@@ -1,8 +1,8 @@
 "use client";
 
-import { LifeBuoy, CheckCircle2, AlertTriangle, ShieldAlert, AlertCircle } from 'lucide-react';
+import { HeartPulse, CheckCircle2, AlertTriangle, ShieldAlert, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
-import { ConfirmSheet } from '@/components/ui/ConfirmSheet';
+import { WelfareSupportSheet } from '@/components/screens/WelfareSupportSheet';
 import { cn } from '@/lib/utils';
 import { submitWelfareRequest } from '@/lib/welfare';
 import { useAuth } from '@/lib/AuthContext';
@@ -30,57 +30,21 @@ export default function SosButton() {
     }
   };
 
-  const handleConfirm = async () => {
+  const handleSuccess = () => {
     setConfirmOpen(false);
-    setSubmitting(true);
-    try {
-      await submitWelfareRequest({
-        category: "Emergency SOS Support",
-        urgency: "High",
-        message: "Urgent welfare assistance requested via mobile SOS button.",
-      });
-      setSent(true);
-      setFeedback({
-        type: 'success',
-        title: 'Welfare Request Sent',
-        message: 'Welfare request sent successfully. Transmitted to Commander portal.',
-      });
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('manobal:welfare_created'));
-      }
-      setTimeout(() => {
-        setSent(false);
-        setFeedback(null);
-      }, 5000);
-    } catch (err: any) {
-      console.error("SOS submission failed:", err);
-      setSent(false);
-      const status = err?.status;
-      if (status === 409) {
-        setFeedback({
-          type: 'active',
-          title: 'Request Already Active',
-          message: 'You already have an active welfare request.',
-        });
-      } else if (status === 401 || status === 403) {
-        setFeedback({
-          type: 'unauthorized',
-          title: 'Authorization Required',
-          message: 'You are not authorized to submit this request.',
-        });
-      } else {
-        setFeedback({
-          type: 'error',
-          title: 'Backend Failure',
-          message: 'Unable to send welfare request. Please try again.',
-        });
-      }
-      setTimeout(() => {
-        setFeedback(null);
-      }, 5000);
-    } finally {
-      setSubmitting(false);
+    setSent(true);
+    setFeedback({
+      type: 'success',
+      title: 'Welfare Request Sent',
+      message: 'Welfare request sent successfully. Transmitted to Commander portal.',
+    });
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('manobal:welfare_created'));
     }
+    setTimeout(() => {
+      setSent(false);
+      setFeedback(null);
+    }, 5000);
   };
 
   return (
@@ -89,20 +53,26 @@ export default function SosButton() {
         onClick={handleTrigger}
         disabled={submitting}
         className={cn(
-          "absolute bottom-20 right-4 z-40 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300",
+          "absolute bottom-20 right-4 z-40 rounded-2xl shadow-[0_8px_20px_rgba(0,168,150,0.3)] transition-all duration-300",
           sent 
-            ? "bg-[#1C2530] border-2 border-mb-accent text-mb-accent w-auto px-4 gap-2" 
-            : "bg-red-600/90 text-mb-text-primary hover:bg-red-500 w-14 active:scale-95"
+            ? "bg-white border-2 border-emerald-500 text-emerald-600 h-14 px-4 flex items-center justify-center gap-2" 
+            : "bg-[#00a896] text-white hover:bg-[#00a896]/90 active:scale-95 py-2.5 px-4 flex flex-col items-start"
         )}
-        aria-label={sent ? "SOS Sent" : "SOS"}
+        aria-label={sent ? "Request Sent" : "Welfare Support"}
       >
         {sent ? (
           <>
-            <CheckCircle2 className="w-5 h-5 text-mb-accent" />
-            <span className="font-medium text-sm mr-1 text-teal-300">Alert Sent</span>
+            <CheckCircle2 className="w-5 h-5" />
+            <span className="font-bold text-sm mr-1">Alert Sent</span>
           </>
         ) : (
-          <LifeBuoy className="w-7 h-7" />
+          <div className="flex flex-col items-start leading-tight">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <HeartPulse className="w-4 h-4" />
+              <span className="font-bold text-[13px] tracking-wide">Welfare</span>
+            </div>
+            <span className="font-bold text-[13px] tracking-wide ml-[22px]">Support</span>
+          </div>
         )}
       </button>
 
@@ -140,15 +110,10 @@ export default function SosButton() {
         </div>
       )}
 
-      <ConfirmSheet
-        open={confirmOpen}
-        title="Emergency Welfare Request"
-        message="Are you sure you want to notify the Welfare Officer? An urgent welfare flag will be transmitted to the command dashboard."
-        confirmLabel="Yes, Notify Officer"
-        cancelLabel="Cancel"
-        isDanger={true}
-        onConfirm={handleConfirm}
-        onCancel={() => setConfirmOpen(false)}
+      <WelfareSupportSheet
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onSuccess={handleSuccess}
       />
     </>
   );

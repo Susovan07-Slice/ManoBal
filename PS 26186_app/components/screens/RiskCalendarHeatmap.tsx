@@ -123,19 +123,19 @@ export function RiskCalendarHeatmap({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full bg-mb-glass-strong backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.2)] border border-mb-glass-border flex flex-col gap-4 ${className}`}
+      className={`relative w-full bg-white/85 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-white/60 flex flex-col gap-4 ${className}`}
     >
       {/* Top Header: Title */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
             <Activity className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs sm:text-sm font-bold text-mb-text-primary uppercase tracking-wider">
+            <h3 className="text-xs sm:text-sm font-bold text-gray-800 uppercase tracking-wider">
               Risk Trends Heatmap
             </h3>
-            <span className="text-[10px] text-mb-text-muted font-mono block">
+            <span className="text-[10px] text-gray-500 font-mono block">
               Continuous 0&ndash;100 Risk Intensity
             </span>
           </div>
@@ -151,7 +151,7 @@ export function RiskCalendarHeatmap({
         {/* Range & Navigation Controls */}
         <div className="flex items-center gap-1.5">
           {/* Duration Pills */}
-          <div className="flex items-center bg-black/25 p-0.5 rounded-xl border border-mb-glass-border text-[11px] font-medium">
+          <div className="flex items-center bg-gray-100 p-0.5 rounded-xl border border-gray-200 text-[11px] font-medium">
             <button
               type="button"
               onClick={() => {
@@ -160,8 +160,8 @@ export function RiskCalendarHeatmap({
               }}
               className={`px-2 py-0.5 rounded-lg transition-all ${
                 weeksCount === 52
-                  ? 'bg-mb-accent text-mb-text-dark font-bold shadow'
-                  : 'text-mb-text-secondary hover:text-white'
+                  ? 'bg-white text-mb-text-primary font-bold shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'
               }`}
             >
               12 Mo
@@ -174,8 +174,8 @@ export function RiskCalendarHeatmap({
               }}
               className={`px-2 py-0.5 rounded-lg transition-all ${
                 weeksCount === 26
-                  ? 'bg-mb-accent text-mb-text-dark font-bold shadow'
-                  : 'text-mb-text-secondary hover:text-white'
+                  ? 'bg-white text-mb-text-primary font-bold shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'
               }`}
             >
               6 Mo
@@ -188,8 +188,8 @@ export function RiskCalendarHeatmap({
               }}
               className={`px-2 py-0.5 rounded-lg transition-all ${
                 weeksCount === 13
-                  ? 'bg-mb-accent text-mb-text-dark font-bold shadow'
-                  : 'text-mb-text-secondary hover:text-white'
+                  ? 'bg-white text-mb-text-primary font-bold shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'
               }`}
             >
               3 Mo
@@ -201,7 +201,7 @@ export function RiskCalendarHeatmap({
             <button
               type="button"
               onClick={() => setPeriodOffset((prev) => prev + 1)}
-              className="p-1.5 rounded-lg bg-black/20 hover:bg-black/40 text-mb-text-secondary hover:text-white border border-mb-glass-border transition"
+              className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 border border-gray-200 transition"
               title="Previous period"
               aria-label="Previous historical period"
             >
@@ -211,7 +211,7 @@ export function RiskCalendarHeatmap({
               <button
                 type="button"
                 onClick={() => setPeriodOffset(0)}
-                className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition"
+                className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition"
               >
                 Today
               </button>
@@ -220,10 +220,10 @@ export function RiskCalendarHeatmap({
               type="button"
               onClick={() => setPeriodOffset((prev) => Math.max(0, prev - 1))}
               disabled={periodOffset === 0}
-              className={`p-1.5 rounded-lg border border-mb-glass-border transition ${
+              className={`p-1.5 rounded-lg border border-gray-200 transition ${
                 periodOffset === 0
-                  ? 'opacity-30 cursor-not-allowed bg-black/10 text-mb-text-muted'
-                  : 'bg-black/20 hover:bg-black/40 text-mb-text-secondary hover:text-white'
+                  ? 'opacity-50 cursor-not-allowed bg-gray-50 text-gray-400'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800'
               }`}
               title="Next period"
               aria-label="Next historical period"
@@ -235,9 +235,9 @@ export function RiskCalendarHeatmap({
       </div>
 
       {/* Summary KPI Strip */}
-      <div className="grid grid-cols-3 gap-2 py-2 px-3 bg-black/25 rounded-2xl border border-mb-glass-border/60 text-xs">
+      <div className="grid grid-cols-3 gap-2 py-2 px-3 bg-gray-50 rounded-2xl border border-gray-100 text-xs">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500 block">
             Days Tracked
           </span>
           <span className="text-sm font-semibold text-mb-text-primary">
@@ -246,7 +246,7 @@ export function RiskCalendarHeatmap({
           </span>
         </div>
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500 block">
             Avg Risk
           </span>
           <span className="text-sm font-semibold text-mb-text-primary">
@@ -254,7 +254,7 @@ export function RiskCalendarHeatmap({
           </span>
         </div>
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted block">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500 block">
             Peak Risk
           </span>
           <span className="text-sm font-semibold text-mb-text-primary">
@@ -311,12 +311,12 @@ export function RiskCalendarHeatmap({
                     const isFuture = day.isFuture;
 
                     // Color determination
-                    let cellBg = 'rgba(255, 255, 255, 0.08)'; // Neutral for No Data
-                    let cellBorder = 'rgba(255, 255, 255, 0.10)';
+                    let cellBg = 'rgba(0, 0, 0, 0.05)'; // Neutral for No Data
+                    let cellBorder = 'rgba(0, 0, 0, 0.10)';
 
                     if (isFuture) {
                       cellBg = 'transparent';
-                      cellBorder = 'rgba(255, 255, 255, 0.04)';
+                      cellBorder = 'rgba(0, 0, 0, 0.08)';
                     } else if (hasData && day.riskScore !== undefined) {
                       cellBg = getRiskColor(day.riskScore);
                       cellBorder = cellBg;
@@ -347,10 +347,10 @@ export function RiskCalendarHeatmap({
                         className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-[3px] border transition-transform duration-150 focus:outline-none ${
                           isFuture
                             ? 'cursor-default opacity-20 border-dashed'
-                            : 'cursor-pointer hover:scale-125 hover:z-20 hover:shadow-md hover:ring-1 hover:ring-white/60'
+                            : 'cursor-pointer hover:scale-125 hover:z-20 hover:shadow-md hover:ring-1 hover:ring-gray-400'
                         } ${
                           isSelected
-                            ? 'ring-2 ring-white scale-125 z-20 shadow-lg'
+                            ? 'ring-2 ring-gray-800 scale-125 z-20 shadow-lg'
                             : ''
                         }`}
                       />
@@ -413,18 +413,18 @@ export function RiskCalendarHeatmap({
 
       {/* Selected Day Expanded Detail Card (Tap / Click View) */}
       {selectedDay && (
-        <div className="p-4 bg-black/40 backdrop-blur-lg rounded-2xl border border-mb-glass-border animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="p-4 bg-gray-50 backdrop-blur-lg rounded-2xl border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4 text-mb-accent" />
-              <span className="text-xs font-bold text-mb-text-primary">
+              <span className="text-xs font-bold text-gray-800">
                 {formatDateLabel(selectedDay.date)}
               </span>
             </div>
             <button
               type="button"
               onClick={() => setSelectedDay(null)}
-              className="p-1 text-mb-text-secondary hover:text-white rounded-lg transition"
+              className="p-1 text-gray-500 hover:text-gray-800 rounded-lg transition"
               title="Close details"
               aria-label="Close details"
             >
@@ -436,7 +436,7 @@ export function RiskCalendarHeatmap({
             <div className="pt-3 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-mb-text-muted block">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500 block">
                     Calculated Risk Score
                   </span>
                   <div className="flex items-baseline gap-2 mt-0.5">
@@ -511,8 +511,8 @@ export function RiskCalendarHeatmap({
         <div className="flex items-center gap-2">
           <div
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              borderColor: 'rgba(255, 255, 255, 0.10)',
+              backgroundColor: 'rgba(0, 0, 0, 0.05)',
+              borderColor: 'rgba(0, 0, 0, 0.10)',
             }}
             className="w-3.5 h-3.5 rounded-[3px] border"
           />
