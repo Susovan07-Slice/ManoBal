@@ -28,8 +28,8 @@ export default function Sidebar() {
   return (
     <aside className="w-64 border-r border-surfaceBorder bg-surface flex flex-col h-full shrink-0">
         <div className="h-20 flex items-center px-6 border-b border-surfaceBorder">
-          <div className="w-12 h-12 flex items-center justify-center mr-4 shrink-0">
-            <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain drop-shadow-sm" />
+          <div className="w-16 h-16 flex items-center justify-center mr-4 shrink-0 overflow-hidden rounded-full">
+            <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-cover scale-110 drop-shadow-sm" />
           </div>
           <div>
             <h1 className="font-bold text-textPrimary tracking-wider uppercase text-sm leading-tight">

@@ -62,8 +62,8 @@ export default function MobileLoginPage() {
     >
       {/* Logo & Branding */}
       <div className="flex flex-col items-center mb-8 animate-fade-up">
-        <div className="w-28 h-28 mb-5 rounded-full bg-white shadow-[0_10px_30px_rgba(31,110,140,0.15)] border-2 border-white flex items-center justify-center p-3">
-          <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain" />
+        <div className="w-28 h-28 mb-5 rounded-full bg-white shadow-[0_10px_30px_rgba(31,110,140,0.15)] border-2 border-white flex items-center justify-center overflow-hidden">
+          <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-cover scale-110" />
         </div>
         <h1 className="text-[28px] font-bold text-ink tracking-tight">ManoBal</h1>
         <p className="eyebrow mt-2">

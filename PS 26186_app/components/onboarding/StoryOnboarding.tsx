@@ -305,12 +305,12 @@ export function StoryOnboarding() {
 
                   {/* Slide 1 Hero */}
                   {i === 0 && (
-                    <div className="relative w-48 h-48 flex items-center justify-center">
+                    <div className="relative w-56 h-56 flex items-center justify-center">
                       <div className="absolute inset-0 rounded-full border border-white/40 scale-150" />
                       <div className="absolute inset-0 rounded-full border border-white/50 scale-125" />
-                      <div className={`w-full h-full bg-white/90 rounded-full shadow-[0_0_40px_rgba(255,255,255,0.8)] flex items-center justify-center border-4 border-white ${isActive && !reducedMotion ? 'animate-pulse' : ''}`}>
-                        <div className="w-24 h-24 relative opacity-90">
-                          <Image src="/logo.png" alt="ManoBal Logo" fill className="object-contain" priority onError={(e) => (e.currentTarget.style.display='none')} />
+                      <div className={`w-full h-full bg-white/90 rounded-full shadow-[0_0_40px_rgba(255,255,255,0.8)] flex items-center justify-center border-4 border-white overflow-hidden ${isActive && !reducedMotion ? 'animate-pulse' : ''}`}>
+                        <div className="w-full h-full relative opacity-100 flex items-center justify-center">
+                          <Image src="/logo.png" alt="ManoBal Logo" fill className="object-cover scale-110" priority onError={(e) => (e.currentTarget.style.display='none')} />
                         </div>
                       </div>
                     </div>
