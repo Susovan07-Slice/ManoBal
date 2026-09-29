@@ -39,7 +39,9 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Bell,
 } from 'lucide-react';
+import SendWelfareNotificationModal from '@/components/dashboard/SendWelfareNotificationModal';
 
 export default function PersonnelDetailPage() {
   const params = useParams();
@@ -56,6 +58,7 @@ export default function PersonnelDetailPage() {
   const [updatingRecId, setUpdatingRecId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showOverrideModal, setShowOverrideModal] = useState(false);
+  const [showNotifyModal, setShowNotifyModal] = useState(false);
 
   // Override modal telemetry form state
   const [overrideTelemetry, setOverrideTelemetry] = useState<AssessmentOverride>({
@@ -180,6 +183,13 @@ export default function PersonnelDetailPage() {
           </div>
 
           <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowNotifyModal(true)}
+              className="flex items-center space-x-1.5 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded text-xs font-semibold transition-colors shadow-sm"
+            >
+              <Bell className="w-3.5 h-3.5" />
+              <span>Notify Personnel</span>
+            </button>
             <button
               onClick={() => setShowOverrideModal(true)}
               className="flex items-center space-x-1.5 px-3 py-2 bg-surfaceHighlight hover:bg-surfaceHighlight/80 text-textPrimary rounded text-xs font-medium transition-colors border border-surfaceHighlight"
@@ -769,6 +779,18 @@ export default function PersonnelDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Phase 47: Send Welfare Notification Modal */}
+      <SendWelfareNotificationModal
+        isOpen={showNotifyModal}
+        onClose={() => setShowNotifyModal(false)}
+        personnelId={personnel.id}
+        personnelCode={personnel.personnel_code}
+        personnelName={personnel.name}
+        battalion={personnel.battalion}
+        sourceType="COMMANDER_ACTION"
+        sourceId={latestAssessment ? latestAssessment.id : undefined}
+      />
     </DashboardLayout>
   );
 }

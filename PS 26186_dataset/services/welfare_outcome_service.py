@@ -537,6 +537,13 @@ class WelfareOutcomeService:
         )
         db.commit()
         db.refresh(followup)
+
+        try:
+            from services.welfare_notification_service import WelfareNotificationService
+            WelfareNotificationService.notify_on_followup_scheduled(db, followup, user)
+        except Exception as e:
+            logger.warning(f"Could not dispatch automated notification for scheduled followup #{followup.id}: {e}")
+
         return followup
 
     @classmethod

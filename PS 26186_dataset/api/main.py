@@ -28,6 +28,7 @@ from api.routes.anomalies import router as anomalies_router
 from api.routes.recommendations import router as recommendations_router
 from api.routes.followups import router as followups_router
 from api.routes.cases import router as cases_router
+from api.routes.notifications import router as notifications_router
 from schemas.prediction import PredictionRequest, PredictionResponse
 
 
@@ -130,6 +131,7 @@ app.include_router(anomalies_router, prefix="/api")
 app.include_router(recommendations_router, prefix="/api")
 app.include_router(followups_router, prefix="/api")
 app.include_router(cases_router, prefix="/api")
+app.include_router(notifications_router, prefix="/api")
 
 # Also mount modular routers at root prefix for direct access
 app.include_router(prediction_router, prefix="")
@@ -147,6 +149,7 @@ app.include_router(anomalies_router, prefix="")
 app.include_router(recommendations_router, prefix="")
 app.include_router(followups_router, prefix="")
 app.include_router(cases_router, prefix="")
+app.include_router(notifications_router, prefix="")
 
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)

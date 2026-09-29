@@ -36,5 +36,6 @@ class Personnel(Base):
     wearable_telemetry = relationship("WearableTelemetry", back_populates="personnel", cascade="all, delete-orphan")
     followups = relationship("WelfareFollowup", back_populates="personnel", cascade="all, delete-orphan")
     cases = relationship("WelfareCase", back_populates="personnel", cascade="all, delete-orphan")
+    notifications = relationship("WelfareNotification", back_populates="recipient", cascade="all, delete-orphan")
 
 

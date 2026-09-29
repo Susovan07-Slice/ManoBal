@@ -9,6 +9,7 @@ from db.models.alert import WelfareAlert, WelfareIntervention, WelfareAlertAudit
 from db.models.anomaly import WelfareAnomaly
 from db.models.welfare_followup import WelfareFollowup, WelfareFollowupAudit
 from db.models.welfare_case import WelfareCase, WelfareCaseReview, WelfareCaseNote, WelfareCaseAudit
+from db.models.welfare_notification import WelfareNotification, WelfareNotificationAudit
 
 __all__ = [
     "User",
@@ -28,5 +29,7 @@ __all__ = [
     "WelfareCaseReview",
     "WelfareCaseNote",
     "WelfareCaseAudit",
+    "WelfareNotification",
+    "WelfareNotificationAudit",
 ]
 
