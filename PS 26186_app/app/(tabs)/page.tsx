@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 export default function HomeRoute() {
   const { user } = useAuth();
   const router = useRouter();
+  const personnelId = user?.personnel_id ?? null;
 
   const [trend, setTrend] = useState<PersonalTrend | null>(null);
   const [latestAssessment, setLatestAssessment] = useState<StressAssessmentOut | null>(null);
@@ -29,14 +30,14 @@ export default function HomeRoute() {
     setError(null);
 
     try {
-      if (user?.personnel_id) {
+      if (personnelId) {
         // Fetch server-authoritative 24-hour schedule status, assessment history & welfare requests
         const [statusRes, historyRes, welfareRes] = await Promise.all([
-          getAssessmentScheduleStatus(user.personnel_id).catch((err) => {
+          getAssessmentScheduleStatus(personnelId).catch((err) => {
             console.warn("Could not retrieve schedule status:", err);
             return null;
           }),
-          getAssessmentHistory(user.personnel_id).catch((err) => {
+          getAssessmentHistory(personnelId).catch((err) => {
             console.warn("Could not retrieve assessment history:", err);
             return [];
           }),
@@ -60,15 +61,11 @@ export default function HomeRoute() {
         setTrend(computed);
 
         // Server-backed 24-hour assessment rule (Sections 6, 7, 8, 9, 10)
-        // Case 1: No previous assessment exists -> assessment_due = true -> auto-open
-        // Case 2: Age < 24 hours -> assessment_due = false -> do NOT auto-open
-        // Case 3: Age >= 24 hours -> assessment_due = true -> auto-open
         if (statusRes && statusRes.assessment_due && !autoRedirectedRef.current) {
-          // Check if user already dismissed or navigated in this session
-          const sessionDismissed = sessionStorage.getItem(`assessment_dismissed_${user.personnel_id}`);
+          const sessionDismissed = sessionStorage.getItem(`assessment_dismissed_${personnelId}`);
           if (!sessionDismissed) {
             autoRedirectedRef.current = true;
-            sessionStorage.setItem(`assessment_dismissed_${user.personnel_id}`, 'true');
+            sessionStorage.setItem(`assessment_dismissed_${personnelId}`, 'true');
             router.push(
               !statusRes.has_assessment
                 ? "/assessment?reason=initial"
@@ -99,7 +96,7 @@ export default function HomeRoute() {
     } finally {
       setLoading(false);
     }
-  }, [user, router]);
+  }, [personnelId, router]);
 
   useEffect(() => {
     loadHomeData();
@@ -119,12 +116,21 @@ export default function HomeRoute() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center">
-        <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-mb-text-secondary">Synchronizing Health Telemetry...</p>
-        <span className="text-xs text-mb-text-muted font-mono mt-1">
-          Evaluating 24-hour schedule status & LightGBM history
-        </span>
+      <div className="flex flex-col gap-6 pb-32 px-4 max-w-[420px] mx-auto w-full pt-6 animate-pulse">
+        {/* Skeleton greeting */}
+        <div className="h-8 w-48 bg-white/15 rounded-xl" />
+        {/* Skeleton hero card */}
+        <div className="h-56 bg-white/10 rounded-3xl" />
+        {/* Skeleton metrics row */}
+        <div className="grid grid-cols-3 gap-2.5">
+          <div className="h-20 bg-white/10 rounded-2xl" />
+          <div className="h-20 bg-white/10 rounded-2xl" />
+          <div className="h-20 bg-white/10 rounded-2xl" />
+        </div>
+        {/* Skeleton chart */}
+        <div className="h-[220px] bg-white/10 rounded-2xl" />
+        {/* Skeleton assessment card */}
+        <div className="h-32 bg-white/10 rounded-2xl" />
       </div>
     );
   }

@@ -6,7 +6,7 @@ import { HighRiskPersonnelItem, WelfareRequestOut } from '@/types/api';
 import { useAuth } from '@/lib/AuthContext';
 import AlertDetailDrawer from './AlertDetailDrawer';
 import JawanRequestDrawer from './JawanRequestDrawer';
-import { AlertCircle, LifeBuoy, ArrowRight, ShieldCheck, Clock } from 'lucide-react';
+import { AlertCircle, LifeBuoy, ArrowRight, ShieldCheck, Clock, Activity } from 'lucide-react';
 
 interface UrgentTriageQueueProps {
   highRiskAlerts: HighRiskPersonnelItem[];
@@ -24,12 +24,44 @@ export default function UrgentTriageQueue({
   const { role } = useAuth();
   const [selectedAlert, setSelectedAlert] = useState<HighRiskPersonnelItem | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<WelfareRequestOut | null>(null);
+  const [localRequests, setLocalRequests] = useState<WelfareRequestOut[]>(welfareRequests);
 
-  const pendingRequests = welfareRequests.filter((r) => r.status === 'pending');
-  const criticalAlerts = highRiskAlerts.filter((a) => a.latest_risk_score >= 70);
+  React.useEffect(() => {
+    setLocalRequests(welfareRequests);
+  }, [welfareRequests]);
 
-  // Combine top urgent items (up to 4 total)
-  const totalUrgent = pendingRequests.length + criticalAlerts.length;
+  // Active / unresolved requests: only unresolved items remain in the queue
+  const activeRequests = localRequests.filter((r) => r.status !== 'resolved');
+  const criticalAlerts = highRiskAlerts.filter((a) => (a.risk_score ?? a.latest_risk_score ?? 0) >= 70);
+
+  // Prioritize active requests by urgency (High > Medium > Routine), then review stage, then recency
+  const urgencyWeight: Record<string, number> = { High: 3, Medium: 2, Routine: 1 };
+  const stageWeight: Record<string, number> = { pending: 3, acknowledged: 2, in_progress: 1 };
+  const sortedActiveRequests = [...activeRequests].sort((a, b) => {
+    const uDiff = (urgencyWeight[b.urgency] || 0) - (urgencyWeight[a.urgency] || 0);
+    if (uDiff !== 0) return uDiff;
+    const sDiff = (stageWeight[b.status] || 0) - (stageWeight[a.status] || 0);
+    if (sDiff !== 0) return sDiff;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const totalUrgent = activeRequests.length + criticalAlerts.length;
+
+  const handleRequestStatusUpdated = (updated: WelfareRequestOut) => {
+    if (updated.status === 'resolved') {
+      // Instantly remove resolved request from queue tab
+      setLocalRequests((prev) => prev.filter((r) => r.id !== updated.id));
+      if (selectedRequest?.id === updated.id) {
+        setSelectedRequest(null);
+      }
+    } else {
+      // Immediately reflect current review status in the queue tab (e.g. acknowledged or in_progress)
+      setLocalRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      if (selectedRequest?.id === updated.id) {
+        setSelectedRequest(updated);
+      }
+    }
+  };
 
   return (
     <div className="bg-surface border border-surfaceBorder rounded-2xl p-5 shadow-card flex flex-col justify-between h-full">
@@ -73,32 +105,91 @@ export default function UrgentTriageQueue({
           </div>
         ) : (
           <div className="space-y-2.5">
-            {/* Show top pending Jawan welfare requests */}
-            {pendingRequests.slice(0, 2).map((req) => (
+            {/* Show top active (unresolved) Jawan welfare requests */}
+            {sortedActiveRequests.slice(0, 2).map((req) => (
               <div
                 key={`req-${req.id}`}
                 className="p-3 bg-surfaceHighlight/40 hover:bg-surfaceHighlight/70 border border-surfaceBorder rounded-xl flex items-center justify-between transition-colors"
               >
                 <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
-                    <LifeBuoy className="w-3.5 h-3.5 text-amber-600" />
+                  <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
+                    req.status === 'acknowledged'
+                      ? 'bg-sky-500/10 border-sky-500/25 text-sky-400'
+                      : req.status === 'in_progress'
+                      ? 'bg-purple-500/10 border-purple-500/25 text-purple-400'
+                      : 'bg-amber-500/10 border-amber-500/25 text-amber-500'
+                  }`}>
+                    {req.status === 'acknowledged' ? (
+                      <Clock className="w-4 h-4 text-sky-400" />
+                    ) : req.status === 'in_progress' ? (
+                      <Activity className="w-4 h-4 text-purple-400" />
+                    ) : (
+                      <LifeBuoy className="w-4 h-4 text-amber-500" />
+                    )}
                   </div>
                   <div className="truncate">
                     <div className="flex items-center space-x-2">
                       <span className="font-bold text-xs text-textPrimary truncate">{req.personnel_name}</span>
-                      <span className="font-mono text-[10px] text-textSecondary">{req.personnel_code}</span>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-alert-roseBg text-alert-roseText font-semibold">
+                      <span className="font-mono text-[10px] text-textSecondary px-1.5 py-0.5 rounded bg-surface border border-surfaceBorder">
+                        {req.personnel_code}
+                      </span>
+                      {/* Urgency Badge */}
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${
+                          req.urgency === 'High'
+                            ? 'bg-rose-500/15 text-rose-500 border-rose-500/30'
+                            : req.urgency === 'Medium'
+                            ? 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                            : 'bg-blue-500/15 text-blue-500 border-blue-500/30'
+                        }`}
+                      >
                         {req.urgency}
                       </span>
+                      {/* Review Status Badge */}
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border flex items-center gap-1 ${
+                          req.status === 'acknowledged'
+                            ? 'bg-sky-500/15 text-sky-400 border-sky-500/30'
+                            : req.status === 'in_progress'
+                            ? 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+                            : 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                        }`}
+                      >
+                        {req.status === 'acknowledged' ? (
+                          <>
+                            <Clock className="w-3 h-3 text-sky-400" />
+                            <span>Acknowledged</span>
+                          </>
+                        ) : req.status === 'in_progress' ? (
+                          <>
+                            <Activity className="w-3 h-3 text-purple-400" />
+                            <span>In Progress</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="w-3 h-3 text-amber-500" />
+                            <span>Pending Review</span>
+                          </>
+                        )}
+                      </span>
                     </div>
-                    <p className="text-[11px] text-textSecondary truncate mt-0.5">{req.subject}</p>
+                    <p className="text-[11px] text-textSecondary truncate mt-0.5">
+                      <span className="font-medium text-textPrimary/90">{req.category}</span>
+                      {req.message ? ` — "${req.message}"` : ''}
+                    </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedRequest(req)}
-                  className="px-2.5 py-1 bg-surface hover:bg-accent hover:text-white border border-surfaceBorder rounded-lg text-xs font-medium text-textPrimary transition-colors shrink-0 ml-3"
+                  className={`px-3 py-1 border rounded-lg text-xs font-semibold transition-colors shrink-0 ml-3 shadow-sm ${
+                    req.status === 'acknowledged'
+                      ? 'bg-sky-500/10 text-sky-400 border-sky-500/30 hover:bg-sky-500 hover:text-white'
+                      : req.status === 'in_progress'
+                      ? 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500 hover:text-white'
+                      : 'bg-surface hover:bg-accent hover:text-white border-surfaceBorder text-textPrimary'
+                  }`}
                 >
-                  Review
+                  {req.status === 'acknowledged' ? 'Action' : req.status === 'in_progress' ? 'Resolve' : 'Review'}
                 </button>
               </div>
             ))}
@@ -110,15 +201,17 @@ export default function UrgentTriageQueue({
                 className="p-3 bg-alert-roseBg/40 hover:bg-alert-roseBg/60 border border-alert-roseBorder/60 rounded-xl flex items-center justify-between transition-colors"
               >
                 <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-alert-roseBg border border-alert-roseBorder flex items-center justify-center shrink-0">
-                    <Clock className="w-3.5 h-3.5 text-alert-rose" />
+                  <div className="w-8 h-8 rounded-lg bg-alert-roseBg border border-alert-roseBorder flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4 text-alert-rose" />
                   </div>
                   <div className="truncate">
                     <div className="flex items-center space-x-2">
                       <span className="font-bold text-xs text-textPrimary truncate">{alert.personnel_name}</span>
-                      <span className="font-mono text-[10px] text-textSecondary">{alert.personnel_code}</span>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-alert-roseBg text-alert-roseText font-semibold">
-                        Score {alert.latest_risk_score}/100
+                      <span className="font-mono text-[10px] text-textSecondary px-1.5 py-0.5 rounded bg-surface border border-surfaceBorder">
+                        {alert.personnel_code}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/15 text-rose-500 border border-rose-500/30 font-bold uppercase tracking-wider">
+                        Score {alert.risk_score ?? alert.latest_risk_score ?? 0}/100
                       </span>
                     </div>
                     <p className="text-[11px] text-textSecondary truncate mt-0.5">
@@ -128,7 +221,7 @@ export default function UrgentTriageQueue({
                 </div>
                 <button
                   onClick={() => setSelectedAlert(alert)}
-                  className="px-2.5 py-1 bg-surface hover:bg-alert-rose hover:text-white border border-surfaceBorder rounded-lg text-xs font-medium text-textPrimary transition-colors shrink-0 ml-3"
+                  className="px-3 py-1 bg-surface hover:bg-alert-rose hover:text-white border border-surfaceBorder rounded-lg text-xs font-semibold text-textPrimary transition-colors shrink-0 ml-3 shadow-sm"
                 >
                   Inspect
                 </button>
@@ -167,6 +260,7 @@ export default function UrgentTriageQueue({
           role={role || 'officer'}
           onClose={() => setSelectedRequest(null)}
           onRefresh={onRefresh}
+          onStatusUpdated={handleRequestStatusUpdated}
         />
       )}
     </div>
