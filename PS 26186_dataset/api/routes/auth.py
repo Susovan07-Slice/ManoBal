@@ -14,7 +14,9 @@ from schemas.auth import (
     JawanSignup,
     UserLogin,
     Token,
-    UserOut
+    UserOut,
+    ChangePassword,
+    ChangeBattalion
 )
 from api.deps import get_current_user, require_roles
 
@@ -384,3 +386,58 @@ def get_me(current_user: User = Depends(get_current_user)):
     Returns the currently authenticated user's profile, RBAC role, and organizational scope.
     """
     return current_user
+
+@router.post(
+    "/change-password",
+    summary="Change account password"
+)
+def change_password(payload: ChangePassword, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if not verify_password(payload.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect old password.")
+    current_user.hashed_password = hash_password(payload.new_password)
+    db.commit()
+    return {"message": "Password updated successfully"}
+
+@router.post(
+    "/change-battalion",
+    summary="Change personnel battalion and location"
+)
+def change_battalion(payload: ChangeBattalion, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        clean_battalion = validate_battalion(payload.battalion)
+        clean_location = validate_location(payload.location)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    current_user.battalion = clean_battalion
+    current_user.location = clean_location
+    
+    if current_user.personnel_id:
+        personnel = db.query(Personnel).filter(Personnel.id == current_user.personnel_id).first()
+        if personnel:
+            personnel.battalion = clean_battalion
+            personnel.location = clean_location
+    
+    db.commit()
+    
+    access_token = create_access_token(
+        data={
+            "sub": current_user.username,
+            "role": current_user.role,
+            "personnel_id": current_user.personnel_id,
+            "battalion": current_user.battalion,
+            "location": current_user.location
+        }
+    )
+    return {
+        "message": "Battalion updated successfully",
+        "token": Token(
+            access_token=access_token,
+            token_type="bearer",
+            role=current_user.role,
+            username=current_user.username,
+            personnel_id=current_user.personnel_id,
+            battalion=current_user.battalion,
+            location=current_user.location
+        ).dict()
+    }

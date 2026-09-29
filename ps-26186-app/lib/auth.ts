@@ -53,3 +53,24 @@ export function logout(): void {
 export function isAuthenticated(): boolean {
   return !!getStoredToken();
 }
+
+
+export async function changePassword(oldPassword: string, newPassword: string): Promise<void> {
+  await apiClient('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+    requiresAuth: true,
+  });
+}
+
+export async function changeBattalion(battalion: string, location: string): Promise<any> {
+  const res = await apiClient<{token: Token}>('/auth/change-battalion', {
+    method: 'POST',
+    body: JSON.stringify({ battalion, location }),
+    requiresAuth: true,
+  });
+  if (res.token && res.token.access_token) {
+    setStoredToken(res.token.access_token);
+  }
+  return res;
+}

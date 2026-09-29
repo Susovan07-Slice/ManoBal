@@ -2,11 +2,46 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
-import { LogOut, Key, MapPin, ChevronRight, ShieldCheck, User as UserIcon } from "lucide-react";
+import { changePassword, changeBattalion } from "@/lib/auth";
+import { LogOut, Key, MapPin, ChevronRight, ShieldCheck, User as UserIcon, X } from "lucide-react";
 
 export default function AccountRoute() {
   const { user, logout } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordStatus, setPasswordStatus] = useState<{type: 'error' | 'success', msg: string} | null>(null);
+
+  const [showBattalionModal, setShowBattalionModal] = useState(false);
+  const [battalion, setBattalion] = useState(user?.battalion || "7th Battalion");
+  const [location, setLocation] = useState(user?.location || "Srinagar");
+  const [battalionStatus, setBattalionStatus] = useState<{type: 'error' | 'success', msg: string} | null>(null);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordStatus(null);
+    try {
+      await changePassword(oldPassword, newPassword);
+      setPasswordStatus({ type: 'success', msg: 'Password updated successfully!' });
+      setTimeout(() => setShowPasswordModal(false), 2000);
+    } catch (err: any) {
+      setPasswordStatus({ type: 'error', msg: err.message || 'Failed to update password.' });
+    }
+  };
+
+  const handleBattalionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBattalionStatus(null);
+    try {
+      await changeBattalion(battalion, location);
+      setBattalionStatus({ type: 'success', msg: 'Battalion updated successfully! Please refresh.' });
+      setTimeout(() => setShowBattalionModal(false), 2000);
+    } catch (err: any) {
+      setBattalionStatus({ type: 'error', msg: err.message || 'Failed to update battalion.' });
+    }
+  };
 
   return (
     <div className="p-4 flex flex-col gap-6 pb-44 min-w-0 animate-fade-up">
@@ -36,7 +71,12 @@ export default function AccountRoute() {
           {/* Change Password */}
           <button 
             className="w-full flex items-center justify-between p-5 border-b border-sky-50 hover:bg-sky-50/50 transition-colors"
-            onClick={() => alert("Change Password flow would open here")}
+            onClick={() => {
+              setPasswordStatus(null);
+              setOldPassword("");
+              setNewPassword("");
+              setShowPasswordModal(true);
+            }}
           >
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-500">
@@ -53,7 +93,12 @@ export default function AccountRoute() {
           {/* Change Battalion */}
           <button 
             className="w-full flex items-center justify-between p-5 border-b border-sky-50 hover:bg-sky-50/50 transition-colors"
-            onClick={() => alert("Change Battalion flow would open here")}
+            onClick={() => {
+              setBattalionStatus(null);
+              setBattalion(user?.battalion || "7th Battalion");
+              setLocation(user?.location || "Srinagar");
+              setShowBattalionModal(true);
+            }}
           >
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-500">
@@ -83,9 +128,80 @@ export default function AccountRoute() {
             </div>
             <ChevronRight className="w-5 h-5 text-alert/50" />
           </button>
-
         </div>
       </div>
+
+      {/* Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-6 animate-fade-in pointer-events-auto">
+          <div className="bg-white rounded-[24px] p-6 w-full max-w-[320px] shadow-2xl animate-fade-up">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-[18px] font-bold text-ink">Change Password</h3>
+              <button onClick={() => setShowPasswordModal(false)} className="text-ink-3 hover:text-ink">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {passwordStatus && (
+              <div className={`mb-4 p-3 rounded-xl text-[12px] ${passwordStatus.type === 'error' ? 'bg-alert-bg text-alert border-alert/30' : 'bg-ok-bg text-ok border-ok/30'} border`}>
+                {passwordStatus.msg}
+              </div>
+            )}
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">Old Password</label>
+                <input type="password" value={oldPassword} onChange={e => setOldPassword(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-brand-500" />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">New Password</label>
+                <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} className="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-brand-500" />
+              </div>
+              <button type="submit" className="w-full py-3 mt-2 rounded-xl font-bold text-[13px] text-white bg-brand-500 hover:bg-brand-600 transition-colors">
+                Update Password
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Battalion Modal */}
+      {showBattalionModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-6 animate-fade-in pointer-events-auto">
+          <div className="bg-white rounded-[24px] p-6 w-full max-w-[320px] shadow-2xl animate-fade-up">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-[18px] font-bold text-ink">Change Battalion</h3>
+              <button onClick={() => setShowBattalionModal(false)} className="text-ink-3 hover:text-ink">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {battalionStatus && (
+              <div className={`mb-4 p-3 rounded-xl text-[12px] ${battalionStatus.type === 'error' ? 'bg-alert-bg text-alert border-alert/30' : 'bg-ok-bg text-ok border-ok/30'} border`}>
+                {battalionStatus.msg}
+              </div>
+            )}
+            <form onSubmit={handleBattalionSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">Battalion</label>
+                <select value={battalion} onChange={e => setBattalion(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-brand-500">
+                  <option value="7th Battalion">7th Battalion</option>
+                  <option value="12th Battalion">12th Battalion</option>
+                  <option value="Command HQ">Command HQ</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">Location</label>
+                <select value={location} onChange={e => setLocation(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-brand-500">
+                  <option value="Srinagar">Srinagar</option>
+                  <option value="Jammu">Jammu</option>
+                  <option value="Leh">Leh</option>
+                </select>
+              </div>
+              <button type="submit" className="w-full py-3 mt-2 rounded-xl font-bold text-[13px] text-white bg-brand-500 hover:bg-brand-600 transition-colors">
+                Update Assignment
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-6 animate-fade-in pointer-events-auto">

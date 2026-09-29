@@ -58,3 +58,11 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ChangePassword(BaseModel):
+    old_password: str
+    new_password: str = Field(..., min_length=6, max_length=128)
+
+class ChangeBattalion(BaseModel):
+    battalion: str = Field(..., min_length=2, max_length=64)
+    location: str = Field(..., min_length=2, max_length=64)
