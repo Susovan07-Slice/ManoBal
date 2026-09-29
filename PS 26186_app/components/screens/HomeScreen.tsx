@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PersonalTrend } from "@/types/trends";
 import { StressAssessmentOut, AssessmentScheduleStatus, WelfareRequestOut } from "@/types/api";
 import { WelfareSupportSheet } from "./WelfareSupportSheet";
 import { TrendChart } from "./TrendChart";
 import { StressEmojiScale } from "@/components/ui/StressEmojiScale";
 import Link from "next/link";
-import { Activity, ArrowRight, CheckCircle2, Briefcase, Moon, FileText } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, Briefcase, Moon, FileText, Bell } from "lucide-react";
+import { getUnreadCount } from "@/lib/notifications";
 
 export function HomeScreen({
   scheduleStatus,
@@ -25,6 +26,43 @@ export function HomeScreen({
   onRefresh?: () => void;
 }) {
   const [showSupportSheet, setShowSupportSheet] = useState(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUnread = async () => {
+      try {
+        const count = await getUnreadCount();
+        if (isMounted) setUnreadCount(count);
+      } catch {
+        // silent
+      }
+    };
+    fetchUnread();
+
+    const handleCountUpdate = (e: any) => {
+      if (typeof e.detail?.unreadCount === 'number' && isMounted) {
+        setUnreadCount(e.detail.unreadCount);
+      }
+    };
+
+    const handleRefresh = () => {
+      if (isMounted) fetchUnread();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('manobal:notification_count_updated', handleCountUpdate);
+      window.addEventListener('manobal:notification_refresh', handleRefresh);
+    }
+
+    return () => {
+      isMounted = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('manobal:notification_count_updated', handleCountUpdate);
+        window.removeEventListener('manobal:notification_refresh', handleRefresh);
+      }
+    };
+  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -60,6 +98,38 @@ export function HomeScreen({
           Your operational wellbeing overview
         </p>
       </div>
+
+      {/* Welfare Notifications Callout */}
+      {unreadCount > 0 && (
+        <div
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('manobal:open_notifications'));
+            }
+          }}
+          className="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-white/80 transition-all shadow-[0_4px_20px_rgba(31,110,140,0.12)] border border-brand-500/30 animate-fade-up"
+        >
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-full bg-brand-100 border border-brand-500/30 flex items-center justify-center text-brand-600 shrink-0">
+              <Bell className="w-5 h-5 animate-bounce" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-bold text-ink tracking-tight">Welfare Updates</h4>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-ok-bg text-ok">
+                  NEW
+                </span>
+              </div>
+              <p className="text-xs text-ink-2 mt-0.5">
+                {unreadCount === 1 ? "1 new support notification" : `${unreadCount} new support notifications`}
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold text-brand-600 flex items-center gap-1 shrink-0">
+            View <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+      )}
 
       {/* 2. Hero Wellbeing Card */}
       <div className="flex flex-col relative">

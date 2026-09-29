@@ -23,6 +23,7 @@
 13. [Alerts & Human Review](#13-alerts--human-review)
 14. [Follow-up & Outcome Tracking](#14-follow-up--outcome-tracking)
 15. [Welfare Case Management](#15-welfare-case-management)
+15B. [Jawan Welfare Notifications & Signal Delivery (Phase 47)](#15b-jawan-welfare-notifications--signal-delivery-phase-47)
 16. [HRMS Integration (Actual Implementation)](#16-hrms-integration-actual-implementation)
 17. [Wearable & Telemetry Integration (Actual Implementation)](#17-wearable--telemetry-integration-actual-implementation)
 18. [Database Architecture & Entity Relationships](#18-database-architecture--entity-relationships)
@@ -443,6 +444,33 @@ Implemented in `services/welfare_case_service.py` (`api/routes/cases.py`):
 
 ---
 
+## 15B. Jawan Welfare Notifications & Signal Delivery (Phase 47)
+
+Implemented across `services/welfare_notification_service.py`, `api/routes/notifications.py`, `PS 26186_app/components/notifications/NotificationDrawer.tsx`, and `PS 26186/components/dashboard/SendWelfareNotificationModal.tsx`.
+
+### Core Purpose
+Connects the existing Commander / Welfare Officer decision workflow to the affected Jawan in the Jawan mobile web portal. When an authorized officer reviews a welfare alert, schedules an outcome follow-up, or approves a support recommendation, the corresponding supportive communication is securely delivered directly to the Jawan.
+
+### Architectural Invariants
+1. **Zero Risk Engine Duplication:** No secondary risk model or parallel alert engine was created. All signals originate from the authoritative Phase 34 LightGBM and existing welfare lifecycle handlers.
+2. **Strict Anti-IDOR Isolation:** A Jawan can ONLY fetch, view, and mark as read notifications where `recipient_personnel_id == authenticated_user.personnel_id`. Cross-user inspection by ID or list yields `HTTP 403 Forbidden` / `HTTP 404 Not Found`.
+3. **Strict Organizational Scoping:** Officers can only notify personnel within their assigned Battalion and Location. Cross-unit notifications are rejected with `HTTP 403 Forbidden`.
+4. **Non-Stigmatizing Content Shielding:** Technical Commander-only analytics (raw risk scores, Isolation Forest sigma scores, SHAP values, rankings, disciplinary terminology) are strictly prohibited and sanitized from Jawan-facing messages.
+5. **Human-in-the-Loop Governance:** Direct ad-hoc notifications require human initiation and authorization. Automated lifecycle triggers fire only when authorized officers take concrete workflow steps (approving a recommendation, scheduling a follow-up, or updating a request status).
+6. **Immutable Audit Trail:** All notification events (creation, delivery, mark read, and mark all read) generate tamper-evident audit records in `welfare_notification_audits`.
+
+### Supported Notification Types
+- `WELFARE_SUPPORT`: General supportive welfare message from the officer.
+- `FOLLOW_UP_REQUEST`: Scheduled welfare check-in / follow-up requested.
+- `FOLLOW_UP_REMINDER`: Reminder to complete an upcoming follow-up check-in.
+- `SUPPORT_RECOMMENDATION`: Actionable rest/support recommendation made available.
+- `DUTY_SUPPORT_REVIEW`: Notice that operational duty review / stand-down has been approved.
+- `RECOVERY_SUPPORT`: Guidance on circadian sleep and recovery routines.
+- `CASE_UPDATE`: Supportive status update on an active welfare case.
+- `WELFARE_MESSAGE`: Direct authorized welfare officer communication.
+
+---
+
 ## 16. HRMS Integration (Actual Implementation)
 
 - **Actual State:** Standardized REST API Ingestion Bridge (`POST /api/hrms/sync`).
@@ -478,10 +506,12 @@ erDiagram
     personnel ||--o{ welfare_recommendations : "receives"
     personnel ||--o{ welfare_followups : "tracked via"
     personnel ||--o{ welfare_cases : "subject of"
+    personnel ||--o{ welfare_notifications : "receives"
 
     welfare_cases ||--o{ welfare_case_notes : "contains"
     welfare_cases ||--o{ welfare_case_reviews : "evaluated via"
     welfare_cases ||--o{ welfare_case_audits : "audited by"
+    welfare_notifications ||--o{ welfare_notification_audits : "audited by"
     stress_assessments ||--o{ welfare_recommendations : "generates"
 
     personnel {
@@ -518,6 +548,19 @@ erDiagram
         datetime created_at
     }
 
+    welfare_notifications {
+        int id PK
+        string notification_id UK
+        int recipient_personnel_id FK
+        string notification_type
+        string title
+        string message
+        string priority
+        string status
+        datetime read_at
+        datetime created_at
+    }
+
     welfare_case_audits {
         int id PK
         int case_id FK
@@ -527,13 +570,22 @@ erDiagram
         string new_status
         datetime created_at
     }
+
+    welfare_notification_audits {
+        int id PK
+        int notification_id FK
+        string action
+        int actor_id
+        string details
+        datetime created_at
+    }
 ```
 
 ---
 
 ## 19. API Architecture & Route Groups
 
-FastAPI backend registers **162 endpoints across 18 tag groups** (`http://localhost:8000/docs`):
+FastAPI backend registers **168 endpoints across 19 tag groups** (`http://localhost:8000/docs`):
 
 | API Area | Base Path | Core Endpoints | Primary Purpose |
 | :--- | :--- | :--- | :--- |
@@ -546,6 +598,7 @@ FastAPI backend registers **162 endpoints across 18 tag groups** (`http://localh
 | **Recommendations** | `/api/recommendations` | `GET /commander`, `PATCH /{id}/status` | Supportive duty-pacing recommendations. |
 | **Follow-up Tracking** | `/api/followups` | `GET /`, `POST /`, `POST /{id}/reassess` | Pre vs. post outcome evaluation, recovery deltas. |
 | **Case Management** | `/api/welfare-cases` | `GET /`, `POST /`, `POST /{id}/notes`, `POST /{id}/status` | Controlled human review workspace, audits. |
+| **Welfare Notifications**| `/api/notifications` | `GET /`, `GET /unread-count`, `POST /{id}/read`, `POST /send` | Jawan notification delivery, Anti-IDOR scoping. |
 | **Unit Intelligence** | `/api/analytics` | `GET /welfare-intelligence/unit` | Cross-signal synthesis with $k \ge 5$ privacy. |
 | **HRMS Ingestion** | `/api/hrms` | `POST /sync` | Mock HRMS service record synchronization. |
 | **Wearable Telemetry** | `/api/telemetry` | `POST /wearable` | Time-series physiological telemetry ingestion. |
@@ -558,10 +611,11 @@ FastAPI backend registers **162 endpoints across 18 tag groups** (`http://localh
 - **Technology:** Next.js 14.2.15, React 18, TailwindCSS, Recharts, Lucide Icons.
 - **Port:** `http://localhost:3000`
 - **Type Safety:** 100% TypeScript (`npx tsc --noEmit` exits with 0 errors).
-- **Core Views:**
+- **Core Views & Modules:**
   - `/dashboard`: Unit welfare summary, distribution charts, alerts table, anomaly panel, recommendation panel, follow-up panel, intelligence heatmap, case management workspace.
   - `/personnel`: Searchable unit roster with battalion and location filters.
   - `/personnel/[id]`: Scoped profile drilldown with historical trajectory graphs and operational attributes.
+  - `SendWelfareNotificationModal.tsx`: Officer-to-Jawan notification modal with predefined support templates, custom messaging, character limits, deep-linking, and battalion-scope enforcement.
   - `/login`: Role-aware officer authentication.
 - **Hydration Parity:** Fully resolved with deterministic mounting guards.
 
@@ -569,7 +623,10 @@ FastAPI backend registers **162 endpoints across 18 tag groups** (`http://localh
 - **Technology:** Next.js 16.3.5 (Turbopack), React 18, TailwindCSS.
 - **Port:** `http://localhost:3001`
 - **Type Safety:** 100% TypeScript (`npx tsc --noEmit` exits with 0 errors).
-- **Core Views:**
+- **Core Views & Modules:**
+  - `TopHeader.tsx`: Real-time notification bell with dynamic badge counter and drawer trigger.
+  - `NotificationDrawer.tsx`: Glassmorphism notification center displaying unread counts, categorized support cards, mark-as-read, mark-all-read, and deep links.
+  - `HomeScreen.tsx`: Prominent "Welfare Updates" callout banner on the home screen showing unread support communications.
   - `/(tabs)/assessment`: 14-screen guided assessment wizard with touch sliders.
   - `/(tabs)/check-in`: Rapid daily mood and fatigue check-in.
   - `/(tabs)/trends`: Personal stress score trajectory visualization.
@@ -593,6 +650,10 @@ ManoBal implements strict defensive security and access control:
 | **Access Welfare Alerts** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
 | **Create Welfare Case** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
 | **Add Clinical Review Note** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
+| **Review Early-Warning Signal** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
+| **Resolve Early-Warning Signal** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
+| **View Own Notifications** | ✅ (Self Only) | ❌ (403) | ❌ (403) | ✅ (Global) |
+| **Send Welfare Notification**| ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
 | **Cross-Location Access** | ❌ (403) | ❌ (403) | ❌ (403) | ✅ (Global) |
 
 ### 21.2 Empirical Anti-IDOR Proof
@@ -1010,6 +1071,14 @@ Follow this step-by-step 5 to 10-minute demonstration script during judging:
 - **Action:** Open Swagger docs (`http://localhost:8000/docs`) or a terminal. Execute a `GET` request to `/api/analytics/welfare-intelligence/personnel/4` (Delhi jawan) using Officer Sharma's Srinagar token.
 - **What Judge Sees:** API returns `HTTP 403 Forbidden` with detail: *"Cross-location access restricted"*.
 - **Verbal Explanation:** *"To prove our defense-grade security, here is a live Anti-IDOR test. Officer Sharma is stationed in Srinagar; when he attempts to access a jawan in Delhi, the system rejects the request with HTTP 403."*
+
+### Step 7: Closed-Loop Welfare Signal Delivery (Commander-to-Personnel) (1 Minute)
+- **Action:** On the Commander Portal (`http://localhost:3000`), open Personnel 1 (`Rajesh Verma`), click **Notify Personnel**, select the template *"Welfare follow-up requested. Please review your Jawan portal for details."*, and click **Send Notification**.
+- **What Happens:** The Commander backend creates a persistent `WelfareNotification` scoped strictly to Jawan Verma with tamper-evident audit logging.
+- **What Judge Sees on Jawan App:** Switch to `http://localhost:3001` (Jawan Portal). The header notification bell dynamically illuminates with an unread badge (`🔔 1`), and the home screen displays a prominent **"Welfare Updates"** support banner.
+- **Action:** Click the notification bell to open the **Notification Drawer**, inspect the support message, and click **Mark as Read**.
+- **What Judge Sees:** The notification card transitions to a read state, the badge counter updates to 0, and the closed-loop communication is completed with zero leakage of confidential ML scores or disciplinary jargon.
+- **Verbal Explanation:** *"This completes our closed-loop welfare delivery. When an officer authorizes a rest stand-down or follow-up, the supportive communication reaches the jawan immediately in their private portal, with non-stigmatizing wording and strict Anti-IDOR protection."*
 
 ---
 

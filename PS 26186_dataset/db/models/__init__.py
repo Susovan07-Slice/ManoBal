@@ -6,9 +6,10 @@ from db.models.welfare_request import WelfareRequest
 from db.models.hrms import HrmsServiceRecord
 from db.models.telemetry import WearableTelemetry
 from db.models.alert import WelfareAlert, WelfareIntervention, WelfareAlertAudit
-from db.models.anomaly import WelfareAnomaly
+from db.models.anomaly import WelfareAnomaly, WelfareAnomalyAudit
 from db.models.welfare_followup import WelfareFollowup, WelfareFollowupAudit
 from db.models.welfare_case import WelfareCase, WelfareCaseReview, WelfareCaseNote, WelfareCaseAudit
+from db.models.welfare_notification import WelfareNotification, WelfareNotificationAudit
 
 __all__ = [
     "User",
@@ -22,11 +23,14 @@ __all__ = [
     "WelfareIntervention",
     "WelfareAlertAudit",
     "WelfareAnomaly",
+    "WelfareAnomalyAudit",
     "WelfareFollowup",
     "WelfareFollowupAudit",
     "WelfareCase",
     "WelfareCaseReview",
     "WelfareCaseNote",
     "WelfareCaseAudit",
+    "WelfareNotification",
+    "WelfareNotificationAudit",
 ]
 

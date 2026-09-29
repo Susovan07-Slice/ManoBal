@@ -1,6 +1,9 @@
 import { apiClient } from './api';
 import {
   WelfareAnomalyOut,
+  AnomalyReviewRequest,
+  AnomalyResolutionRequest,
+  WelfareAnomalyAuditOut,
   PersonnelAnomalyHistoryResponse,
   CommanderAnomalySummaryResponse,
 } from '@/types/api';
@@ -21,18 +24,37 @@ export async function acknowledgeAnomaly(anomalyId: number): Promise<WelfareAnom
   });
 }
 
-export async function reviewAnomaly(anomalyId: number): Promise<WelfareAnomalyOut> {
+export async function reviewAnomaly(
+  anomalyId: number,
+  payload?: AnomalyReviewRequest
+): Promise<WelfareAnomalyOut> {
   return apiClient<WelfareAnomalyOut>(`/anomalies/${anomalyId}/review`, {
     method: 'POST',
+    body: payload ? JSON.stringify(payload) : undefined,
   });
 }
 
 export async function resolveAnomaly(
   anomalyId: number,
-  resolutionNotes: string
+  payload: string | AnomalyResolutionRequest
 ): Promise<WelfareAnomalyOut> {
+  const body =
+    typeof payload === 'string'
+      ? { resolution_notes: payload, notify_personnel: true }
+      : {
+          resolution_notes: payload.resolution_notes,
+          notify_personnel: payload.notify_personnel !== false,
+          custom_message: payload.custom_message,
+        };
   return apiClient<WelfareAnomalyOut>(`/anomalies/${anomalyId}/resolve`, {
     method: 'POST',
-    body: JSON.stringify({ resolution_notes: resolutionNotes }),
+    body: JSON.stringify(body),
   });
 }
+
+export async function getAnomalyAudits(
+  anomalyId: number
+): Promise<WelfareAnomalyAuditOut[]> {
+  return apiClient<WelfareAnomalyAuditOut[]>(`/anomalies/${anomalyId}/audits`);
+}
+

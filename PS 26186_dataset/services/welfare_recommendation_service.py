@@ -712,6 +712,13 @@ class WelfareRecommendationService:
 
         db.commit()
         db.refresh(rec)
+
+        try:
+            from services.welfare_notification_service import WelfareNotificationService
+            WelfareNotificationService.notify_on_recommendation_accepted(db, rec, user)
+        except Exception as e:
+            logger.warning(f"Could not dispatch automated notification for accepted recommendation #{rec.id}: {e}")
+
         return rec, intervention
 
     @classmethod
