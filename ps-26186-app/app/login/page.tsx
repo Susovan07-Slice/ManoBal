@@ -41,7 +41,7 @@ export default function MobileLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login(username.trim(), password);
+      await login(username.trim().toLowerCase(), password);
       router.push('/');
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please verify credentials.');
