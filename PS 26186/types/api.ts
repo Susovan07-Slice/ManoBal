@@ -464,12 +464,39 @@ export interface WelfareAnomalyOut {
   evidence: AnomalyEvidence;
   acknowledged_at?: string | null;
   acknowledged_by?: number | null;
+  review_decision?: string | null;
+  review_notes?: string | null;
+  reviewed_at?: string | null;
+  reviewed_by?: number | null;
   resolved_at?: string | null;
   resolved_by?: number | null;
   resolution_notes?: string | null;
   associated_alert_id?: number | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface AnomalyReviewRequest {
+  decision: string;
+  notes?: string;
+}
+
+export interface AnomalyResolutionRequest {
+  resolution_notes: string;
+  notify_personnel?: boolean;
+  custom_message?: string;
+}
+
+export interface WelfareAnomalyAuditOut {
+  id: number;
+  anomaly_id: number;
+  action: string;
+  actor_id?: number | null;
+  actor_username?: string | null;
+  previous_status?: string | null;
+  new_status?: string | null;
+  timestamp: string;
+  details?: string | null;
 }
 
 export interface PersonnelAnomalyHistoryResponse {
