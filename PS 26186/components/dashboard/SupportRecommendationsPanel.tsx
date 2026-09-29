@@ -379,7 +379,7 @@ export default function SupportRecommendationsPanel() {
       )}
 
       {/* Recommendations List */}
-      {!isSuppressed && (
+      {!isSuppressed && !error && (
         <div className="space-y-4">
           {recList.length === 0 ? (
             <div className="p-8 text-center bg-surface border border-surfaceHighlight rounded-xl">

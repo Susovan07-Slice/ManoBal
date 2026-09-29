@@ -19,6 +19,15 @@ export default function MobileLoginPage() {
   useEffect(() => {
     if (user) {
       router.push('/');
+      return;
+    }
+    // Onboarding guard
+    try {
+      if (!sessionStorage.getItem('manobal_onboarding_seen')) {
+        router.replace('/welcome');
+      }
+    } catch (e) {
+      // Ignore storage errors, default to allowing login
     }
   }, [user, router]);
 
@@ -49,92 +58,96 @@ export default function MobileLoginPage() {
 
   return (
     <div 
-      className="flex flex-col min-h-screen text-mb-text-primary p-6 justify-center bg-cover bg-center bg-no-repeat absolute inset-0 z-20"
-      style={{ backgroundImage: "url('/login-bg.png')" }}
+      className="flex flex-col min-h-[100dvh] p-6 justify-center absolute inset-0 z-20 overflow-y-auto"
     >
-      <div className="flex flex-col items-center mb-8">
-        <div className="w-32 h-32 mb-4 drop-shadow-xl flex items-center justify-center">
+      {/* Logo & Branding */}
+      <div className="flex flex-col items-center mb-8 animate-fade-up">
+        <div className="w-28 h-28 mb-5 rounded-full bg-white shadow-[0_10px_30px_rgba(31,110,140,0.15)] border-2 border-white flex items-center justify-center p-3">
           <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain" />
         </div>
-        
-        <h1 className="text-2xl font-bold text-mb-text-primary tracking-wider">ManoBal</h1>
-        <p className="text-xs text-mb-text-primary uppercase tracking-widest font-mono mt-1 font-semibold">
+        <h1 className="text-[28px] font-bold text-ink tracking-tight">ManoBal</h1>
+        <p className="eyebrow mt-2">
           Personnel Wellness Check-In
         </p>
       </div>
 
+      {/* Error Alert */}
       {error && (
-        <div className="mb-4 p-3 bg-red-950/60 border border-red-800/80 rounded-lg text-xs text-red-200 flex items-center space-x-2">
-          <AlertCircle className="w-4 h-4 text-mb-danger shrink-0" />
+        <div className="mb-4 p-3.5 bg-alert-bg border border-alert/30 rounded-2xl text-[13px] text-ink flex items-center space-x-2.5 animate-fade-up">
+          <AlertCircle className="w-4 h-4 text-alert shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1">
-            Service Username
-          </label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-              <User className="w-4 h-4" />
-            </span>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. jawan_verma"
-              disabled={loading}
-              className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg pl-10 pr-3 py-3 outline-none transition-colors shadow-sm placeholder:text-gray-400"
-              required
-            />
+      {/* Login Form Card */}
+      <div className="glass-card p-6 space-y-5 animate-fade-up stagger-1">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">
+              Service Username
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-ink-3">
+                <User className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. jawan_verma"
+                disabled={loading}
+                className="w-full bg-white border border-sky-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-ink text-sm font-medium rounded-2xl pl-11 pr-4 h-[52px] outline-none transition-all shadow-sm placeholder:text-ink-3"
+                required
+              />
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-mb-text-primary font-bold mb-1">
-            Password
-          </label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-              <Lock className="w-4 h-4" />
-            </span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              disabled={loading}
-              className="w-full bg-white/90 border border-gray-300 focus:border-mb-accent text-gray-900 text-sm font-medium rounded-lg pl-10 pr-3 py-3 outline-none transition-colors shadow-sm placeholder:text-gray-400"
-              required
-            />
+          <div>
+            <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">
+              Password
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-ink-3">
+                <Lock className="w-4 h-4" />
+              </span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                disabled={loading}
+                className="w-full bg-white border border-sky-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-ink text-sm font-medium rounded-2xl pl-11 pr-4 h-[52px] outline-none transition-all shadow-sm placeholder:text-ink-3"
+                required
+              />
+            </div>
           </div>
-        </div>
 
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full mt-4 bg-mb-accent hover:bg-mb-accent text-mb-text-dark font-bold py-3 rounded-lg text-sm"
-        >
-          {loading ? 'Authenticating...' : 'Sign In to Portal'}
-        </Button>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-2"
+          >
+            {loading ? 'Authenticating...' : 'Sign In to Portal'}
+          </Button>
 
-        <div className="pt-2 text-center">
-          <p className="text-xs text-mb-text-secondary">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-mb-accent hover:underline font-semibold">
-              Sign Up
-            </Link>
-          </p>
-        </div>
-      </form>
+          <div className="pt-1 text-center">
+            <p className="text-[13px] text-ink-2">
+              Don&apos;t have an account?{' '}
+              <Link href="/signup" className="text-brand-500 hover:text-brand-600 hover:underline font-semibold">
+                Sign Up
+              </Link>
+            </p>
+          </div>
+        </form>
+      </div>
 
-      <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-        <p className="text-xs text-mb-text-secondary mb-2 font-medium">Quick Demo Access:</p>
+      {/* Demo Access */}
+      <div className="mt-8 pt-6 border-t border-sky-200/60 text-center animate-fade-up stagger-2">
+        <p className="text-[12px] text-ink-3 mb-3 font-medium">Quick Demo Access:</p>
         <button
           type="button"
           onClick={fillJawan}
-          className="w-full py-2 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono text-mb-accent font-semibold transition-colors"
+          className="w-full h-[48px] bg-white/70 backdrop-blur-md hover:bg-white border border-sky-200 rounded-full text-[12px] font-semibold text-brand-600 transition-all shadow-sm"
         >
           Log in as Constable Rajesh Verma (PF-0001)
         </button>
@@ -142,5 +155,3 @@ export default function MobileLoginPage() {
     </div>
   );
 }
-
-

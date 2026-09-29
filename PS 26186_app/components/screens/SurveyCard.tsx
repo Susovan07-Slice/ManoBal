@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { SurveyQuestion as SurveyQuestionType, SurveyAnswer } from "@/types/survey";
@@ -42,21 +42,21 @@ export function SurveyCard({
 
   if (showSupport) {
     return (
-      <div className="flex flex-col h-full justify-center animate-in fade-in zoom-in-95 duration-300">
-        <Card className="flex flex-col items-center text-center p-8 border-red-500/50 bg-[#1A1515]">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-6">
-            <AlertCircle className="w-8 h-8 text-red-500" />
+      <div className="flex flex-col h-full justify-center animate-fade-up">
+        <Card className="glass-card p-8 text-center flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full bg-alert-bg flex items-center justify-center mb-6">
+            <AlertCircle className="w-8 h-8 text-alert" />
           </div>
-          <h2 className="text-xl font-semibold text-mb-text-primary mb-4">Support is Available</h2>
-          <p className="text-mb-text-secondary mb-8 leading-relaxed">
+          <h2 className="text-xl font-semibold text-ink mb-4">Support is Available</h2>
+          <p className="text-ink-2 mb-8 leading-relaxed">
             Based on your response, we want to make sure you have immediate support. You can connect with the Welfare Officer right now.
           </p>
           <div className="flex flex-col w-full gap-4">
-            <Button variant="danger" className="w-full gap-2 text-lg min-h-[56px]">
+            <Button variant="danger" className="w-full gap-2 text-lg min-h-[56px] rounded-full">
               <Phone className="w-5 h-5" />
               Contact Welfare Officer
             </Button>
-            <Button variant="ghost" className="min-h-[56px]" onClick={() => {
+            <Button variant="ghost" className="min-h-[56px] rounded-full text-ink" onClick={() => {
               setShowSupport(false);
               if (currentIndex < questions.length - 1) {
                 setCurrentIndex(prev => prev + 1);
@@ -87,12 +87,12 @@ export function SurveyCard({
         </div>
       </div>
 
-      <div className="flex justify-between items-center mt-8">
+      <div className="flex justify-between items-center mt-8 mb-4">
         <Button
           variant="ghost"
           disabled={currentIndex === 0}
           onClick={() => setCurrentIndex(prev => prev - 1)}
-          className="px-4"
+          className="px-4 rounded-full text-ink border border-transparent hover:border-sky-200"
         >
           Back
         </Button>
@@ -105,7 +105,7 @@ export function SurveyCard({
                 onComplete(answers);
               }
             }}
-            className="px-6"
+            className="px-6 rounded-full bg-brand-500 text-white"
           >
             {currentIndex === questions.length - 1 ? "Finish" : "Next"}
           </Button>
@@ -114,5 +114,3 @@ export function SurveyCard({
     </div>
   );
 }
-
-

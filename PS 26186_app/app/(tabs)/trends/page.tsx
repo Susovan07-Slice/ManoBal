@@ -11,7 +11,6 @@ import { TrendChart } from "@/components/screens/TrendChart";
 import { TrendSummaryCard } from "@/components/screens/TrendSummaryCard";
 import Link from "next/link";
 import { Activity, AlertCircle, Calendar, RefreshCw, ShieldAlert, ArrowRight } from "lucide-react";
-import { formatAssessmentDateTime } from "@/lib/utils";
 
 export default function TrendsRoute() {
   const { user } = useAuth();
@@ -42,25 +41,25 @@ export default function TrendsRoute() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center">
-        <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-mb-text-secondary">Retrieving Telemetry Trends...</p>
-        <span className="text-xs text-mb-text-muted mt-1 font-mono">Querying FastAPI assessment history</span>
+      <div className="flex flex-col h-full items-center justify-center p-6 text-center">
+        <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-sm font-medium text-ink">Retrieving Telemetry Trends...</p>
+        <span className="text-[12px] text-ink-3 mt-1 font-medium">Querying FastAPI assessment history</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mb-4">
-          <AlertCircle className="w-6 h-6" />
+      <div className="flex flex-col h-full items-center justify-center p-6 text-center">
+        <div className="w-12 h-12 rounded-full bg-alert-bg flex items-center justify-center mb-4">
+          <AlertCircle className="w-6 h-6 text-alert" />
         </div>
-        <p className="text-mb-text-secondary font-medium mb-1">Telemetry Synchronization Failed</p>
-        <p className="text-xs text-mb-text-secondary mb-4 max-w-xs">{error}</p>
+        <p className="text-ink font-medium mb-1">Telemetry Synchronization Failed</p>
+        <p className="text-[13px] text-ink-2 mb-4 max-w-xs">{error}</p>
         <button
           onClick={fetchTrends}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-mb-accent text-xs font-semibold rounded-lg transition"
+          className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-sky-50 text-brand-500 text-[13px] font-semibold rounded-full border border-sky-200 shadow-sm transition"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Retry Sync
         </button>
@@ -70,17 +69,17 @@ export default function TrendsRoute() {
 
   if (!trend || trend.last7Days.length === 0) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center">
-        <div className="w-14 h-14 bg-[#0a1412]/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-[#1e332c]/50">
-          <Activity className="w-7 h-7 text-mb-accent" />
+      <div className="flex flex-col h-full items-center justify-center p-6 text-center">
+        <div className="w-14 h-14 bg-brand-100 rounded-2xl flex items-center justify-center mb-4">
+          <Activity className="w-7 h-7 text-brand-500" />
         </div>
-        <p className="text-lg font-semibold text-mb-text-primary mb-1">No Assessment History</p>
-        <p className="text-xs text-mb-text-secondary mb-6 max-w-xs">
+        <p className="text-lg font-semibold text-ink mb-1">No Assessment History</p>
+        <p className="text-[13px] text-ink-2 mb-6 max-w-xs">
           You haven&apos;t completed any wellness assessments yet. Take your first assessment to establish a health baseline.
         </p>
         <Link
           href="/assessment"
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-mb-accent to-emerald-600 text-mb-text-dark font-semibold text-xs rounded-xl shadow-lg shadow-teal-500/20 active:scale-95 transition"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold text-[13px] rounded-full shadow-[0_16px_40px_rgba(31,110,140,0.22)] active:scale-[.97] transition"
         >
           Begin Self-Assessment <ArrowRight className="w-3.5 h-3.5" />
         </Link>
@@ -89,86 +88,101 @@ export default function TrendsRoute() {
   }
 
   return (
-    <div className="p-4 flex flex-col gap-6 pb-28 animate-in fade-in duration-500">
+    <div className="p-4 flex flex-col gap-5 pb-44 min-w-0 animate-fade-up">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Personal Insights</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Real-time stress and operational telemetry tracking</p>
+          <h2 className="text-[22px] font-bold text-ink">Personal Insights</h2>
+          <p className="text-[13px] text-ink-3 mt-0.5">Real-time stress and operational telemetry tracking</p>
         </div>
         <button
           onClick={fetchTrends}
-          className="p-2 bg-white/70 backdrop-blur-sm hover:bg-white text-gray-500 hover:text-gray-700 rounded-lg border border-gray-200 transition"
+          className="w-10 h-10 bg-white/70 backdrop-blur-sm hover:bg-white text-ink-3 hover:text-ink rounded-full border border-sky-200 shadow-sm transition flex items-center justify-center"
           title="Refresh telemetry"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
       
+      {/* Summary Card */}
       <TrendSummaryCard trend={trend} />
       
-      <div>
+      {/* Assessment Trajectory Chart */}
+      <div className="animate-fade-up stagger-1">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+          <h3 className="eyebrow">
             Assessment Trajectory ({trend.last7Days.length} Records)
           </h3>
         </div>
-        <TrendChart data={trend.last7Days} />
+        <div className="glass-card p-5 w-full h-[220px]">
+          <TrendChart data={trend.last7Days} />
+        </div>
       </div>
 
-      {/* Primary Visualization: Calendar Heatmap of Historical Risk Trends */}
-      <RiskCalendarHeatmap assessments={assessments} onRefresh={fetchTrends} />
+      {/* Calendar Heatmap */}
+      <div className="animate-fade-up stagger-2">
+        <RiskCalendarHeatmap assessments={assessments} onRefresh={fetchTrends} />
+      </div>
 
-      {/* Historical Assessment Log */}
-      <div className="mt-4">
-        <h3 className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">
+      {/* Assessment Log */}
+      <div className="mt-2 animate-fade-up stagger-3">
+        <h3 className="eyebrow mb-4">
           Assessment Log
         </h3>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {assessments.slice(0, 5).map((a) => (
             <div
               key={a.id}
-              className="bg-white/85 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_rgba(0,0,0,0.06)] rounded-2xl p-5 flex flex-col gap-4 hover:bg-white/95 transition-all duration-300"
+              className="bg-white rounded-[20px] shadow-[0_10px_30px_rgba(31,110,140,0.08)] border border-white/80 p-5 flex flex-col gap-3 hover:shadow-[0_10px_30px_rgba(31,110,140,0.14)] transition-all duration-200"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-gray-600" />
-                  <span className="text-sm font-semibold tracking-wide text-gray-600">
-                    {formatAssessmentDateTime(a.assessment_timestamp)}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-brand-500" />
+                  </div>
+                  <span className="text-[13px] font-semibold text-ink">
+                    {new Date(a.assessment_timestamp).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </span>
                 </div>
                 <span
-                  className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${
+                  className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${
                     a.stress_level === 'High'
-                      ? 'bg-rose-500/10 text-mb-saffron border border-rose-500/20'
+                      ? 'bg-alert-bg text-alert'
                       : a.stress_level === 'Medium'
-                      ? 'bg-amber-500/10 text-mb-saffron border border-amber-500/20'
-                      : 'bg-emerald-500/10 text-mb-green border border-emerald-500/20'
+                      ? 'bg-warn-bg text-warn'
+                      : 'bg-ok-bg text-ok'
                   }`}
                 >
                   {a.stress_level}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-sm pt-4 border-t border-gray-200">
-                <span className="text-gray-600 uppercase font-bold tracking-widest text-xs">
-                  Score: <strong className="text-gray-800 text-sm">
+              <div className="flex items-center justify-between text-[13px] pt-3 border-t border-sky-200/50">
+                <span className="text-ink-3 text-[11px] font-semibold uppercase tracking-wide">
+                  Score: <strong className="text-ink text-[14px] tabular-nums">
                     {typeof a.risk_score === 'number' ? a.risk_score.toFixed(1) : a.risk_score}/100
                   </strong>
                 </span>
-                <span className="text-gray-600 uppercase font-bold tracking-widest text-xs">
-                  Priority: <strong className="text-gray-800 text-sm">{a.risk_priority}</strong>
+                <span className="text-ink-3 text-[11px] font-semibold uppercase tracking-wide">
+                  Priority: <strong className="text-ink text-[13px]">{a.risk_priority}</strong>
                 </span>
               </div>
 
 
               {a.key_factors && a.key_factors.length > 0 && (
-                <div className="text-sm text-mb-text-secondary pt-4 border-t border-gray-200">
-                  <span className="text-gray-400 block text-[11px] uppercase font-bold tracking-widest mb-2.5">
+                <div className="pt-3 border-t border-sky-200/50">
+                  <span className="eyebrow block mb-2">
                     Key Factors
                   </span>
-                  <div className="flex flex-wrap gap-2.5">
+                  <div className="flex flex-wrap gap-2">
                     {a.key_factors.slice(0, 3).map((f, i) => (
-                      <span key={i} className="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200">
+                      <span key={i} className="bg-sky-50 text-ink-2 text-[11px] font-medium px-3 py-1.5 rounded-full border border-sky-200">
                         {f}
                       </span>
                     ))}
@@ -183,5 +197,3 @@ export default function TrendsRoute() {
     </div>
   );
 }
-
-
