@@ -221,7 +221,11 @@ export function HomeScreen({
           <span className="text-[10px] font-semibold text-ink-3 uppercase tracking-wide">
             Duty Load
           </span>
-          <span className="text-2xl font-semibold text-ink leading-none tabular-nums">48</span>
+          <span className="text-2xl font-semibold text-ink leading-none tabular-nums">
+            {typeof (latestAssessment?.duty_hours_per_week ?? trend?.averageDutyHours) === "number"
+              ? Math.round(Number(latestAssessment?.duty_hours_per_week ?? trend?.averageDutyHours))
+              : 48}
+          </span>
           <span className="text-[10px] text-ink-3 font-medium">HRS/WK</span>
         </div>
         <div className="p-4 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(31,110,140,0.08)] flex flex-col items-center text-center gap-1">
@@ -231,7 +235,11 @@ export function HomeScreen({
           <span className="text-[10px] font-semibold text-ink-3 uppercase tracking-wide">
             Recovery
           </span>
-          <span className="text-2xl font-semibold text-ink leading-none tabular-nums">7.2</span>
+          <span className="text-2xl font-semibold text-ink leading-none tabular-nums">
+            {typeof (latestAssessment?.sleep_hours ?? trend?.averageSleepHours) === "number"
+              ? Number(latestAssessment?.sleep_hours ?? trend?.averageSleepHours).toFixed(1)
+              : "7.2"}
+          </span>
           <span className="text-[10px] text-ink-3 font-medium">HRS</span>
         </div>
         <div className="p-4 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(31,110,140,0.08)] flex flex-col items-center text-center gap-1">

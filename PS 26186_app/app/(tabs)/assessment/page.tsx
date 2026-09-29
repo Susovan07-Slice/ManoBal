@@ -93,8 +93,12 @@ function AssessmentContent() {
       const response = await submitAssessment(targetPersonnelId, overridePayload);
       setAssessmentResult(response.assessment);
 
-      if (user?.personnel_id && typeof window !== "undefined") {
-        sessionStorage.removeItem(`assessment_dismissed_${user.personnel_id}`);
+      if (typeof window !== "undefined") {
+        if (user?.personnel_id) {
+          sessionStorage.removeItem(`assessment_dismissed_${user.personnel_id}`);
+        }
+        window.dispatchEvent(new CustomEvent("manobal:assessment_completed", { detail: response.assessment }));
+        window.dispatchEvent(new CustomEvent("manobal:welfare_created"));
       }
     } catch (err: any) {
       console.error("Assessment inference failed:", err);

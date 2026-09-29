@@ -37,6 +37,21 @@ export default function TrendsRoute() {
 
   useEffect(() => {
     fetchTrends();
+
+    const handleRefresh = () => {
+      fetchTrends();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('manobal:assessment_completed', handleRefresh);
+      window.addEventListener('focus', handleRefresh);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('manobal:assessment_completed', handleRefresh);
+        window.removeEventListener('focus', handleRefresh);
+      }
+    };
   }, [fetchTrends]);
 
   if (loading) {

@@ -8,9 +8,10 @@ import {
 
 export async function runPersonnelAssessment(
   personnelId: number,
-  override?: AssessmentOverride
+  override?: AssessmentOverride,
+  simulate: boolean = true
 ): Promise<AssessmentResponse> {
-  return apiClient<AssessmentResponse>(`/personnel/${personnelId}/assess`, {
+  return apiClient<AssessmentResponse>(`/personnel/${personnelId}/assess?simulate=${simulate}`, {
     method: 'POST',
     body: override ? JSON.stringify(override) : undefined,
   });

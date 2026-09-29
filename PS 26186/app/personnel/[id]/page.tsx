@@ -97,9 +97,27 @@ export default function PersonnelDetailPage() {
   const handleTriggerAssessment = async (override?: AssessmentOverride) => {
     setEvaluating(true);
     try {
-      await runPersonnelAssessment(personnelId, override);
+      const response = await runPersonnelAssessment(personnelId, override, true);
       setShowOverrideModal(false);
-      await loadData();
+      
+      if (response && response.assessment) {
+        const simAssessment = { 
+          ...response.assessment, 
+          id: response.assessment.id || -Date.now() 
+        };
+        setAssessments([simAssessment, ...assessments]);
+        
+        if (override && personnel) {
+          const updatedPersonnel = { ...personnel };
+          Object.keys(override).forEach(key => {
+            const val = (override as any)[key];
+            if (val !== undefined) {
+              (updatedPersonnel as any)[key] = val;
+            }
+          });
+          setPersonnel(updatedPersonnel);
+        }
+      }
     } catch (err: any) {
       alert(`Assessment execution failed: ${err?.message || 'Server error'}`);
     } finally {

@@ -70,6 +70,11 @@ class StressAssessmentOut(BaseModel):
     out_of_distribution: Optional[bool] = False
     ood_reasons: Optional[List[str]] = []
     key_factors: List[str] = []
+    duty_hours_per_week: Optional[float] = None
+    sleep_hours: Optional[float] = None
+    consecutive_duty_days: Optional[int] = None
+    night_shifts_per_month: Optional[int] = None
+    mood_score: Optional[int] = None
     model_version: str
     assessment_timestamp: datetime
     recommendations: List[RecommendationOut] = []

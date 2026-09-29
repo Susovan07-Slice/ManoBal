@@ -69,6 +69,11 @@ export interface StressAssessmentOut {
   key_factors: string[];
   top_risk_factors?: string[];
   protective_factors?: string[];
+  duty_hours_per_week?: number | null;
+  sleep_hours?: number | null;
+  consecutive_duty_days?: number | null;
+  night_shifts_per_month?: number | null;
+  mood_score?: number | null;
   model_version: string;
   assessment_timestamp: string;
   recommendations: RecommendationOut[];

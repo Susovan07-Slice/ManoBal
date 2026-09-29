@@ -102,26 +102,7 @@ def submit_welfare_request(
             detail=f"Personnel record with ID {current_user.personnel_id} not found."
         )
 
-    # Check for duplicate active request in the same category
     req_category = request_in.category.strip()
-    active_existing = (
-        db.query(WelfareRequest)
-        .filter(
-            WelfareRequest.personnel_id == personnel.id,
-            WelfareRequest.category == req_category,
-            WelfareRequest.status.in_(["pending", "in_progress"])
-        )
-        .first()
-    )
-    if active_existing:
-        logger.warning(
-            f"WELFARE_REQUEST_DUPLICATE_REJECTED: personnel_id={personnel.id} "
-            f"existing_id={active_existing.id} category='{req_category}' status='{active_existing.status}'"
-        )
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"You already have an active {active_existing.status} welfare request for '{req_category}' pending commander review."
-        )
 
     now = datetime.now(timezone.utc)
     new_request = WelfareRequest(

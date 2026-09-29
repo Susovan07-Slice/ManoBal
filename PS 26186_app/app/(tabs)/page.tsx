@@ -101,15 +101,20 @@ export default function HomeRoute() {
   useEffect(() => {
     loadHomeData();
 
-    const handleWelfareCreated = () => {
+    const handleRefresh = () => {
       loadHomeData();
     };
+
     if (typeof window !== 'undefined') {
-      window.addEventListener('manobal:welfare_created', handleWelfareCreated);
+      window.addEventListener('manobal:welfare_created', handleRefresh);
+      window.addEventListener('manobal:assessment_completed', handleRefresh);
+      window.addEventListener('focus', handleRefresh);
     }
     return () => {
       if (typeof window !== 'undefined') {
-        window.removeEventListener('manobal:welfare_created', handleWelfareCreated);
+        window.removeEventListener('manobal:welfare_created', handleRefresh);
+        window.removeEventListener('manobal:assessment_completed', handleRefresh);
+        window.removeEventListener('focus', handleRefresh);
       }
     };
   }, [loadHomeData]);

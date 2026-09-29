@@ -11,6 +11,7 @@ from db.models.user import User
 from db.models.personnel import Personnel
 from db.models.assessment import StressAssessment
 from db.models.recommendation import WelfareRecommendation
+from db.models.telemetry import WearableTelemetry
 from schemas.assessment import (
     AssessmentOverride,
     StressAssessmentOut,
@@ -34,6 +35,12 @@ def _format_assessment_out(
 ) -> StressAssessmentOut:
     """Helper to convert StressAssessment ORM to Pydantic schema with parsed factors and recommendations."""
     key_factors_parsed = []
+    duty_val = None
+    sleep_val = None
+    consec_val_tel = None
+    night_val = None
+    mood_val = None
+
     if a.key_factors:
         try:
             parsed = json.loads(a.key_factors)
@@ -41,6 +48,11 @@ def _format_assessment_out(
                 key_factors_parsed = parsed
             elif isinstance(parsed, dict):
                 key_factors_parsed = parsed.get("top_risk_factors", parsed.get("key_factors", []))
+                duty_val = parsed.get("duty_hours_per_week")
+                sleep_val = parsed.get("sleep_hours")
+                consec_val_tel = parsed.get("consecutive_duty_days")
+                night_val = parsed.get("night_shifts_per_month")
+                mood_val = parsed.get("mood_score")
             else:
                 key_factors_parsed = [str(parsed)]
         except Exception:
@@ -61,6 +73,12 @@ def _format_assessment_out(
 
     p_code = personnel.personnel_code if personnel else (a.personnel.personnel_code if a.personnel else None)
     p_name = personnel.name if personnel else (a.personnel.name if a.personnel else None)
+
+    if duty_val is None:
+        if personnel and personnel.duty_hours_per_week is not None:
+            duty_val = float(personnel.duty_hours_per_week)
+        elif a.personnel and a.personnel.duty_hours_per_week is not None:
+            duty_val = float(a.personnel.duty_hours_per_week)
 
     score_val = float(a.risk_score)
     conf_val = "Moderate"
@@ -84,6 +102,16 @@ def _format_assessment_out(
         percentile_val = meta.get("risk_percentile", None)
         ood_val = meta.get("out_of_distribution", False)
         ood_reasons = meta.get("ood_reasons", [])
+        if "duty_hours_per_week" in meta:
+            duty_val = meta.get("duty_hours_per_week")
+        if "sleep_hours" in meta:
+            sleep_val = meta.get("sleep_hours")
+        if "consecutive_duty_days" in meta:
+            consec_val_tel = meta.get("consecutive_duty_days")
+        if "night_shifts_per_month" in meta:
+            night_val = meta.get("night_shifts_per_month")
+        if "mood_score" in meta:
+            mood_val = meta.get("mood_score")
 
     return StressAssessmentOut(
         id=a.id,
@@ -106,6 +134,11 @@ def _format_assessment_out(
         out_of_distribution=ood_val,
         ood_reasons=ood_reasons,
         key_factors=key_factors_parsed,
+        duty_hours_per_week=duty_val,
+        sleep_hours=sleep_val,
+        consecutive_duty_days=consec_val_tel,
+        night_shifts_per_month=night_val,
+        mood_score=mood_val,
         model_version=a.model_version,
         assessment_timestamp=(
             a.assessment_timestamp.replace(tzinfo=timezone.utc)
@@ -125,6 +158,7 @@ def _format_assessment_out(
 )
 def run_personnel_assessment(
     personnel_id: int,
+    simulate: bool = False,
     override_telemetry: Optional[AssessmentOverride] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -138,7 +172,7 @@ def run_personnel_assessment(
     personnel = check_personnel_access(current_user, personnel_id, db)
 
     # Update personnel telemetry attributes if provided in override
-    if override_telemetry:
+    if override_telemetry and not simulate:
         if override_telemetry.duty_hours_per_week is not None:
             personnel.duty_hours_per_week = override_telemetry.duty_hours_per_week
         if override_telemetry.night_shifts_per_month is not None:
@@ -290,7 +324,14 @@ def run_personnel_assessment(
     low_p = probas.get("low", probas.get("Low", 0.0))
     med_p = probas.get("moderate", probas.get("Medium", probas.get("medium", 0.0)))
     high_p = probas.get("high", probas.get("High", 0.0)) + probas.get("critical", probas.get("Critical", 0.0))
-    
+
+    # Attach explicit telemetry metadata to result for response formatting
+    result["duty_hours_per_week"] = duty_hours
+    result["sleep_hours"] = sleep
+    result["consecutive_duty_days"] = consec_days
+    result["night_shifts_per_month"] = night_shifts
+    result["mood_score"] = satisfaction_val
+
     key_factors_dump = json.dumps({
         "top_risk_factors": result.get("top_risk_factors", result.get("key_factors", [])),
         "protective_factors": result.get("protective_factors", []),
@@ -298,10 +339,16 @@ def run_personnel_assessment(
         "probabilities": probas,
         "confidence": result.get("confidence", 0.85),
         "uncertainty": result.get("uncertainty", 0.15),
-        "assessment_completeness": result.get("assessment_completeness", 1.0)
+        "assessment_completeness": result.get("assessment_completeness", 1.0),
+        "duty_hours_per_week": duty_hours,
+        "sleep_hours": sleep,
+        "consecutive_duty_days": consec_days,
+        "night_shifts_per_month": night_shifts,
+        "mood_score": satisfaction_val
     })
 
     new_assessment = StressAssessment(
+        id=0 if simulate else None,
         personnel_id=personnel.id,
         stress_level=result.get("stress_level", "Medium"),
         low_probability=float(low_p),
@@ -313,10 +360,27 @@ def run_personnel_assessment(
         model_version=str(result.get("model_version", "risk_engine_v2"))[:32],
         assessment_timestamp=datetime.now(timezone.utc)
     )
-    db.add(new_assessment)
-    db.flush()  # Populates new_assessment.id
+    
+    if not simulate:
+        db.add(new_assessment)
+        db.flush()  # Populates new_assessment.id
 
+        # Also persist wearable telemetry record for longitudinal sleep recovery tracking
+        try:
+            wt = WearableTelemetry(
+                personnel_id=personnel.id,
+                recorded_at=new_assessment.assessment_timestamp,
+                sleep_duration_hours=float(sleep),
+                source="assessment_self_report",
+                device_model="Self-Assessment",
+                created_at=datetime.now(timezone.utc)
+            )
+            db.add(wt)
+        except Exception as e:
+            logger.warning(f"Could not persist self-report telemetry: {e}")
+    
     # 4. Persist WelfareRecommendations to Database
+    recs = []
     for rec in result.get("recommendations", []):
         if isinstance(rec, dict):
             rec_type = rec.get("type", "General Welfare")
@@ -340,36 +404,43 @@ def run_personnel_assessment(
             rec_priority = result["risk_priority"]
 
         welfare_rec = WelfareRecommendation(
+            id=0 if simulate else None,
             personnel_id=personnel.id,
-            assessment_id=new_assessment.id,
+            assessment_id=new_assessment.id if not simulate else 0,
             recommendation_type=rec_type,
             recommendation_text=rec_text,
             priority=rec_priority,
             status="pending",
             created_at=datetime.now(timezone.utc)
         )
-        db.add(welfare_rec)
+        recs.append(welfare_rec)
+        if not simulate:
+            db.add(welfare_rec)
 
-    db.commit()
-    db.refresh(new_assessment)
+    if not simulate:
+        db.commit()
+        db.refresh(new_assessment)
+    else:
+        new_assessment.recommendations = recs
 
     logger.info(
-        f"Assessment recorded for {personnel.personnel_code}: Level={new_assessment.stress_level}, "
+        f"{'Simulated ' if simulate else ''}Assessment recorded for {personnel.personnel_code}: Level={new_assessment.stress_level}, "
         f"Continuous Risk Score={result['risk_score']} ({new_assessment.risk_priority})"
     )
 
     # Trigger Welfare Alerts evaluation safely without blocking assessment response
-    try:
-        WelfareAlertService.evaluate_and_generate_alerts(db, personnel.id, new_assessment)
-    except Exception as e:
-        logger.error(f"Non-critical failure evaluating welfare alerts for personnel {personnel.id}: {e}", exc_info=True)
+    if not simulate:
+        try:
+            WelfareAlertService.evaluate_and_generate_alerts(db, personnel.id, new_assessment)
+        except Exception as e:
+            logger.error(f"Non-critical failure evaluating welfare alerts for personnel {personnel.id}: {e}", exc_info=True)
 
-    # Trigger Phase 40 Welfare Recommendations evaluation safely
-    try:
-        from services.welfare_recommendation_service import WelfareRecommendationService
-        WelfareRecommendationService.evaluate_and_generate_recommendations(personnel, db, new_assessment, persist=True)
-    except Exception as re_err:
-        logger.error(f"Non-critical failure evaluating welfare recommendations for personnel {personnel.id}: {re_err}", exc_info=True)
+        # Trigger Phase 40 Welfare Recommendations evaluation safely
+        try:
+            from services.welfare_recommendation_service import WelfareRecommendationService
+            WelfareRecommendationService.evaluate_and_generate_recommendations(personnel, db, new_assessment, persist=True)
+        except Exception as re_err:
+            logger.error(f"Non-critical failure evaluating welfare recommendations for personnel {personnel.id}: {re_err}", exc_info=True)
 
     assessment_out = _format_assessment_out(new_assessment, personnel, meta=result)
     return AssessmentResponse(
