@@ -22,12 +22,12 @@ export default function TopHeader({ title }: { title: string }) {
     : '';
 
   return (
-    <header className={cn("flex items-center justify-between px-5 h-16 shrink-0 sticky top-0 z-40 transition-all", scrolled ? "bg-white/60 backdrop-blur-xl shadow-[0_4px_20px_rgba(31,110,140,0.08)]" : "bg-transparent")}>
+    <header className={cn("flex items-center justify-between px-5 h-20 shrink-0 sticky top-0 z-40 transition-all", scrolled ? "bg-white/60 backdrop-blur-xl shadow-[0_4px_20px_rgba(31,110,140,0.08)]" : "bg-transparent")}>
       <div className="flex items-center space-x-4">
-        <div className="w-11 h-11 rounded-full bg-white shadow-[0_2px_12px_rgba(31,110,140,0.15)] border-2 border-white flex items-center justify-center overflow-hidden">
-          <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain" />
+        <div className="w-14 h-14 rounded-full bg-white shadow-[0_2px_12px_rgba(31,110,140,0.15)] border-2 border-white flex items-center justify-center overflow-hidden">
+          <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-cover scale-110" />
         </div>
-        <h1 className="text-[18px] font-bold text-ink tracking-tight">{title}</h1>
+        <h1 className="text-[20px] font-bold text-ink tracking-tight">{title}</h1>
       </div>
 
       {user && (
