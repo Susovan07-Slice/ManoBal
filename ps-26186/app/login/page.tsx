@@ -133,11 +133,11 @@ function LoginForm() {
             </div>
 
             {/* Role Pills */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-1 mb-6">
               <button
                 type="button"
                 onClick={() => selectRolePill('officer', 'officer_sharma', 'OfficerPassword123!')}
-                className={`flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all ${
+                className={`w-full flex items-center justify-center space-x-2.5 px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all ${
                   activeRole === 'officer'
                     ? 'border-[#7BA083] bg-[#E8F0EC] text-[#2D3748] ring-2 ring-[#7BA083]/25 shadow-sm'
                     : 'border-[#D0DFD5] bg-[#FAFAFC] text-[#64748B] hover:bg-[#F1F7F4] hover:border-[#BACFC2]'
@@ -153,27 +153,6 @@ function LoginForm() {
                   {activeRole === 'officer' && <span className="w-1.5 h-1.5 rounded-full bg-[#FAFAFC]" />}
                 </span>
                 <span className="font-semibold truncate">Commander</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => selectRolePill('counselor', 'counselor_priya', 'WelfarePassword123!')}
-                className={`flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all ${
-                  activeRole === 'counselor'
-                    ? 'border-[#7BA083] bg-[#E8F0EC] text-[#2D3748] ring-2 ring-[#7BA083]/25 shadow-sm'
-                    : 'border-[#D0DFD5] bg-[#FAFAFC] text-[#64748B] hover:bg-[#F1F7F4] hover:border-[#BACFC2]'
-                }`}
-              >
-                <span
-                  className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                    activeRole === 'counselor'
-                      ? 'border-[#7BA083] bg-[#7BA083]'
-                      : 'border-[#BACFC2] bg-transparent'
-                  }`}
-                >
-                  {activeRole === 'counselor' && <span className="w-1.5 h-1.5 rounded-full bg-[#FAFAFC]" />}
-                </span>
-                <span className="font-semibold truncate">Welfare Officer</span>
               </button>
             </div>
 
@@ -255,30 +234,7 @@ function LoginForm() {
               </button>
             </form>
 
-            {/* Quick Demo Switcher */}
-            <div className="mt-5 pt-4 border-t border-[#D0DFD5]">
-              <p className="text-[11px] uppercase tracking-wider font-semibold text-[#64748B] mb-2 font-mono">
-                All Demo Roles:
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => fillCredentials('admin', 'AdminPassword123!')}
-                  className="px-2.5 py-1.5 bg-[#F1F7F4] hover:bg-[#E8F0EC] rounded-lg border border-[#D0DFD5] hover:border-[#BACFC2] text-left transition-colors"
-                >
-                  <div className="font-semibold text-[#2D3748] text-[11px]">Administrator</div>
-                  <div className="text-[#7BA083] font-mono text-[9px]">admin</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillCredentials('jawan_verma', 'PersonnelPassword123!')}
-                  className="px-2.5 py-1.5 bg-[#F1F7F4] hover:bg-[#E8F0EC] rounded-lg border border-[#D0DFD5] hover:border-[#BACFC2] text-left transition-colors"
-                >
-                  <div className="font-semibold text-[#2D3748] text-[11px]">Personnel / Jawan</div>
-                  <div className="text-[#7BA083] font-mono text-[9px]">jawan_verma</div>
-                </button>
-              </div>
-            </div>
+
           </div>
 
 
