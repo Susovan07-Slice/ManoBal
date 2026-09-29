@@ -1,4 +1,4 @@
-import { StoryOnboarding } from "@/components/onboarding/StoryOnboarding";
+﻿import { StoryOnboarding } from "@/components/onboarding/StoryOnboarding";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
