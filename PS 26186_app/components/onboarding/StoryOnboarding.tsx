@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { HeartPulse, Shield, Brain, TrendingUp, Moon, Briefcase, Users, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { PhoneFrame } from "./PhoneFrame";
 
 const SLIDE_MS = 5000;
 
@@ -170,9 +171,9 @@ export function StoryOnboarding() {
   }, [goToNext, goToPrev, finishOnboarding]);
 
   const handleAreaClick = (e: React.MouseEvent) => {
-    const width = window.innerWidth;
-    const clickX = e.clientX;
-    if (clickX > width * 0.35) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    if (clickX > rect.width * 0.35) {
       goToNext();
     } else {
       goToPrev();
@@ -182,9 +183,9 @@ export function StoryOnboarding() {
   const slide = SLIDES[currentSlide];
 
   return (
-    <div className="w-full h-full flex-1 min-h-[100dvh] bg-[#f1f5f9] flex flex-col md:py-8 items-center justify-center select-none z-50">
+    <div className="w-full h-full flex-1 min-h-[100dvh] flex flex-col items-center justify-center select-none z-50">
       <div 
-        className="w-full flex-1 md:flex-none md:w-full md:h-[844px] md:max-h-[100dvh] md:rounded-[40px] relative overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(31,110,140,0.15)]"
+        className="w-full flex-1 relative overflow-hidden flex flex-col"
         style={{ background: "linear-gradient(135deg, #9FD3E8 0%, #86C5DF 100%)" }}
         role="region"
         aria-roledescription="carousel"
@@ -271,13 +272,13 @@ export function StoryOnboarding() {
                 const pos = [
                   { top: "10%", left: "8%", delay: "0s", dur: "4s" },
                   { top: "50%", left: "4%", delay: "1.5s", dur: "5s" },
-                  { top: "25%", right: "8%", delay: "0.7s", dur: "4.5s" }
+                  { top: i === 2 ? "calc(10% + 220px)" : "25%", right: i === 2 ? "2%" : "8%", delay: "0.7s", dur: "4.5s" }
                 ][idx];
                 
                 return (
                   <div
                     key={idx}
-                    className="absolute w-16 h-16 rounded-full bg-white/45 backdrop-blur-md shadow-[0_8px_32px_rgba(31,110,140,0.12)] flex items-center justify-center border border-white/60"
+                    className="absolute w-16 h-16 rounded-full bg-white/45 backdrop-blur-md shadow-[0_8px_32px_rgba(31,110,140,0.12)] flex items-center justify-center border border-white/60 z-30"
                     style={{
                       top: pos.top,
                       left: pos.left,
@@ -310,7 +311,7 @@ export function StoryOnboarding() {
                       <div className="absolute inset-0 rounded-full border border-white/50 scale-125" />
                       <div className={`w-full h-full bg-white/90 rounded-full shadow-[0_0_40px_rgba(255,255,255,0.8)] flex items-center justify-center border-4 border-white overflow-hidden ${isActive && !reducedMotion ? 'animate-pulse' : ''}`}>
                         <div className="w-full h-full relative opacity-100 flex items-center justify-center">
-                          <Image src="/logo.png" alt="ManoBal Logo" fill className="object-cover scale-110" priority onError={(e) => (e.currentTarget.style.display='none')} />
+                          <Image src="/logo.png" alt="ManoBal Logo" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover scale-110" priority onError={(e) => (e.currentTarget.style.display='none')} />
                         </div>
                       </div>
                     </div>
@@ -355,6 +356,18 @@ export function StoryOnboarding() {
                       <div className="absolute top-[10%] left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-[#1E8FC0] rounded-full px-6 py-4 flex items-center gap-3 shadow-[0_16px_40px_rgba(31,110,140,0.3)] border border-white/20">
                         <HeartPulse className="w-6 h-6 text-white" />
                         <span className="text-white font-bold whitespace-nowrap text-[15px]">Welfare Support</span>
+                      </div>
+                      {/* Phone mockup — upper-right corner, staggered entrance */}
+                      <div
+                        className="absolute top-[10%] right-[4%] z-10"
+                        style={{
+                          transition: reducedMotion ? 'none' : 'opacity 500ms cubic-bezier(.32,.72,0,1), transform 500ms cubic-bezier(.32,.72,0,1)',
+                          transitionDelay: reducedMotion ? '0ms' : '150ms',
+                          opacity: isActive ? 1 : 0,
+                          transform: isActive ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.92)',
+                        }}
+                      >
+                        <PhoneFrame isActive={isActive} reducedMotion={reducedMotion} />
                       </div>
                     </div>
                   )}
