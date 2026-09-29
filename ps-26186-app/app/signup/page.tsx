@@ -209,7 +209,7 @@ export default function JawanSignupPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">
-                Service Username *
+                Service Username (only lowercase) *
               </label>
               <input
                 id="jawan-username-input"

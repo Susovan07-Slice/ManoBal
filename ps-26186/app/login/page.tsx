@@ -189,7 +189,7 @@ function LoginForm() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs uppercase tracking-wider text-[#64748B] font-bold mb-1.5 font-mono">
-                  Service Username
+                  Service Username (only lowercase)
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#7BA083]">

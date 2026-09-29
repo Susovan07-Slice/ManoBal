@@ -284,7 +284,7 @@ export default function CommanderSignupPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-[#64748B] font-semibold mb-1">
-                    Service Username *
+                    Service Username (only lowercase) *
                   </label>
                   <input
                     id="commander-username-input"

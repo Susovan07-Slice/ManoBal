@@ -84,7 +84,7 @@ export default function MobileLoginPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-[12px] font-semibold text-ink-2 mb-1.5">
-              Service Username
+              Service Username (only lowercase)
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-ink-3">
