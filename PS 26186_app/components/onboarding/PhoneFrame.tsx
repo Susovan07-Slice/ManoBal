@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Activity, HeartPulse, TrendingUp, Shield, ChevronRight } from "lucide-react";
 
 /**
@@ -61,8 +62,8 @@ export function PhoneFrame({
             {/* Mini header bar */}
             <div className="flex items-center justify-between px-2 pt-2.5 pb-1">
               <div className="flex items-center gap-1">
-                <div className="w-4 h-4 rounded-full bg-white/80 flex items-center justify-center">
-                  <HeartPulse className="w-2.5 h-2.5 text-[#2A9BC8]" />
+                <div className="w-4 h-4 rounded-full bg-white/80 flex items-center justify-center overflow-hidden">
+                  <Image src="/logo.png" alt="ManoBal Logo" width={16} height={16} className="object-cover scale-110" />
                 </div>
                 <span className="text-[5px] font-bold text-[#14232E] tracking-tight">
                   ManoBal
