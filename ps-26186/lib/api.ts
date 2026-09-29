@@ -76,7 +76,7 @@ export async function apiClient<T>(
   let response: Response;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
     response = await fetch(url, {
       ...rest,
       headers: requestHeaders,
