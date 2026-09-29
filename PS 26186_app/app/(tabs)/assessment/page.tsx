@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { CheckCircle2, ChevronLeft, ArrowRight, HeartPulse, AlertTriangle, Sparkles, Clock } from "lucide-react";
 import Link from "next/link";
 import { apiClient } from "@/lib/api";
+import { StressEmojiScale } from "@/components/ui/StressEmojiScale";
 
 const SCREENS = [
   { id: "intro", type: "intro", bg: "/assessment_pics/1.png", cardTopColor: "#d3d8cd", title: "Daily Assessment", subtitle: "Single unified operational duty, recovery, and wellness reporting." },
@@ -150,10 +151,11 @@ function AssessmentContent() {
       if (screen.id === "physicalActivity") { value = physicalActivity; setter = setPhysicalActivity; }
 
       return (
-        <div className="w-full">
-          <div className="flex justify-between items-center mb-6">
-            <span className="text-mb-text-primary font-semibold text-[13px] tracking-wider uppercase">{screen.title}</span>
-            <span className="font-mono font-bold text-mb-accent text-2xl">{value} <span className="text-xs font-normal text-mb-text-secondary">{screen.unit}</span></span>
+        <div className="w-full mt-4">
+          <div className="flex justify-end items-center mb-6">
+            <span className="text-3xl font-semibold text-brand-500 tabular-nums">
+              {value} <span className="text-sm text-ink-3">{screen.unit}</span>
+            </span>
           </div>
           <input
             type="range"
@@ -162,7 +164,7 @@ function AssessmentContent() {
             step={screen.step}
             value={value}
             onChange={(e) => setter(parseFloat(e.target.value))}
-            className="w-full"
+            className="w-full accent-brand-500"
           />
         </div>
       );
@@ -180,8 +182,8 @@ function AssessmentContent() {
       const isIndexBased = ["interestScore", "discouragedScore", "concentrationScore"].includes(screen.id);
 
       return (
-        <div className="w-full">
-          <div className="flex bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-1 shadow-inner gap-1">
+        <div className="w-full mt-4">
+          <div className="flex bg-sky-50 border border-sky-200 rounded-2xl p-1 gap-1">
             {screen.options?.map((opt, idx) => {
               const actualValue = isIndexBased ? idx : opt;
               const isSelected = value === actualValue;
@@ -190,10 +192,10 @@ function AssessmentContent() {
                   key={opt}
                   type="button"
                   onClick={() => setter(actualValue)}
-                  className={`flex-1 py-1.5 text-sm rounded-xl font-bold transition-all duration-300 border ${
+                  className={`flex-1 py-1.5 text-sm font-bold transition-all duration-300 border ${
                     isSelected
-                      ? "bg-gradient-to-b from-mb-accent/20 to-mb-accent/5 border-mb-accent/30 text-mb-text-primary shadow-sm"
-                      : "border-transparent text-mb-text-muted hover:text-mb-text-primary hover:bg-white/50"
+                      ? "bg-white border-brand-500/30 text-ink shadow-sm rounded-xl"
+                      : "border-transparent text-ink-3 hover:text-ink hover:bg-white/50 rounded-xl"
                   }`}
                 >
                   {opt}
@@ -212,7 +214,7 @@ function AssessmentContent() {
       if (screen.id === "moodScore") { value = moodScore; setter = setMoodScore; }
 
       return (
-        <div className="w-full">
+        <div className="w-full mt-4">
           <RatingSlider
             label=""
             value={value}
@@ -229,12 +231,11 @@ function AssessmentContent() {
 
   if (evaluating) {
     return (
-      <div className="flex flex-col h-full items-center justify-center text-mb-text-secondary p-6 text-center space-y-4">
-        <div className="absolute inset-0 z-[-1] bg-[#0a110e]" />
-        <div className="w-12 h-12 border-3 border-mb-accent border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col h-full items-center justify-center p-6 text-center space-y-4">
+        <div className="w-12 h-12 border-3 border-brand-500 border-t-transparent rounded-full animate-spin" />
         <div>
-          <p className="text-base font-semibold text-mb-text-primary">Running AI Stress Pipeline...</p>
-          <p className="text-xs text-mb-text-secondary mt-1 font-mono">
+          <p className="text-base font-semibold text-ink">Running AI Stress Pipeline...</p>
+          <p className="text-xs text-ink-3 mt-1 font-mono">
             Evaluating combined operational & wellbeing telemetry via LightGBM
           </p>
         </div>
@@ -277,102 +278,135 @@ function AssessmentContent() {
     ).slice(0, 3);
 
     const categoryColor =
-      category === "Critical" ? "text-red-500 border-red-500/30 bg-red-500/10" :
-      category === "High" ? "text-amber-500 border-amber-500/30 bg-amber-500/10" :
-      category === "Elevated" ? "text-yellow-400 border-yellow-400/30 bg-yellow-400/10" :
-      category === "Moderate" ? "text-blue-400 border-blue-400/30 bg-blue-400/10" :
-      "text-emerald-400 border-emerald-400/30 bg-emerald-400/10";
+      category === "Critical" ? "text-danger bg-danger/10 border-danger/20" :
+      category === "High" ? "text-alert bg-alert-bg border-alert/20" :
+      category === "Elevated" ? "text-warn bg-warn-bg border-warn/20" :
+      category === "Moderate" ? "text-brand-500 bg-brand-100 border-brand-500/20" :
+      "text-ok bg-ok-bg border-ok/20";
 
     const barColor =
-      category === "Critical" ? "bg-red-500" :
-      category === "High" ? "bg-amber-500" :
-      category === "Elevated" ? "bg-yellow-400" :
-      category === "Moderate" ? "bg-blue-400" :
-      "bg-emerald-400";
+      category === "Critical" ? "bg-danger" :
+      category === "High" ? "bg-alert" :
+      category === "Elevated" ? "bg-warn" :
+      category === "Moderate" ? "bg-brand-500" :
+      "bg-ok";
 
     return (
       <div className="p-5 flex flex-col gap-5 pb-32 relative min-h-screen">
         {/* Status Confirmation Banner */}
-        <div className="p-4 bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl flex items-center space-x-3 mt-2 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-          <CheckCircle2 className="w-7 h-7 text-[#00A896] shrink-0" />
+        <div className="glass-card p-5 flex items-center gap-3 bg-ok-bg/30 border-ok/20">
+          <div className="w-8 h-8 rounded-full bg-ok-bg flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-ok" />
+          </div>
           <div>
-            <h3 className="text-sm font-bold text-gray-800 tracking-wide">Daily Assessment Completed</h3>
+            <h3 className="text-ink font-semibold">Daily Assessment Completed</h3>
           </div>
         </div>
 
         {/* Welfare Risk Score Card */}
-        <div className="flex flex-col items-center bg-white/85 backdrop-blur-[20px] border border-white/60 rounded-[32px] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.06)] text-center">
-          <span className="text-[11px] uppercase font-bold tracking-[0.2em] text-gray-500 mb-2">
-            Continuous Welfare Risk
-          </span>
-          <div className="flex items-baseline justify-center gap-1 my-2">
-            <span className="text-[72px] font-light text-gray-800 tracking-tight leading-none">
-              {scoreVal.toFixed(1)}
-            </span>
-            <span className="text-2xl font-normal text-gray-500">/ 100</span>
+        <div className="glass-card p-6 text-center">
+          <span className="eyebrow block mb-4">Continuous Welfare Risk</span>
+          
+          <div className="relative w-48 h-48 mx-auto mb-4 flex items-center justify-center">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="#BFE3F0"
+                strokeWidth="8"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                className={`transition-all duration-1000 ease-out`}
+                stroke={category === 'Critical' ? '#E5484D' : category === 'High' ? '#F0508C' : category === 'Elevated' ? '#F5A623' : category === 'Moderate' ? '#2A9BC8' : '#2FBF8F'}
+                strokeWidth="8"
+                strokeDasharray={`${(scoreVal / 100) * 283} 283`}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-[44px] font-semibold text-ink tabular-nums leading-none">
+                {scoreVal.toFixed(1)}
+              </span>
+              <span className="text-sm text-ink-3">/ 100</span>
+            </div>
           </div>
 
-          <div className={`px-5 py-1.5 rounded-full border text-sm font-bold mt-2 mb-5 ${categoryColor}`}>
+          <div className={`inline-block px-4 py-1.5 rounded-full border text-sm font-semibold mb-4 ${categoryColor}`}>
             {category} Concern
           </div>
 
           {/* Continuous Progress Bar */}
-          <div className="w-full max-w-xs h-2.5 bg-gray-200 rounded-full overflow-hidden relative">
+          <div className="w-full bg-sky-200 rounded-full h-2 overflow-hidden relative mb-2">
             <div
               className={`h-full rounded-full transition-all duration-1000 ease-out ${barColor}`}
               style={{ width: `${Math.min(100, Math.max(5, scoreVal))}%` }}
             />
           </div>
+
+          <StressEmojiScale score={scoreVal} />
         </div>
 
         {/* What is Contributing (Risk Factors) */}
         {topFactors.length > 0 && (
-          <div className="bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-            <h4 className="text-xs uppercase font-bold tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4 text-amber-500" />
-              What is contributing?
+          <div className="glass-card p-5">
+            <h4 className="eyebrow mb-4 flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-warn-bg flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-warn" />
+              </div>
+              Contributing Factors
             </h4>
-            <ul className="space-y-2 text-sm text-gray-800">
+            <div className="flex flex-wrap gap-2">
               {topFactors.map((factor, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <span className="text-amber-500 shrink-0 font-bold">•</span>
-                  <span>{factor}</span>
-                </li>
+                <span key={idx} className="px-3 py-1.5 bg-sky-50 rounded-full text-[12px] text-ink-2 font-medium border border-sky-200">
+                  {factor}
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
         {/* Protective Factors */}
         {protective.length > 0 && (
-          <div className="bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-            <h4 className="text-xs uppercase font-bold tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-500" />
+          <div className="glass-card p-5">
+            <h4 className="eyebrow mb-4 flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-ok-bg flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-ok" />
+              </div>
               Protective Factors
             </h4>
-            <ul className="space-y-2 text-sm text-gray-800">
+            <div className="flex flex-wrap gap-2">
               {protective.map((factor, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <span className="text-emerald-500 shrink-0 font-bold">•</span>
-                  <span>{factor}</span>
-                </li>
+                <span key={idx} className="px-3 py-1.5 bg-sky-50 rounded-full text-[12px] text-ink-2 font-medium border border-sky-200">
+                  {factor}
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
         {/* Recommended Action */}
         {assessmentResult.recommendations && assessmentResult.recommendations.length > 0 && (
-          <div className="bg-white/85 backdrop-blur-xl border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-            <h4 className="text-xs uppercase font-bold tracking-wider text-[#00A896] mb-3 flex items-center gap-1.5">
-              <HeartPulse className="w-4 h-4 text-[#00A896]" />
+          <div className="glass-card p-5">
+            <h4 className="eyebrow mb-4 flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
+                <HeartPulse className="w-5 h-5 text-brand-500" />
+              </div>
               Recommended Guidance
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {assessmentResult.recommendations.slice(0, 2).map((rec: any, idx: number) => (
-                <div key={idx} className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-800">
-                  <div className="font-semibold text-xs text-[#00A896] mb-0.5">{rec.recommendation_type || rec.type || "Welfare Action"}</div>
-                  <div>{rec.recommendation_text || rec.action || String(rec)}</div>
+                <div key={idx} className="p-4 bg-sky-50/50 rounded-2xl border border-sky-200/50">
+                  <div className="font-semibold text-sm text-ink mb-1">{rec.recommendation_type || rec.type || "Welfare Action"}</div>
+                  <div className="text-ink-3 text-sm mb-3">{rec.recommendation_text || rec.action || String(rec)}</div>
+                  <button onClick={() => handleRecStatusChange(rec.id, 'IN_PROGRESS')} className="rounded-full text-[11px] px-3 py-1 border border-brand-500 text-brand-500">
+                    {rec.status || 'Mark in Progress'}
+                  </button>
                 </div>
               ))}
             </div>
@@ -380,16 +414,16 @@ function AssessmentContent() {
         )}
 
         {/* Navigation Action Buttons */}
-        <div className="flex gap-4 mt-auto w-full pt-2">
+        <div className="flex gap-3 mt-4 mb-8">
           <Link
             href="/"
-            className="flex-1 py-4 bg-white/85 backdrop-blur-md border border-white/60 hover:bg-white rounded-2xl text-[15px] font-bold text-gray-800 text-center transition-colors shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+            className="flex-1 py-3 bg-white border border-sky-200 hover:bg-sky-50 rounded-full text-[15px] font-bold text-ink text-center transition-colors"
           >
             Dashboard
           </Link>
           <Link
             href="/trends"
-            className="flex-1 py-4 bg-[#00a896] shadow-[0_8px_20px_rgba(0,168,150,0.3)] hover:opacity-90 rounded-2xl text-[15px] font-bold text-white text-center transition-colors"
+            className="flex-1 py-3 bg-brand-500 hover:opacity-90 rounded-full text-[15px] font-bold text-white text-center transition-colors"
           >
             View Trends
           </Link>
@@ -398,85 +432,80 @@ function AssessmentContent() {
     );
   }
 
-  // Active Screen UI
   return (
     <div className="relative min-h-screen flex flex-col">
-      {/* Dynamic Background Image overlay for just this page */}
-      {SCREENS.map((s, idx) => (
-        <div
-          key={s.id}
-          className={`absolute inset-0 z-[-1] bg-cover bg-center transition-opacity duration-700 ease-in-out ${
-            idx === currentIndex ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ backgroundImage: `url('${s.bg}')` }}
-        />
-      ))}
-      <div className="absolute inset-0 z-[-1] bg-gradient-to-b from-transparent via-transparent to-[#0a110e]/80" />
-
       {/* Top Header Section */}
       <div className="pt-12 px-6 pb-4 flex justify-between items-center z-10">
         <button
           onClick={currentIndex > 0 ? handleBack : undefined}
-          className={`p-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white transition-opacity ${currentIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          className={`p-2 rounded-full bg-white border border-sky-200 text-ink transition-opacity shadow-sm ${currentIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         {currentIndex > 0 && currentIndex < SCREENS.length - 1 && (
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-white/90 tracking-widest uppercase">
+            <span className="text-[11px] font-bold text-ink-3 tracking-widest uppercase">
               {String(currentIndex).padStart(2, '0')} / {String(SCREENS.length - 2).padStart(2, '0')}
             </span>
           </div>
         )}
-        <div className="w-9 h-9" /> {/* spacer */}
+        <div className="w-9 h-9" />
       </div>
 
-      {/* Main Content Area (bottom-aligned) */}
-      <div className="mt-auto p-5 pb-32 z-10 flex flex-col gap-5 w-full">
-        <div 
-          className="rounded-[32px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.12)] min-h-[220px] flex flex-col justify-center relative overflow-hidden border border-white/60"
-          style={{
-            background: `linear-gradient(to bottom, ${screen.cardTopColor} 0%, #f3f5f0 45%, #fdfcf8 100%)`
-          }}
-        >
-          
-          <div className="mb-8">
-            {screen.section && (
-              <span className="text-[10px] text-mb-accent font-bold tracking-widest uppercase block mb-1.5">{screen.section}</span>
-            )}
-            <h2 className="text-xl font-bold text-mb-text-primary tracking-wide leading-snug">{screen.title}</h2>
-            {screen.subtitle && (
-              <p className="text-[12px] text-mb-text-secondary mt-1.5">{screen.subtitle}</p>
+      {/* Main Content Area (center-aligned, pushed up slightly) */}
+      <div className="flex-1 flex flex-col justify-center p-5 pb-40 z-10 w-full">
+        {screen.type === "intro" ? (
+          <div className="glass-card p-8 text-center flex flex-col items-center animate-fade-up">
+            <h2 className="text-2xl font-bold text-ink">{screen.title}</h2>
+            <p className="text-[14px] text-ink-2 mt-2 mb-8">{screen.subtitle}</p>
+            <Button onClick={handleNext} className="w-full justify-center gap-2 rounded-full py-4 text-base bg-brand-500 text-white">
+              Start Assessment <ArrowRight className="w-5 h-5" />
+            </Button>
+          </div>
+        ) : screen.type === "completion" ? (
+          <div className="glass-card p-8 text-center flex flex-col items-center animate-fade-up">
+            <div className="w-16 h-16 rounded-full bg-ok-bg flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-8 h-8 text-ok" />
+            </div>
+            <h2 className="text-2xl font-bold text-ink">{screen.title}</h2>
+            <p className="text-[14px] text-ink-2 mt-2 mb-8">{screen.subtitle}</p>
+            <Button onClick={handleSubmitAssessment} className="w-full justify-center gap-2 rounded-full py-4 text-base bg-brand-500 text-white">
+              Submit Assessment <CheckCircle2 className="w-5 h-5" />
+            </Button>
+            {error && (
+              <div className="mt-4 text-danger text-sm">
+                {error}
+                <button onClick={handleSubmitAssessment} className="ml-2 px-3 py-1 bg-white text-brand-500 border border-sky-200 rounded-full text-xs">
+                  Retry
+                </button>
+              </div>
             )}
           </div>
-
-          {screen.type === "intro" ? (
-             <div className="space-y-4 mt-auto">
-               <Button onClick={handleNext} className="w-full justify-center gap-2 bg-mb-accent hover:opacity-90 text-mb-text-dark font-bold py-4 rounded-2xl shadow-lg shadow-teal-900/20 text-base">
-                 Start Assessment <ArrowRight className="w-5 h-5" />
-               </Button>
-             </div>
-          ) : screen.type === "completion" ? (
-            <div className="space-y-4 mt-auto">
-               <Button onClick={handleSubmitAssessment} className="w-full justify-center gap-2 bg-mb-accent hover:opacity-90 text-mb-text-dark font-bold py-4 rounded-2xl shadow-lg shadow-teal-900/20 text-base">
-                 Submit Assessment <CheckCircle2 className="w-5 h-5" />
-               </Button>
+        ) : (
+          <div className="glass-card p-6 animate-fade-up w-full flex flex-col">
+            <div className="mb-2">
+              {screen.section && (
+                <span className="eyebrow mb-2 block">{screen.section}</span>
+              )}
+              <h2 className="text-xl font-bold text-ink leading-snug">{screen.title}</h2>
+              {screen.subtitle && (
+                <p className="text-[13px] text-ink-3 mt-1">{screen.subtitle}</p>
+              )}
             </div>
-          ) : (
-             <div className="flex-1 flex flex-col justify-center">
-               {renderControl()}
-               <div className="mt-10 flex gap-3">
-                 <Button onClick={handleBack} className="flex-1 justify-center gap-1 bg-white/5 hover:bg-white/10 border border-white/10 text-mb-text-primary font-semibold py-3.5 rounded-2xl transition-colors">
-                   <ChevronLeft className="w-4 h-4" /> Previous
-                 </Button>
-                 <Button onClick={handleNext} className="flex-1 justify-center gap-2 bg-mb-glass hover:bg-white/10 border border-white/20 text-mb-text-primary font-bold py-3.5 rounded-2xl transition-colors">
-                   Next <ArrowRight className="w-4 h-4" />
-                 </Button>
-               </div>
-             </div>
-          )}
 
-        </div>
+            <div className="flex-1 flex flex-col justify-center">
+              {renderControl()}
+              <div className="flex justify-between items-center mt-6 mb-4 gap-3">
+                <Button variant="ghost" onClick={handleBack} className="flex-1 justify-center gap-1 py-3 rounded-full border border-sky-200 bg-white text-ink hover:bg-sky-50">
+                  <ChevronLeft className="w-4 h-4" /> Previous
+                </Button>
+                <Button onClick={handleNext} className="flex-1 justify-center gap-2 py-3 rounded-full bg-brand-500 text-white">
+                  Next <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -486,8 +515,8 @@ export default function AssessmentPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-screen items-center justify-center p-6 text-mb-text-secondary bg-[#0a110e]">
-          <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin" />
+        <div className="flex h-screen items-center justify-center p-6 bg-white/50">
+          <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

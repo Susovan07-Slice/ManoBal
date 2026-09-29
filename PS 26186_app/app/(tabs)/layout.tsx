@@ -26,6 +26,14 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (mounted && !isLoading && !user) {
+      try {
+        if (!sessionStorage.getItem('manobal_onboarding_seen')) {
+          router.replace('/welcome');
+          return;
+        }
+      } catch (e) {
+        // ignore
+      }
       router.replace('/login');
     }
   }, [mounted, isLoading, user, router]);
@@ -35,9 +43,9 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
 
   if (shouldBlock) {
     return (
-      <div className="flex flex-col h-full items-center justify-center bg-transparent backdrop-blur-sm text-mb-text-secondary p-6 space-y-3">
-        <div className="w-8 h-8 border-2 border-mb-accent border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-mono tracking-widest uppercase">
+      <div className="flex flex-col h-full items-center justify-center bg-transparent p-6 space-y-3">
+        <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <span className="text-[12px] font-semibold text-ink-3 tracking-wide">
           Verifying Service Token...
         </span>
         <a
@@ -57,12 +65,10 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="flex flex-col h-full overflow-hidden absolute inset-0">
       <TopHeader title={title} />
-      <main className="flex-1 overflow-y-auto bg-transparent pb-28">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-transparent pb-40 min-w-0">
         {children}
       </main>
       <BottomTabBar />
     </div>
   );
 }
-
-

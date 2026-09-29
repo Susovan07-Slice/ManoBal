@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { submitWelfareRequest } from "@/lib/welfare";
 import { WelfareRequestOut } from "@/types/api";
-import { X, HeartPulse, Send, AlertTriangle, CheckCircle2, ShieldCheck } from "lucide-react";
+import { X, HeartPulse, Send, AlertTriangle, CheckCircle2, ShieldCheck, Info } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface WelfareSupportSheetProps {
@@ -61,101 +61,111 @@ export function WelfareSupportSheet({
   };
 
   return (
-    <div className="absolute inset-0 z-[60] bg-black/60 backdrop-blur-sm flex flex-col justify-end animate-in fade-in duration-200">
-      <div className="bg-white/95 backdrop-blur-2xl border-t border-white/60 rounded-t-3xl max-h-[90%] overflow-y-auto p-5 space-y-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom duration-300">
-        {/* Header */}
-        <div className="flex justify-between items-start border-b border-gray-200 pb-3">
-          <div className="flex items-center space-x-2">
-            <HeartPulse className="w-5 h-5 text-mb-accent" />
-            <div>
-              <h3 className="text-base font-bold text-gray-800">Request Welfare Support</h3>
-              <p className="text-[11px] text-gray-500 font-mono">Voluntary &bull; Non-Punitive Decision Support</p>
+    <div className="absolute inset-0 z-[60] bg-black/40 backdrop-blur-sm flex flex-col justify-end animate-in fade-in duration-200">
+      <div className="bg-white rounded-t-[28px] max-h-[90dvh] flex flex-col shadow-[0_-16px_40px_rgba(31,110,140,0.15)] border-t border-white/60 animate-sheet-up">
+        <div className="w-10 h-1 bg-ink-3/30 rounded-full mx-auto mt-3 mb-1" />
+        
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* Header */}
+          <div className="flex justify-between items-start border-b border-sky-200/50 pb-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
+                <HeartPulse className="w-5 h-5 text-brand-500" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-ink">Request Welfare Support</h3>
+                <p className="text-[11px] text-ink-3 font-medium">Voluntary &bull; Non-Punitive Decision Support</p>
+              </div>
             </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full text-ink-3 hover:text-ink hover:bg-sky-50 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          {error && (
+            <div className="p-3 bg-alert-bg border border-alert/30 rounded-2xl text-[13px] text-ink flex items-center space-x-2">
+              <AlertTriangle className="w-4 h-4 text-alert shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form id="welfare-form" onSubmit={handleSubmit} className="space-y-4">
+            {/* Category */}
+            <div className="space-y-1.5">
+              <label className="text-[12px] font-semibold text-ink-2 block mb-1.5">Support Category</label>
+              <div className="grid grid-cols-1 gap-1.5">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategory(cat)}
+                    className={`text-left text-[13px] p-3 rounded-2xl border transition-all h-[52px] flex items-center ${
+                      category === cat
+                        ? "bg-brand-100 text-brand-600 border-brand-500 font-semibold shadow-sm"
+                        : "bg-white border-sky-200 text-ink-2 hover:bg-sky-50"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Urgency */}
+            <div className="space-y-1.5 pt-2 border-t border-sky-200/50">
+              <label className="text-[12px] font-semibold text-ink-2 block mb-1.5">Requested Urgency</label>
+              <div className="grid grid-cols-3 gap-2">
+                {URGENCIES.map((u) => (
+                  <button
+                    key={u.value}
+                    type="button"
+                    onClick={() => setUrgency(u.value)}
+                    className={`p-3 rounded-2xl border text-center transition-all shadow-sm ${
+                      urgency === u.value
+                        ? u.value === "Routine"
+                          ? "bg-brand-100 text-brand-600 border-brand-500 font-bold"
+                          : u.value === "Medium"
+                          ? "bg-warn-bg text-warn border-warn font-bold"
+                          : "bg-alert-bg text-alert border-alert font-bold"
+                        : "bg-white border-sky-200 text-ink-2 hover:bg-sky-50"
+                    }`}
+                  >
+                    <span className="text-[13px] block">{u.label}</span>
+                    <span className="text-[10px] font-normal block mt-0.5 opacity-80">{u.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Optional Message */}
+            <div className="space-y-1.5 pt-2 border-t border-sky-200/50">
+              <div className="flex justify-between items-center">
+                <label className="text-[12px] font-semibold text-ink-2">Brief Note / Context (Optional)</label>
+                <span className="text-[11px] text-ink-3">Max 1000 chars</span>
+              </div>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={1000}
+                rows={3}
+                placeholder="E.g., I would like to consult regarding consecutive night shifts or request leave pacing..."
+                className="w-full bg-white border border-sky-200 rounded-2xl p-4 text-[13px] text-ink placeholder:text-ink-3 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition"
+              />
+            </div>
+
+            {/* Disclaimer */}
+            <div className="text-[11px] text-ink-3 italic leading-relaxed p-3 bg-brand-100/50 rounded-xl flex items-start gap-2">
+              <Info className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" />
+              <p>This request will appear in your battalion Commander & Welfare Officer dashboard for supportive review. It is not disciplinary.</p>
+            </div>
+          </form>
         </div>
 
-        {error && (
-          <div className="p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-200 flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-mb-danger shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Category */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-500 block">Support Category</label>
-            <div className="grid grid-cols-1 gap-1.5">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setCategory(cat)}
-                  className={`text-left text-xs p-2.5 rounded-xl border transition-colors ${
-                    category === cat
-                      ? "bg-teal-50 text-teal-700 border-teal-300 font-bold shadow-sm"
-                      : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Urgency */}
-          <div className="space-y-1.5 pt-2 border-t border-gray-200">
-            <label className="text-xs font-semibold text-gray-500 block">Requested Urgency</label>
-            <div className="grid grid-cols-3 gap-2">
-              {URGENCIES.map((u) => (
-                <button
-                  key={u.value}
-                  type="button"
-                  onClick={() => setUrgency(u.value)}
-                  className={`p-2 rounded-xl border text-center transition-colors shadow-sm ${
-                    urgency === u.value
-                      ? u.value === "High"
-                        ? "bg-rose-50 text-rose-700 border-rose-300 font-bold"
-                        : "bg-teal-50 text-teal-700 border-teal-300 font-bold"
-                      : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800 text-xs"
-                  }`}
-                >
-                  <span className="text-xs block">{u.label}</span>
-                  <span className="text-[9px] font-normal block mt-0.5 opacity-80">{u.desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Optional Message */}
-          <div className="space-y-1.5 pt-2 border-t border-gray-200">
-            <div className="flex justify-between items-center text-xs">
-              <label className="font-semibold text-gray-500">Brief Note / Context (Optional)</label>
-              <span className="text-[10px] text-gray-400">Max 1000 chars</span>
-            </div>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              maxLength={1000}
-              rows={3}
-              placeholder="E.g., I would like to consult regarding consecutive night shifts or request leave pacing..."
-              className="w-full bg-white border border-gray-200 rounded-xl p-3 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-mb-accent focus:ring-1 focus:ring-mb-accent transition"
-            />
-          </div>
-
-          {/* Disclaimer */}
-          <p className="text-[10px] text-gray-500 italic leading-relaxed">
-            This request will appear in your battalion Commander & Welfare Officer dashboard for supportive review. It is not disciplinary.
-          </p>
-
-          {/* Buttons */}
-          <div className="flex gap-2.5 pt-1 pb-2">
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-sky-200/50 p-4" style={{paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))'}}>
+          <div className="flex gap-2.5">
             <Button
               type="button"
               variant="ghost"
@@ -167,8 +177,9 @@ export function WelfareSupportSheet({
             </Button>
             <Button
               type="submit"
+              form="welfare-form"
               disabled={submitting}
-              className="flex-1 justify-center gap-1.5 bg-gradient-to-r from-mb-accent to-mb-accent text-mb-text-dark font-bold shadow-md"
+              className="flex-1 justify-center gap-1.5"
             >
               {submitting ? (
                 <span>Submitting...</span>
@@ -180,7 +191,7 @@ export function WelfareSupportSheet({
               )}
             </Button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

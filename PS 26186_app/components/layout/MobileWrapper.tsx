@@ -3,14 +3,11 @@ import { ReactNode } from 'react';
 export default function MobileWrapper({ children }: { children: ReactNode }) {
   return (
     <div 
-      className="max-w-[420px] mx-auto min-h-screen relative shadow-[0_8px_30px_rgba(0,0,0,0.12)] bg-cover bg-center bg-no-repeat overflow-hidden"
-      style={{ backgroundImage: "url('/gallery_bg.png')" }}
+      className="max-w-md mx-auto min-h-[100dvh] relative shadow-[0_0_60px_rgba(31,110,140,0.08)] overflow-x-hidden w-full min-w-0"
     >
-      <div className="relative z-10 flex flex-col min-h-screen bg-transparent">
+      <div className="relative z-10 flex flex-col min-h-[100dvh] bg-transparent">
         {children}
       </div>
     </div>
   );
 }
-
-

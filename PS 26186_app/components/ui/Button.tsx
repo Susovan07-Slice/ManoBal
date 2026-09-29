@@ -1,4 +1,4 @@
-﻿import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { ButtonHTMLAttributes, forwardRef } from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -11,12 +11,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "flex items-center justify-center min-h-[48px] px-6 rounded-xl font-medium transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none active:scale-95",
+          "flex items-center justify-center h-[52px] px-6 rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none active:scale-[.97]",
           {
-            "bg-mb-accent text-mb-text-primary hover:bg-mb-accent shadow-lg shadow-teal-600/20": variant === "primary",
-            "bg-mb-glass-strong backdrop-blur-md border border-mb-glass-border text-mb-text-primary hover:bg-white/10 shadow-lg shadow-black/20": variant === "secondary",
-            "bg-red-500/80 backdrop-blur-md text-mb-text-primary hover:bg-red-400 border border-red-500/30": variant === "danger",
-            "bg-transparent text-mb-text-secondary hover:bg-white/10": variant === "ghost",
+            "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-[0_16px_40px_rgba(31,110,140,0.22)] hover:shadow-[0_16px_40px_rgba(31,110,140,0.30)]": variant === "primary",
+            "bg-white/70 backdrop-blur-md border border-brand-500/20 text-brand-600 hover:bg-white/90 shadow-[0_10px_30px_rgba(31,110,140,0.12)]": variant === "secondary",
+            "bg-gradient-to-r from-alert to-danger text-white shadow-[0_16px_40px_rgba(240,80,140,0.22)]": variant === "danger",
+            "bg-transparent text-ink-2 hover:text-ink hover:bg-sky-50": variant === "ghost",
           },
           className
         )}

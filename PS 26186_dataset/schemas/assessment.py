@@ -12,7 +12,7 @@ class AssessmentOverride(BaseModel):
     physical_activity_hours_per_week: Optional[float] = Field(None, ge=0.0, le=50.0, description="Weekly physical conditioning hours")
     operational_exposure: Optional[Literal["Low", "Medium", "High"]] = Field(None, description="Current operational hazard exposure")
     remote_posting: Optional[Literal["Yes", "No"]] = Field(None, description="Remote posting status")
-    mood_score: Optional[int] = Field(None, ge=1, le=5, description="Self-reported mood index (1-5)")
+    mood_score: Optional[int] = Field(None, ge=1, le=7, description="Self-reported mood index (1-7)")
     burnout_symptoms: Optional[Literal["Rarely", "Sometimes", "Often"]] = Field(None, description="Self-reported burnout frequency")
     physical_fatigue: Optional[int] = Field(None, ge=1, le=5, description="Self-reported physical fatigue rating (1-5)")
     interest_score: Optional[int] = Field(None, ge=0, le=3, description="Interest in daily tasks (0=Very interested, 1=Moderately, 2=Low, 3=Very low)")

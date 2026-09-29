@@ -26,17 +26,18 @@ export function ConfirmSheet({
   if (!open) return null;
 
   return (
-    <div className="absolute inset-0 z-[60] flex flex-col justify-end bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="relative bg-mb-glass-strong backdrop-blur-2xl w-full rounded-t-3xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border-t border-mb-glass-border animate-in slide-in-from-bottom-full pb-8">
+    <div className="absolute inset-0 z-[60] flex flex-col justify-end bg-black/40 backdrop-blur-sm animate-in fade-in">
+      <div className="relative bg-white w-full rounded-t-[28px] p-6 shadow-[0_-16px_40px_rgba(31,110,140,0.15)] border-t border-white/60 animate-in slide-in-from-bottom-full pb-8">
+        <div className="w-10 h-1 bg-ink-3/30 rounded-full mx-auto mb-4" />
         <button
           onClick={onCancel}
-          className="absolute top-5 right-5 p-2 text-white/50 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors z-10"
+          className="absolute top-5 right-5 p-2 text-ink-3 hover:text-ink bg-sky-50 hover:bg-sky-100 rounded-full transition-colors z-10"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
-        {title && <h2 className="text-xl font-semibold mb-2 text-white pr-8">{title}</h2>}
-        <p className="text-white/80 mb-8">{message}</p>
+        {title && <h2 className="text-xl font-semibold mb-2 text-ink pr-8">{title}</h2>}
+        <p className="text-ink-2 mb-8">{message}</p>
         <div className="flex flex-col gap-3">
           <Button variant={isDanger ? "danger" : "primary"} onClick={onConfirm}>
             {confirmLabel}
@@ -49,5 +50,3 @@ export function ConfirmSheet({
     </div>
   );
 }
-
-
