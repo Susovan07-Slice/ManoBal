@@ -35,8 +35,8 @@ def register(
     Administrative user provisioning endpoint.
     Restricted to system administrators.
     """
-    clean_username = user_in.username.strip().lower()
-    existing_user = db.query(User).filter(func.lower(User.username) == clean_username).first()
+    clean_username = user_in.username.strip()
+    existing_user = db.query(User).filter(func.lower(User.username) == clean_username.lower()).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -95,7 +95,7 @@ def register_commander(signup_data: CommanderSignup, db: Session = Depends(get_d
     Binds the account permanently to a validated canonical Battalion and Location scope.
     Returns signed JWT token with scope claims.
     """
-    clean_username = signup_data.username.strip().lower()
+    clean_username = signup_data.username.strip()
 
     # 1. Validate organizational scope against canonical options
     try:
@@ -108,7 +108,7 @@ def register_commander(signup_data: CommanderSignup, db: Session = Depends(get_d
         )
 
     # 2. Check duplicate username
-    existing_user = db.query(User).filter(func.lower(User.username) == clean_username).first()
+    existing_user = db.query(User).filter(func.lower(User.username) == clean_username.lower()).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -173,7 +173,7 @@ def register_jawan(signup_data: JawanSignup, db: Session = Depends(get_db)):
     Enforces uniqueness of username and personnel_code, and validates canonical battalion and location.
     Returns an immediate signed JWT token for seamless session initialization.
     """
-    clean_username = signup_data.username.strip().lower()
+    clean_username = signup_data.username.strip()
     clean_code = signup_data.personnel_code.strip().upper()
 
     # 1. Validate organizational scope
@@ -187,7 +187,7 @@ def register_jawan(signup_data: JawanSignup, db: Session = Depends(get_db)):
         )
 
     # 2. Check duplicate username and existing personnel
-    existing_user = db.query(User).filter(func.lower(User.username) == clean_username).first()
+    existing_user = db.query(User).filter(func.lower(User.username) == clean_username.lower()).first()
     existing_personnel = db.query(Personnel).filter(func.upper(Personnel.personnel_code) == clean_code).first()
 
     try:
@@ -335,7 +335,7 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
     Authenticates username and password, returning a signed JWT Bearer access token
     populated with organizational scope metadata.
     """
-    clean_username = login_data.username.strip().lower()
+    clean_username = login_data.username.strip()
     user = db.query(User).filter(User.username == clean_username).first()
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(

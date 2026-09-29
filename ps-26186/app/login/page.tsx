@@ -41,7 +41,7 @@ function LoginForm() {
     setError(null);
     setIsLoading(true);
     try {
-      await login(username.trim().toLowerCase(), password);
+      await login(username.trim(), password);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please verify your credentials.');
