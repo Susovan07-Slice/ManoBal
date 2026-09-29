@@ -28,6 +28,10 @@ sys.exit(1)
 echo "Executing database migrations (alembic upgrade head)..."
 alembic upgrade head
 
+# Initialize schema and sync all columns
+echo "Ensuring full database schema synchronization..."
+python -m db.init_db
+
 # Seed synthetic demo data if tables are empty
 echo "Seeding synthetic demo records (if not present)..."
 python -m db.seed
