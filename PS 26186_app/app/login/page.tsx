@@ -23,7 +23,7 @@ export default function MobileLoginPage() {
     }
     // Onboarding guard
     try {
-      if (!localStorage.getItem('manobal_onboarding_seen')) {
+      if (!sessionStorage.getItem('manobal_onboarding_seen')) {
         router.replace('/welcome');
       }
     } catch (e) {

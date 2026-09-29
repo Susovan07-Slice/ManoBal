@@ -55,7 +55,7 @@ export function StoryOnboarding() {
   
   const finishOnboarding = useCallback(() => {
     try {
-      localStorage.setItem("manobal_onboarding_seen", "1");
+      sessionStorage.setItem("manobal_onboarding_seen", "1");
     } catch (e) {
       // ignore
     }
