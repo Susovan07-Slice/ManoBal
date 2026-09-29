@@ -317,7 +317,8 @@ DEMO_PERSONNEL_DATA = [
 def seed_database():
     """Populates database with synthetic demo users, personnel, and assessments."""
     logger.info("Starting safe database seeding (SYNTHETIC DEMO DATA ONLY)...")
-    Base.metadata.create_all(bind=engine)
+    from db.init_db import init_db
+    init_db()
     db = SessionLocal()
 
     try:
