@@ -74,15 +74,15 @@ function LoginForm() {
       <div className="relative z-10 max-w-4xl w-full bg-[#FAFAFC] rounded-3xl shadow-xl shadow-slate-300/40 overflow-hidden grid grid-cols-1 md:grid-cols-2 border border-[#D0DFD5]">
         
         {/* Left Side: Armed Forces Hero Section */}
-        <div className="relative bg-[#E8F0EC] p-6 sm:p-8 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-[#D0DFD5] min-h-[580px]">
+        <div className="relative bg-[#000000] p-6 sm:p-8 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-[#D0DFD5] min-h-[580px]">
           {/* Top Brand Watermark */}
           <div className="relative z-10 flex items-center space-x-3">
-            <div className="w-14 h-14 flex items-center justify-center">
+            <div className="w-14 h-14 flex items-center justify-center bg-gray-900 rounded-lg">
               <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain drop-shadow-sm" />
             </div>
             <div>
               <span className="text-xs uppercase tracking-widest font-bold text-[#7BA083]">ManoBal</span>
-              <span className="text-[10px] text-[#64748B] block tracking-wider uppercase font-mono">Defense Portal</span>
+              <span className="text-[10px] text-gray-400 block tracking-wider uppercase font-mono">Defense Portal</span>
             </div>
           </div>
 
@@ -99,10 +99,10 @@ function LoginForm() {
 
           {/* Bottom Heading & Subtext */}
           <div className="relative z-10 mt-auto pt-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#2D3748] tracking-tight leading-snug">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
               Indian Armed Forces
             </h1>
-            <p className="text-[#64748B] text-xs mt-1 font-normal leading-relaxed">
+            <p className="text-gray-400 text-xs mt-1 font-normal leading-relaxed">
               Personnel Stress & Welfare Decision-Support System. Official authorized access for Command personnel.
             </p>
           </div>

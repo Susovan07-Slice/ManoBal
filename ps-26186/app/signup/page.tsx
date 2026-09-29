@@ -134,15 +134,15 @@ export default function CommanderSignupPage() {
       <div className="relative z-10 max-w-4xl w-full bg-[#FAFAFC] rounded-3xl shadow-xl shadow-slate-300/40 overflow-hidden grid grid-cols-1 md:grid-cols-2 border border-[#D0DFD5] my-6">
         
         {/* Left Side: Indian Army Insignia Hero Panel */}
-        <div className="relative bg-[#E8F0EC] p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-[#D0DFD5]">
+        <div className="relative bg-[#000000] p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-[#D0DFD5]">
           {/* Top Brand Watermark */}
           <div className="relative z-10 flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-[#DCEAE0] border border-[#BACFC2] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gray-900 border border-gray-800 flex items-center justify-center">
               <ShieldCheck className="w-4 h-4 text-[#7BA083]" />
             </div>
             <div>
               <span className="text-xs uppercase tracking-widest font-bold text-[#7BA083]">ManoBal</span>
-              <span className="text-[10px] text-[#64748B] block tracking-wider uppercase font-mono">Command Enlistment</span>
+              <span className="text-[10px] text-gray-400 block tracking-wider uppercase font-mono">Command Enlistment</span>
             </div>
           </div>
 
@@ -166,13 +166,13 @@ export default function CommanderSignupPage() {
 
           {/* Bottom Heading & Subtext */}
           <div className="relative z-10 mt-auto">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#2D3748] tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
               Create your <br />
               <span className="text-[#7BA083]">
                 Officer Account
               </span>
             </h1>
-            <p className="text-[#64748B] text-xs sm:text-sm mt-3 font-normal leading-relaxed">
+            <p className="text-gray-400 text-xs sm:text-sm mt-3 font-normal leading-relaxed">
               Register unit authority to access personnel psychological assessment telemetry, predictive risk monitoring, and welfare pipelines.
             </p>
           </div>
