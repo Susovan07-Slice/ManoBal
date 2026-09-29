@@ -155,14 +155,14 @@ export default function AlertsTable({
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-0.5 rounded text-xs font-mono font-bold uppercase ${
+                        className={`inline-block px-2 py-0.5 rounded text-xs font-mono font-bold uppercase cursor-pointer transition-all hover:shadow-sm ${
                           req.status === 'resolved'
-                            ? 'bg-[#EEF6F2] text-[#2D6346] border border-[#BBD9C7]'
+                            ? 'bg-[#EEF6F2] hover:bg-[#DCECE4] text-[#2D6346] border border-[#BBD9C7]'
                             : req.status === 'in_progress'
-                            ? 'bg-[#F4EFF8] text-[#69428E] border border-[#DCCBEA]'
+                            ? 'bg-[#F4EFF8] hover:bg-[#E7DEEF] text-[#69428E] border border-[#DCCBEA]'
                             : req.status === 'acknowledged'
-                            ? 'bg-[#EEF4F8] text-[#3E6580] border border-[#BCD3E3]'
-                            : 'bg-[#FDF6EE] text-[#8E5B23] border border-[#F3D2AE]'
+                            ? 'bg-[#EEF4F8] hover:bg-[#DCE9F2] text-[#3E6580] border border-[#BCD3E3]'
+                            : 'bg-[#FDF6EE] hover:bg-[#F6E6D5] text-[#8E5B23] border border-[#F3D2AE]'
                         }`}
                       >
                         {currentReqStatus(req.status)}

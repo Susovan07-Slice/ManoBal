@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 // New brand colors for the heatmap from UI redesign prompt
-const HEATMAP_COLORS = ['#E6EFF4', '#7ED9B5', '#F3D36B', '#F5A25B', '#EF5A6F'];
+const HEATMAP_COLORS = ['#A3E6D0', '#7ED9B5', '#F3D36B', '#F5A25B', '#EF5A6F'];
 
 // Helper to map continuous 0-100 score to the 5 distinct buckets
 function getDiscreteRiskColor(score: number): string {
@@ -44,7 +44,7 @@ export function RiskCalendarHeatmap({
   onRefresh,
   className = '',
 }: RiskCalendarHeatmapProps) {
-  const [weeksCount, setWeeksCount] = useState<number>(52);
+  const [weeksCount, setWeeksCount] = useState<number>(13);
   const [periodOffset, setPeriodOffset] = useState<number>(0);
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [hoveredDay, setHoveredDay] = useState<CalendarDay | null>(null);
@@ -270,14 +270,15 @@ export function RiskCalendarHeatmap({
       >
         <div className="inline-flex flex-col gap-1 min-w-max">
           {/* Month Labels Header Row */}
-          <div className="flex text-[10px] font-semibold text-ink-2 mb-1 pl-8">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] font-semibold text-ink-2 mb-1">
+            <div className="w-6 shrink-0"></div>
             {gridResult.weeks.map((week, wIdx) => (
               <div
                 key={`m-label-${wIdx}`}
-                className="w-3.5 sm:w-4 text-center shrink-0"
+                className="w-3 sm:w-3.5 shrink-0 relative h-4"
               >
                 {week.monthLabel ? (
-                  <span className="text-[11px] text-brand-600 font-bold tracking-wider -translate-x-1 block whitespace-nowrap">
+                  <span className="absolute text-[11px] text-brand-600 font-bold tracking-wider whitespace-nowrap z-10" style={{ bottom: 0, left: 0 }}>
                     {week.monthLabel}
                   </span>
                 ) : null}
@@ -309,7 +310,7 @@ export function RiskCalendarHeatmap({
                     const isFuture = day.isFuture;
 
                     // Color determination using new 5-color palette
-                    let cellBg = '#F1F9FC'; // Very subtle sky for empty
+                    let cellBg = 'rgba(31,110,140,0.08)'; // Slightly darker for empty cells to stand out
                     let cellBorder = 'transparent';
 
                     if (isFuture) {
@@ -491,7 +492,7 @@ export function RiskCalendarHeatmap({
       <div className="pt-3 border-t border-sky-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div
-            className="w-3.5 h-3.5 rounded-[4px] bg-[#F1F9FC]"
+            className="w-3.5 h-3.5 rounded-[4px] bg-[rgba(31,110,140,0.08)]"
           />
           <span className="text-[11px] text-ink-3 font-semibold">
             No Data

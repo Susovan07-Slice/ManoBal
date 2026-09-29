@@ -164,7 +164,7 @@ export function HomeScreen({
                 </svg>
                 {/* Center score */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[44px] font-semibold text-ink leading-none tabular-nums">
+                  <span className="text-[36px] font-semibold text-ink leading-none tabular-nums tracking-tight">
                     {typeof riskScore === "number" ? riskScore.toFixed(1) : riskScore}
                   </span>
                   <span className="text-[12px] text-ink-3 font-medium mt-1">/100</span>
@@ -287,7 +287,12 @@ export function HomeScreen({
             <span className="text-ink-3 font-medium">Next assessment</span>
             <span className="text-ink font-semibold">
               {scheduleStatus?.hours_since_last_assessment != null
-                ? `${Math.max(0, 24 - scheduleStatus.hours_since_last_assessment)}h remaining`
+                ? (() => {
+                    const remainingDec = Math.max(0, 24 - scheduleStatus.hours_since_last_assessment);
+                    const hrs = Math.floor(remainingDec);
+                    const mins = Math.floor((remainingDec - hrs) * 60);
+                    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')} remaining`;
+                  })()
                 : "Now"}
             </span>
           </div>

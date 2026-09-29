@@ -78,6 +78,7 @@ export function TrendChart({ data }: { data: TrendDay[] }) {
             yAxisId="left"
             type="monotone"
             dataKey="stressIndex"
+            name="Stress Index"
             fill="url(#areaGradient)"
             stroke="none"
           />

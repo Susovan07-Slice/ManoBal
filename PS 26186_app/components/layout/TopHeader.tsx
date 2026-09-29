@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
@@ -12,6 +12,7 @@ export default function TopHeader({ title }: { title: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [isTitleHovered, setIsTitleHovered] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,49 +74,64 @@ export default function TopHeader({ title }: { title: string }) {
     <>
       <header
         className={cn(
-          "flex items-center justify-between px-5 h-20 shrink-0 sticky top-0 z-40 transition-all",
+          "flex items-center justify-between px-3 sm:px-5 h-16 shrink-0 sticky top-0 z-40 transition-all",
           scrolled ? "bg-white/60 backdrop-blur-xl shadow-[0_4px_20px_rgba(31,110,140,0.08)]" : "bg-transparent"
         )}
       >
-        <div className="flex items-center space-x-4">
-          <div className="w-14 h-14 rounded-full bg-white shadow-[0_2px_12px_rgba(31,110,140,0.15)] border-2 border-white flex items-center justify-center overflow-hidden">
-            <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-cover scale-110" />
+        <div 
+          className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0 transition-all duration-500 ease-out"
+          onMouseEnter={() => setIsTitleHovered(true)}
+          onMouseLeave={() => setIsTitleHovered(false)}
+        >
+          <div className="w-14 h-14 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center transition-all duration-500 ease-out">
+            <img src="/logo.png" alt="ManoBal Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-[20px] font-bold text-ink tracking-tight">{title}</h1>
+          <h1 
+            className="text-lg sm:text-2xl font-bold text-ink tracking-wide leading-tight truncate transition-all duration-500 ease-out"
+            title={title}
+          >
+            {title}
+          </h1>
         </div>
 
         {user && (
-          <div className="flex items-center space-x-3">
-            {/* Notification Bell Button */}
-            <button
-              onClick={() => setDrawerOpen(true)}
-              title="Welfare Notifications"
-              className="relative w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(31,110,140,0.1)] flex items-center justify-center text-ink-3 hover:text-ink-2 transition-colors"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] h-[18px] text-[10px] font-bold bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-md animate-pulse">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
+          <div className="flex items-center space-x-3 shrink-0 pl-2">
+            <div 
+              className={cn(
+                "flex-col items-end text-right transition-all duration-500 ease-out overflow-hidden hidden sm:flex",
+                isTitleHovered ? "max-w-0 opacity-0 space-x-0" : "max-w-[200px] opacity-100"
               )}
-            </button>
-
-            <div className="flex flex-col items-end text-right">
-              <span className="text-[12px] font-semibold text-ink">{user.username}</span>
+            >
+              <span className="text-[12px] font-semibold text-ink whitespace-nowrap">{user.username}</span>
               {battalionLocationText && (
-                <span className="inline-flex items-center bg-ok-bg text-ok text-[10px] font-semibold px-2.5 py-0.5 rounded-full mt-0.5">
+                <span className="inline-flex items-center bg-ok-bg text-ok text-[10px] font-semibold px-2.5 py-0.5 rounded-full mt-0.5 whitespace-nowrap">
                   <MapPin className="w-2.5 h-2.5 mr-1 text-ok shrink-0" />
                   {battalionLocationText}
                 </span>
               )}
             </div>
 
-            <button
-              onClick={logout}
-              title="Sign Out"
-              className="w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(31,110,140,0.1)] flex items-center justify-center text-ink-3 hover:text-ink-2 transition-colors"
+            <div 
+              className={cn(
+                "flex-col items-end text-right transition-all duration-500 ease-out overflow-hidden sm:hidden flex",
+                isTitleHovered ? "max-w-0 opacity-0" : "max-w-[100px] opacity-100"
+              )}
             >
-              <LogOut className="w-4 h-4" />
+              <span className="text-[11px] font-semibold text-ink whitespace-nowrap">{user.username}</span>
+            </div>
+
+            {/* Notification Bell Button */}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              title="Welfare Notifications"
+              className="relative w-10 h-10 shrink-0 rounded-full bg-white/80 backdrop-blur-md border border-white/60 shadow-[0_4px_12px_rgba(31,110,140,0.08)] flex items-center justify-center text-ink-2 hover:text-brand-600 hover:bg-white transition-all duration-200"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[20px] h-[20px] text-[10px] font-bold bg-alert text-white rounded-full flex items-center justify-center shadow-md animate-pulse">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
           </div>
         )}
