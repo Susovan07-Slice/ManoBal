@@ -1,9 +1,8 @@
 # ManoBal 🛡️ — Personnel Stress & Welfare Monitoring System
 ### AI-Driven Early Warning, Longitudinal Welfare Intelligence & Human-in-the-Loop Decision Support for Defense & Uniformed Services
-**Smart India Hackathon (SIH) 2026** | **Problem Statement:** PS 26186  
 **System Title:** Personnel Stress & Welfare Monitoring System  
 **Repository Architecture:** Monorepo (FastAPI ML Backend + Next.js Commander Dashboard + Next.js Jawan Mobile Portal)  
-**System Status:** **Ready for Pilot Field Deployment & SIH Evaluation** (`READY WITH MINOR DOCUMENTED GAPS`)
+**System Status:** **Ready for Pilot Field Deployment** (`READY WITH MINOR DOCUMENTED GAPS`)
 
 ---
 
@@ -40,10 +39,8 @@
 29. [Testing & Verification Results](#29-testing--verification-results)
 30. [Known Limitations](#30-known-limitations)
 31. [Future Scope](#31-future-scope)
-32. [PPT / Project Presentation Guide (15 Slides)](#32-ppt--project-presentation-guide-15-slides)
-33. [Live Demo Flow (5–10 Minutes)](#33-live-demo-flow-510-minutes)
-34. [One-Minute Project Explanation (Elevator Pitch)](#34-one-minute-project-explanation-elevator-pitch)
-35. [Technical Architecture Explanation (Technical Pitch)](#35-technical-architecture-explanation-technical-pitch)
+32. [Live Demo Flow (5–10 Minutes)](#33-live-demo-flow-510-minutes)
+34. [Technical Architecture Explanation (Technical Pitch)](#35-technical-architecture-explanation-technical-pitch)
 
 ---
 
@@ -148,7 +145,7 @@ The complete system pipeline transitions raw data into structured human welfare 
 
 ## 4. Key Features
 
-### 4.1 Personnel / Jawan Experience (`PS 26186_app`)
+### 4.1 Personnel / Jawan Experience (`manobal-mobile`)
 - **Secure Authentication:** JWT bearer token authentication with role `personnel`.
 - **14-Screen Interactive Assessment:** Touch-friendly slider controls for duty hours, night shifts, consecutive duty days, sleep duration, physical fatigue, mood/morale, and burnout frequency.
 - **Immediate Calibrated Feedback:** Displays personal stress category (Low, Medium, High, Very High) with supportive, non-stigmatizing visual guidance.
@@ -156,7 +153,7 @@ The complete system pipeline transitions raw data into structured human welfare 
 - **Self-Care Recommendations:** Direct self-guided recovery actions (circadian sleep pacing, breathing routines, hydration guidelines).
 - **Self-Only Authorization:** Strict Anti-IDOR enforcement prevents jawans from accessing any peer records or commander-level views.
 
-### 4.2 Commander & Welfare Officer Experience (`PS 26186`)
+### 4.2 Commander & Welfare Officer Experience (`manobal-web`)
 - **Unit Welfare Overview:** Real-time summary cards displaying active personnel count, average stress index, and stress/risk category distributions.
 - **Early-Warning Alerts Panel:** Multi-tier alerts (`HIGH_STRESS_SPIKE`, `WORSENING_TREND`, `ANOMALOUS_FATIGUE`, `PROLONGED_DEPLOYMENT`) with urgency badges.
 - **Anomaly Detection Heatmap:** Isolation Forest signals highlighting personnel experiencing anomalous multidimensional shifts, annotated with SHAP attribution bars.
@@ -446,7 +443,7 @@ Implemented in `services/welfare_case_service.py` (`api/routes/cases.py`):
 
 ## 15B. Jawan Welfare Notifications & Signal Delivery (Phase 47)
 
-Implemented across `services/welfare_notification_service.py`, `api/routes/notifications.py`, `PS 26186_app/components/notifications/NotificationDrawer.tsx`, and `PS 26186/components/dashboard/SendWelfareNotificationModal.tsx`.
+Implemented across `services/welfare_notification_service.py`, `api/routes/notifications.py`, `manobal-mobile/components/notifications/NotificationDrawer.tsx`, and `manobal-web/components/dashboard/SendWelfareNotificationModal.tsx`.
 
 ### Core Purpose
 Connects the existing Commander / Welfare Officer decision workflow to the affected Jawan in the Jawan mobile web portal. When an authorized officer reviews a welfare alert, schedules an outcome follow-up, or approves a support recommendation, the corresponding supportive communication is securely delivered directly to the Jawan.
@@ -607,7 +604,7 @@ FastAPI backend registers **168 endpoints across 19 tag groups** (`http://localh
 
 ## 20. Frontend Architecture
 
-### 20.1 Commander & Welfare Officer Dashboard (`PS 26186`)
+### 20.1 Commander & Welfare Officer Dashboard (`manobal-web`)
 - **Technology:** Next.js 14.2.15, React 18, TailwindCSS, Recharts, Lucide Icons.
 - **Port:** `http://localhost:3000`
 - **Type Safety:** 100% TypeScript (`npx tsc --noEmit` exits with 0 errors).
@@ -619,7 +616,7 @@ FastAPI backend registers **168 endpoints across 19 tag groups** (`http://localh
   - `/login`: Role-aware officer authentication.
 - **Hydration Parity:** Fully resolved with deterministic mounting guards.
 
-### 20.2 Jawan Mobile Portal (`PS 26186_app`)
+### 20.2 Jawan Mobile Portal (`manobal-mobile`)
 - **Technology:** Next.js 16.3.5 (Turbopack), React 18, TailwindCSS.
 - **Port:** `http://localhost:3001`
 - **Type Safety:** 100% TypeScript (`npx tsc --noEmit` exits with 0 errors).
@@ -680,17 +677,17 @@ ManoBal implements strict defensive security and access control:
 ManoBal/
 ├── README.md                                  # Complete Master Technical Documentation
 ├── pyrightconfig.json                         # Strict Python type-resolution configuration
-├── PS 26186/                                  # Commander & Welfare Officer Web Dashboard
+├── manobal-web/                                  # Commander & Welfare Officer Web Dashboard
 │   ├── app/                                   # Next.js App Router (dashboard, personnel, login)
 │   ├── components/                            # Modular UI panels (Alerts, Anomalies, Cases, etc.)
 │   ├── lib/                                   # API client, auth context, dashboard fetchers
 │   └── package.json                           # Next.js 14, React 18, TailwindCSS, Recharts
-├── PS 26186_app/                              # Jawan Mobile Self-Assessment Portal
+├── manobal-mobile/                              # Jawan Mobile Self-Assessment Portal
 │   ├── app/                                   # Next.js 16 App Router ((tabs), assessment, trends)
 │   ├── components/                            # Mobile sliders, rating controls, bottom navigation
 │   ├── lib/                                   # Mobile API client, auth state
 │   └── package.json                           # Next.js 16 (Turbopack), TailwindCSS
-└── PS 26186_dataset/                          # FastAPI Backend & Machine Learning Engine
+└── manobal-backend/                          # FastAPI Backend & Machine Learning Engine
     ├── api/                                   # API Routing Layer
     │   ├── routes/                            # 16 route modules (auth, assess, cases, alerts, etc.)
     │   ├── deps.py                            # Token validation, RBAC, Anti-IDOR dependencies
@@ -702,7 +699,7 @@ ManoBal/
     ├── schemas/                               # Pydantic v2 validation & response contracts
     ├── services/                              # Business logic, ML inference, case management
     ├── tests/                                 # 35 Pytest files (456 tests covering Phases 34–46)
-    └── docs/                                  # Phase validation reports & SIH traceability
+    └── docs/                                  # Phase validation reports & Production traceability
 ```
 
 ---
@@ -739,9 +736,9 @@ git clone https://github.com/Susovan07-Slice/ManoBal.git
 cd ManoBal
 ```
 
-### Step 2: Set Up Backend (`PS 26186_dataset`)
+### Step 2: Set Up Backend (`manobal-backend`)
 ```bash
-cd "PS 26186_dataset"
+cd "manobal-backend"
 python -m venv venv
 # On Windows:
 venv\Scripts\activate
@@ -752,17 +749,17 @@ pip install -r requirements.txt
 python -m db.init_db
 ```
 
-### Step 3: Set Up Commander Dashboard (`PS 26186`)
+### Step 3: Set Up Commander Dashboard (`manobal-web`)
 Open a second terminal:
 ```bash
-cd "PS 26186"
+cd "manobal-web"
 npm install
 ```
 
-### Step 4: Set Up Jawan Mobile App (`PS 26186_app`)
+### Step 4: Set Up Jawan Mobile App (`manobal-mobile`)
 Open a third terminal:
 ```bash
-cd "PS 26186_app"
+cd "manobal-mobile"
 npm install
 ```
 
@@ -774,7 +771,7 @@ Start all three services concurrently in separate terminals:
 
 ### Terminal 1: Backend API (Port 8000)
 ```bash
-cd "PS 26186_dataset"
+cd "manobal-backend"
 # Ensure venv is activated
 uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
@@ -782,14 +779,14 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 
 ### Terminal 2: Commander Dashboard (Port 3000)
 ```bash
-cd "PS 26186"
+cd "manobal-web"
 npm run dev
 ```
 *Accessible at:* `http://localhost:3000/dashboard` | *Login:* `http://localhost:3000/login`
 
 ### Terminal 3: Jawan Mobile Portal (Port 3001)
 ```bash
-cd "PS 26186_app"
+cd "manobal-mobile"
 npm run dev -- -p 3001
 ```
 *Accessible at:* `http://localhost:3001` | *Login:* `http://localhost:3001/login`
@@ -896,12 +893,12 @@ All tests have been executed and verified in the live workspace environment:
 | :--- | :--- | :--- | :---: | :---: |
 | **Phase 34–44 Target Suite** | Active Production Engine | `pytest tests/test_phase3[4-9]* tests/test_phase4[0-4]*` | **102 / 102 Passed** | **100.0%** |
 | **Phase 45 System Audit** | Live Programmatic Integration | `python -u test_phase45_audit.py` | **4 / 4 Suites Passed** | **100.0%** |
-| **Phase 46 SIH Acceptance Audit**| End-to-End Problem Statement | `python -u test_phase46_audit.py` | **6 / 6 Blocks Passed** | **100.0%** |
+| **Phase 46 Production Acceptance Audit**| End-to-End Problem Statement | `python -u test_phase46_audit.py` | **6 / 6 Blocks Passed** | **100.0%** |
 | **Full Repository Regression** | All Repo Tests | `python -m pytest tests/` | **442 Passed, 14 Legacy Failed** | **96.9%** |
-| **Commander TypeScript** | `PS 26186` | `npx tsc --noEmit` | **0 Errors** | **100.0%** |
-| **Jawan TypeScript** | `PS 26186_app` | `npx tsc --noEmit` | **0 Errors** | **100.0%** |
-| **Commander Production Build** | `PS 26186` | `npm run build` | **Exit Code 0 (8 routes)** | **100.0%** |
-| **Jawan Production Build** | `PS 26186_app` | `npm run build` | **Exit Code 0 (9 routes)** | **100.0%** |
+| **Commander TypeScript** | `manobal-web` | `npx tsc --noEmit` | **0 Errors** | **100.0%** |
+| **Jawan TypeScript** | `manobal-mobile` | `npx tsc --noEmit` | **0 Errors** | **100.0%** |
+| **Commander Production Build** | `manobal-web` | `npm run build` | **Exit Code 0 (8 routes)** | **100.0%** |
+| **Jawan Production Build** | `manobal-mobile` | `npm run build` | **Exit Code 0 (9 routes)** | **100.0%** |
 
 > **Audit Note on the 14 Legacy Failures:** All 14 repository failures originate in deprecated exploratory scripts created prior to Phase 34 asserting obsolete integer cutoffs ($score > 85$) or experimental CatBoost models. None exist in active production routes, services, or models.
 
@@ -919,7 +916,7 @@ In the spirit of complete intellectual honesty, the following operational limita
 
 ## 31. Future Scope
 
-Post-SIH enhancements for operational force-wide deployment include:
+Post-Production enhancements for operational force-wide deployment include:
 - **Native Android Packaging:** Wrapping the Next.js Jawan portal via Capacitor/React Native to generate signed `.apk` binaries for defense-issued smartphones.
 - **Direct BLE Smartwatch Pairing:** Integrating Web Bluetooth APIs for direct real-time heart rate and HRV streaming from MIL-STD-810 tactical smartwatches.
 - **Enterprise Defense Connectors:** Building dedicated SFTP/SOAP connectors for direct synchronization with military personnel databases.
@@ -927,192 +924,5 @@ Post-SIH enhancements for operational force-wide deployment include:
 
 ---
 
-# PPT / PROJECT PRESENTATION GUIDE
-
-Use this 15-slide presentation blueprint to prepare the official SIH pitch deck:
-
-### Slide 1 — Title Slide
-- **Title:** ManoBal 🛡️ — AI-Driven Personnel Stress & Welfare Monitoring System
-- **Subtitle:** Proactive Psychological Resilience, Early-Warning Analytics & Human-in-the-Loop Welfare for Defense & CAPF Forces
-- **Visual:** Split screen showing the Commander Dashboard on desktop alongside the Jawan Mobile Portal on a smartphone.
-- **Spoken Script:** *"Respected jury members, we present ManoBal—an indigenous AI platform designed to transform welfare management in our Armed Forces and CAPFs from reactive crisis management into proactive, preventive care."*
-
-### Slide 2 — The Operational Challenge
-- **Objective:** Establish the critical operational problem.
-- **Key Points:** 14–30 consecutive duty days without rest; circadian disruption from rotating night shifts; prolonged deployment; accumulated leave deficits; stigma barrier preventing manual disclosure.
-- **Visual:** Infographic illustrating the compounding stressors leading to operational burnout.
-- **Spoken Script:** *"Our jawans operate under immense physical and psychological strain. Today, mental health care in the armed forces is largely reactive—we only intervene when an acute crisis manifests. ManoBal bridges this gap by detecting stress weeks before a breakdown occurs."*
-
-### Slide 3 — The Proposed Solution
-- **Objective:** Introduce ManoBal's core value proposition.
-- **Key Points:** Fuses objective operational metrics (duty hours, night shifts, leave gaps) with voluntary mobile check-ins and recovery vitals to predict continuous calibrated stress risk (0–100).
-- **Visual:** High-level pipeline: Inputs $\rightarrow$ AI Risk Engine $\rightarrow$ Welfare Triage $\rightarrow$ Human Support.
-- **Spoken Script:** *"ManoBal combines operational HR indicators with voluntary mobile assessments. Our calibrated AI engine identifies early-warning risk patterns and alerts commanders to initiate supportive interventions."*
-
-### Slide 4 — Target Users & Roles
-- **Objective:** Clarify role separation and user workflows.
-- **Key Points:**
-  - Jawan: Private mobile self-assessment and personal trend tracking.
-  - Commander: Scoped unit stress heatmaps, early alerts, and duty pacing.
-  - Welfare Officer: Clinical reviews, case management, and follow-up tracking.
-  - Administrator: System configuration and audit compliance.
-- **Visual:** 4 user persona cards showing role boundaries and permissions.
-- **Spoken Script:** *"ManoBal provides purpose-built interfaces for every echelon: a dignified mobile app for the jawan, an operational overview for the commander, and an auditable case workspace for welfare officers."*
-
-### Slide 5 — End-to-End System Architecture
-- **Objective:** Demonstrate robust engineering design.
-- **Key Points:** Decoupled monorepo: FastAPI ASGI backend, Next.js 14 Commander Dashboard, Next.js 16 Jawan Mobile Portal, and unified SQLAlchemy relational database.
-- **Visual:** The complete System Architecture diagram (Section 5 of README).
-- **Spoken Script:** *"The system is built on an enterprise micro-architecture: a high-throughput FastAPI backend serving 162 validated endpoints, powering two specialized Next.js web applications with strict token-based security."*
-
-### Slide 6 — Data Flow & Welfare Signal Chain
-- **Objective:** Show how raw data becomes supportive action.
-- **Key Points:** Assessment $\rightarrow$ ML Inference $\rightarrow$ Longitudinal Trend $\rightarrow$ Anomaly Detection $\rightarrow$ Recommendation $\rightarrow$ Case Review $\rightarrow$ Follow-up.
-- **Visual:** Flowchart showing the progression from data submission to follow-up resolution.
-- **Spoken Script:** *"Every self-assessment triggers an integrated signal chain. If stress spikes, the system updates velocity trends, triggers early alerts, generates restorative recommendations, and feeds directly into an auditable case workflow."*
-
-### Slide 7 — Dual AI/ML Engine
-- **Objective:** Showcase technical sophistication and machine learning design.
-- **Key Points:**
-  - Supervised Risk Engine: Calibrated LightGBM model predicting continuous score $[0, 100]$.
-  - Unsupervised Anomaly Engine: Isolation Forest detecting multidimensional behavioral outliers.
-  - Explainability: TreeExplainer SHAP attribution extracting plain-language risk factors.
-- **Visual:** Chart comparing the supervised risk classifier with the unsupervised anomaly detector.
-- **Spoken Script:** *"Our AI architecture is two-fold: a calibrated LightGBM model that evaluates compound workload and sleep strain, and an Isolation Forest that detects statistical anomalies. SHAP explainability ensures that commanders understand exactly why a jawan was flagged."*
-
-### Slide 8 — Real-World Risk Engine Realism
-- **Objective:** Prove model calibration with concrete data.
-- **Key Points:** Monotonic risk scaling; Low Risk baseline (26.8); High Risk compound overload (88.5); input shielding safely rejecting malformed or negative data with HTTP 422.
-- **Visual:** Bar chart showing score progression across normal, moderate, and extreme duty profiles.
-- **Spoken Script:** *"Our risk engine is mathematically calibrated. A normal 42-hour workweek with 8 hours of sleep yields a low risk score of 26.8. When duty stretches to 96 hours with severe sleep debt, the score scales monotonically to 88.5, safely bounded within a 0 to 100 range."*
-
-### Slide 9 — Longitudinal Welfare Intelligence
-- **Objective:** Highlight the advantage of temporal analytics over static tests.
-- **Key Points:** Exponentially Weighted Moving Average (EWMA); velocity ($\Delta S / \Delta t$) and acceleration; early detection of rapid score escalation across 7, 30, and 90-day horizons.
-- **Visual:** Recharts trend graph showing a jawan's stress velocity escalating over time.
-- **Spoken Script:** *"A single test is just a snapshot. ManoBal's longitudinal engine tracks stress velocity. If a jawan's score spikes rapidly over seven days, the system alerts the commander before clinical symptoms fully manifest."*
-
-### Slide 10 — Human Welfare Case Management
-- **Objective:** Emphasize human-in-the-loop clinical governance.
-- **Key Points:** Controlled lifecycle transitions (`OPEN` $\rightarrow$ `UNDER_REVIEW` $\rightarrow$ `RESOLVED`); immutable review notes; explicit human decisions; no automatic closures.
-- **Visual:** Screenshot of the `WelfareCaseManagement` workspace.
-- **Spoken Script:** *"Crucially, ManoBal does not replace human judgment. Our case workspace empowers welfare officers to record immutable notes, transition case states, and schedule supportive interventions. The AI recommends; the human decides."*
-
-### Slide 11 — Post-Intervention Outcome Tracking
-- **Objective:** Demonstrate accountability and closed-loop welfare care.
-- **Key Points:** Measures pre-intervention baseline against post-intervention reassessment; computes quantitative recovery delta ($\Delta S$); categorizes outcomes as Improved, Stable, or Worsened.
-- **Visual:** Before-and-after score comparison diagram showing stress recovery.
-- **Spoken Script:** *"We don't just open cases—we track outcomes. By comparing baseline assessments against post-intervention check-ins, commanders can verify whether a 48-hour rest stand-down actually reduced the jawan's fatigue."*
-
-### Slide 12 — Security, Anti-IDOR & Privacy
-- **Objective:** Prove defense-grade confidentiality and ethical design.
-- **Key Points:** Role-based access control; Anti-IDOR location and battalion boundaries; $k \ge 5$ k-anonymity privacy thresholds; zero personnel rankings; zero autonomous disciplinary actions.
-- **Visual:** Diagram illustrating cross-location IDOR rejection (HTTP 403) and aggregate privacy shielding.
-- **Spoken Script:** *"Confidentiality is paramount. ManoBal enforces strict Anti-IDOR scoping—an officer in Srinagar cannot access personnel records in Delhi. Sub-unit cohorts smaller than five are automatically masked to prevent deductive identification."*
-
-### Slide 13 — Live User Interfaces
-- **Objective:** Demonstrate UI visual appeal, responsiveness, and completeness.
-- **Key Points:**
-  - Commander Portal: High-contrast military-grade dashboard, heatmaps, alert triage.
-  - Jawan Portal: Calming, 14-screen interactive mobile assessment wizard with touch sliders.
-- **Visual:** Side-by-side screenshots of Commander Dashboard and Jawan Assessment Screen.
-- **Spoken Script:** *"Both frontends are fully operational. The Commander Dashboard provides military-grade command telemetry, while the Jawan Portal provides a dignified, touch-optimized self-assessment experience."*
-
-### Slide 14 — Verification & Test Validation
-- **Objective:** Establish credibility through rigorous empirical testing.
-- **Key Points:** 102/102 target phase tests passed; 442 full regression tests passed; 0 TypeScript errors; exit code 0 production builds across both frontends; live end-to-end audit passed.
-- **Visual:** Table of test results showing 100% pass rates on all production suites.
-- **Spoken Script:** *"Our platform has undergone exhaustive validation: 102 out of 102 target phase tests passed, zero TypeScript errors, clean production builds, and an independent SIH acceptance audit verifying that the system is ready for pilot deployment."*
-
-### Slide 15 — Future Scope & Defense Impact
-- **Objective:** Conclude with the strategic vision.
-- **Key Points:** Native Android APK packaging; MIL-STD BLE tactical smartwatch pairing; enterprise defense intranet connectors; offline mesh synchronization for forward posts.
-- **Visual:** Roadmap timeline showing path from SIH prototype to tri-service field deployment.
-- **Spoken Script:** *"ManoBal provides an indigenous, scalable capability tailored for our defense forces. By safeguarding the psychological resilience and readiness of our jawans, we ensure that those who defend our nation are supported with the highest standards of proactive care. Thank you."*
-
----
-
-# LIVE DEMO FLOW
-
-Follow this step-by-step 5 to 10-minute demonstration script during judging:
-
-### Step 1: System Readiness & API Health Check (30 Seconds)
-- **Action:** Open browser tab to `http://localhost:8000/api/health` and `http://localhost:8000/docs`.
-- **What Judge Sees:** Live JSON health response: `{"status":"healthy","model_loaded":true,"database":{"connected":true}}` and the full interactive OpenAPI documentation featuring 162 routes.
-- **Verbal Explanation:** *"Here is our live FastAPI backend running on port 8000, confirming that our LightGBM machine learning pipeline and database are active and healthy."*
-
-### Step 2: Jawan Self-Assessment Workflow (2 Minutes)
-- **Action:** Navigate to `http://localhost:3001` (Jawan Portal), log in as `jawan_verma` (`PersonnelPassword123!`), and click **Daily Assessment**.
-- **What Judge Sees:** A mobile-optimized, touch-friendly 14-screen wizard. Drag the weekly duty hours slider to 72 hours, set consecutive days to 16, night shifts to 12, sleep hours to 4.5, and burnout frequency to "Often". Click **Submit Assessment**.
-- **What Happens:** The frontend sends payload to `POST /api/personnel/1/assess`. The LightGBM engine evaluates the record in 12ms and returns a calibrated score of **80.8 (High Risk)**.
-- **What Judge Sees:** Assessment result screen displaying high stress level, top contributing factors (duty schedule, sleep debt), and supportive self-care recommendations.
-- **Verbal Explanation:** *"Notice that the feedback is strictly supportive. The jawan sees plain-language recovery recommendations, without punitive scoring or rankings."*
-
-### Step 3: Commander Dashboard & Anomaly Triage (2 Minutes)
-- **Action:** Switch to `http://localhost:3000/dashboard`, log in as `officer_sharma` (`OfficerPassword123!`).
-- **What Judge Sees:** Live Commander Dashboard updates dynamically. Total assessed personnel count (345), average stress index, and distribution charts reflect unit telemetry.
-- **What to Click:** Scroll to **Welfare Alerts Panel** and **Early Warning Signals Panel**.
-- **What Judge Sees:** An active `HIGH_STRESS_SPIKE` alert for Constable Rajesh Verma, alongside an Isolation Forest anomaly signal annotating the sudden sleep debt and duty hour surge.
-- **Verbal Explanation:** *"The commander immediately sees that Constable Verma has breached early-warning thresholds. The Isolation Forest model flags this as an anomaly, while SHAP factor attribution explains exactly what caused the spike."*
-
-### Step 4: Proactive Welfare Recommendations (1 Minute)
-- **Action:** Scroll to the **Support Recommendations Panel**.
-- **What Judge Sees:** Actionable, non-clinical recommendations: *"Immediate 48-hour operational rest stand-down"* and *"Protected circadian recovery sleep block"*.
-- **Verbal Explanation:** *"Notice that the AI does not autonomously reassign duty rosters. It presents evidence-based recommendations to the commander for human authorization."*
-
-### Step 5: Human Welfare Case Workspace (2 Minutes)
-- **Action:** Scroll to **Welfare Case Management** on the dashboard. Click **Open Case** for Personnel ID 1 with type `CURRENT_RISK_REVIEW`.
-- **What Judge Sees:** A new case `WC-2026-0006` appears in the list with status `OPEN`.
-- **What to Click:** Click **Add Review Note**, type *"Conducted initial telephonic check-in with Constable Verma. Authorized 48-hour rest rotation."*, and submit. Then click **Update Status** and transition status to `UNDER_REVIEW`.
-- **What Judge Sees:** Case status updates to `UNDER_REVIEW`, the note is appended with an immutable timestamp, and the case timeline aggregates all historical events.
-- **Verbal Explanation:** *"This is our auditable human workflow. The welfare officer records clinical observations and transitions case states. Every action appends to an immutable audit trail."*
-
-### Step 6: Security & Anti-IDOR Enforcement (1 Minute)
-- **Action:** Open Swagger docs (`http://localhost:8000/docs`) or a terminal. Execute a `GET` request to `/api/analytics/welfare-intelligence/personnel/4` (Delhi jawan) using Officer Sharma's Srinagar token.
-- **What Judge Sees:** API returns `HTTP 403 Forbidden` with detail: *"Cross-location access restricted"*.
-- **Verbal Explanation:** *"To prove our defense-grade security, here is a live Anti-IDOR test. Officer Sharma is stationed in Srinagar; when he attempts to access a jawan in Delhi, the system rejects the request with HTTP 403."*
-
-### Step 7: Closed-Loop Welfare Signal Delivery (Commander-to-Personnel) (1 Minute)
-- **Action:** On the Commander Portal (`http://localhost:3000`), open Personnel 1 (`Rajesh Verma`), click **Notify Personnel**, select the template *"Welfare follow-up requested. Please review your Jawan portal for details."*, and click **Send Notification**.
-- **What Happens:** The Commander backend creates a persistent `WelfareNotification` scoped strictly to Jawan Verma with tamper-evident audit logging.
-- **What Judge Sees on Jawan App:** Switch to `http://localhost:3001` (Jawan Portal). The header notification bell dynamically illuminates with an unread badge (`🔔 1`), and the home screen displays a prominent **"Welfare Updates"** support banner.
-- **Action:** Click the notification bell to open the **Notification Drawer**, inspect the support message, and click **Mark as Read**.
-- **What Judge Sees:** The notification card transitions to a read state, the badge counter updates to 0, and the closed-loop communication is completed with zero leakage of confidential ML scores or disciplinary jargon.
-- **Verbal Explanation:** *"This completes our closed-loop welfare delivery. When an officer authorizes a rest stand-down or follow-up, the supportive communication reaches the jawan immediately in their private portal, with non-stigmatizing wording and strict Anti-IDOR protection."*
-
----
-
-# ONE-MINUTE PROJECT EXPLANATION
-*(Elevator Pitch for General Jury Members)*
-
-> "Respected jury members, personnel in our Armed Forces and CAPFs face demanding operational conditions—long continuous deployments, sleep fragmentation from night duties, and accumulated leave deficits. Today, mental health care is largely **reactive**—interventions occur only after a severe crisis or breakdown.
->
-> **ManoBal** transforms this into a **proactive, preventive welfare paradigm**. 
->
-> Using a lightweight mobile portal, jawans complete voluntary wellness check-ins. Our calibrated AI engine fuses this data with operational duty indicators to detect stress velocity and behavioral anomalies weeks before an emergency occurs. 
->
-> The system alerts commanding officers and provides actionable, supportive duty-pacing recommendations—such as a 48-hour rest stand-down. All actions are governed by an auditable human case-management workspace with strict Anti-IDOR privacy and small-group anonymization. 
->
-> In short, ManoBal ensures that those who defend our nation receive the proactive care and support they deserve."
-
----
-
-# TECHNICAL ARCHITECTURE EXPLANATION
-*(Deep-Dive Pitch for Technical Evaluators)*
-
-> "From a technical perspective, ManoBal is architected as an enterprise-grade monorepo comprising three decoupled layers:
->
-> 1. **The Presentation Layer:** Built on Next.js. We have a high-contrast Next.js 14 web portal for commanders featuring real-time Recharts distribution graphs, and a Next.js 16 mobile portal optimized for touch-based jawan self-assessments.
->
-> 2. **The API & Service Layer:** Powered by FastAPI, exposing 162 validated endpoints across 18 tag groups. Business logic is strictly modularized across dedicated services for prediction, EWMA longitudinal trajectory tracking, multi-tier alerts, Isolation Forest anomaly detection, and controlled case management.
->
-> 3. **The Machine Learning Pipeline:** Our champion model is a calibrated LightGBM classifier. We apply median imputation, one-hot encoding, and min-max scaling, followed by isotonic probability calibration. This ensures our 0-to-100 risk score is continuous, monotonic, and reflects true empirical probabilities. For behavioral anomaly detection, we run an unsupervised Isolation Forest paired with TreeExplainer SHAP attribution to provide plain-language feature explanations.
->
-> 4. **Defensive Security & Privacy:** We enforce HMAC-SHA256 JWT bearer authentication, location-and-battalion scoped Anti-IDOR checks, and $k \ge 5$ k-anonymity privacy thresholds to prevent deductive deanonymization on aggregate heatmaps.
->
-> Every core workflow has been verified with 102 target phase tests, clean production builds, and zero TypeScript errors."
-
----
-
 ## License & Intellectual Property
-Developed under Problem Statement SIH PS 26186 for the Smart India Hackathon 2026. All source code, models, and architectures are proprietary to the ManoBal Project Development Team.
+Developed for the Ministry of Defense & Uniformed Services. All source code, models, and architectures are proprietary to the ManoBal Project Development Team.
