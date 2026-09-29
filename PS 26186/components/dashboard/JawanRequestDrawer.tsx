@@ -9,14 +9,18 @@ import Link from 'next/link';
 
 interface JawanRequestDrawerProps {
   request: WelfareRequestOut;
+  role?: string;
   onClose: () => void;
   onRefresh?: () => void;
+  onStatusUpdated?: (updated: WelfareRequestOut) => void;
 }
 
 export default function JawanRequestDrawer({
   request,
+  role,
   onClose,
   onRefresh,
+  onStatusUpdated,
 }: JawanRequestDrawerProps) {
   const [currentReq, setCurrentReq] = useState<WelfareRequestOut>(request);
   const [updating, setUpdating] = useState(false);
@@ -28,7 +32,13 @@ export default function JawanRequestDrawer({
     try {
       const updated = await updateWelfareRequestStatus(currentReq.id, newStatus);
       setCurrentReq(updated);
+      if (onStatusUpdated) onStatusUpdated(updated);
       if (onRefresh) onRefresh();
+      if (newStatus === 'resolved') {
+        setTimeout(() => {
+          onClose();
+        }, 700);
+      }
     } catch (err: any) {
       alert(`Failed to update request status: ${err?.message || 'Access denied'}`);
     } finally {

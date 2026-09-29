@@ -124,6 +124,7 @@ export interface DashboardSummary {
   medium_risk: number;
   high_risk: number;
   pending_recommendations: number;
+  active_recommendations_count?: number;
   acknowledged_recommendations: number;
 }
 
@@ -154,6 +155,7 @@ export interface HighRiskPersonnelItem {
   job_role: string;
   location: string;
   risk_score: number;
+  latest_risk_score?: number;
   stress_level: string;
   risk_priority: string;
   duty_hours_per_week: number;
@@ -161,6 +163,7 @@ export interface HighRiskPersonnelItem {
   consecutive_duty_days: number;
   leave_gap_days: number;
   key_factors: string[];
+  primary_risk_driver?: string;
   pending_recommendations_count: number;
   latest_assessment_date: string;
 }

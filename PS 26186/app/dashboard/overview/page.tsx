@@ -86,7 +86,7 @@ export default function DashboardOverviewPage() {
     return () => clearInterval(interval);
   }, [loadDashboardData]);
 
-  const criticalCount = highRiskPersonnel.filter((p) => p.latest_risk_score >= 70).length;
+  const criticalCount = highRiskPersonnel.filter((p) => (p.risk_score ?? p.latest_risk_score ?? 0) >= 70).length;
   const pendingWelfareCount = welfareRequests.filter((r) => r.status === 'pending').length;
 
   return (
@@ -160,7 +160,7 @@ export default function DashboardOverviewPage() {
           <div className="lg:col-span-3">
             <QuickActionHub
               urgentAlertsCount={criticalCount + pendingWelfareCount}
-              recommendationsCount={summary?.active_recommendations_count || 4}
+              recommendationsCount={summary?.pending_recommendations ?? summary?.active_recommendations_count ?? 4}
               signalsCount={criticalCount}
             />
           </div>

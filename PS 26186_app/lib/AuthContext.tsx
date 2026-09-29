@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const storedUser = getStoredUser();
 
       if (!storedToken) {
+        // No token at all — resolve immediately, unauthenticated
         setIsLoading(false);
         setUser(null);
         setToken(null);
@@ -36,25 +37,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setToken(storedToken);
+
       if (storedUser) {
+        // ✅ We have a cached user — unblock UI immediately
         setUser(storedUser);
         setRole((storedUser.role as UserRole) || 'personnel');
         setIsLoading(false);
-      }
-
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-        setRole(currentUser.role as UserRole);
-        setStoredUser(currentUser);
-      } catch (err) {
-        console.warn('Mobile session could not be restored:', err);
-        setStoredToken(null);
-        setStoredUser(null);
-        setUser(null);
-        setToken(null);
-      } finally {
-        setIsLoading(false);
+        // Then silently verify / refresh user in the background
+        try {
+          const currentUser = await getCurrentUser();
+          setUser(currentUser);
+          setRole(currentUser.role as UserRole);
+          setStoredUser(currentUser);
+        } catch (err) {
+          console.warn('Background session refresh failed:', err);
+          setStoredToken(null);
+          setStoredUser(null);
+          setUser(null);
+          setToken(null);
+        }
+      } else {
+        // Token exists but no cached user — must wait for network
+        try {
+          const currentUser = await getCurrentUser();
+          setUser(currentUser);
+          setRole(currentUser.role as UserRole);
+          setStoredUser(currentUser);
+        } catch (err) {
+          console.warn('Mobile session could not be restored:', err);
+          setStoredToken(null);
+          setStoredUser(null);
+          setUser(null);
+          setToken(null);
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
 

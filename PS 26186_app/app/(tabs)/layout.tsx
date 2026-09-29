@@ -5,6 +5,7 @@ import TopHeader from '@/components/layout/TopHeader';
 import BottomTabBar from '@/components/layout/BottomTabBar';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import { getStoredToken } from '@/lib/api';
 
 export default function TabsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,6 +17,8 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
   if (pathname === "/trends") title = "Personal Trends";
 
   const [mounted, setMounted] = useState(false);
+  // Check localStorage immediately to avoid flashing spinner for returning users
+  const hasStoredSession = typeof window !== 'undefined' ? !!getStoredToken() : false;
 
   useEffect(() => {
     setMounted(true);
@@ -35,18 +38,10 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
     }
   }, [mounted, isLoading, user, router]);
 
-  // Safety fallback: if authentication resolution takes > 2 seconds, redirect to /login
-  useEffect(() => {
-    if (!mounted) return;
-    const timer = setTimeout(() => {
-      if (!user) {
-        window.location.href = '/login';
-      }
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [mounted, user]);
+  // Only block render on first visit (no stored session) or when loading without any user data
+  const shouldBlock = !mounted || (isLoading && !hasStoredSession && !user);
 
-  if (!mounted || isLoading) {
+  if (shouldBlock) {
     return (
       <div className="flex flex-col h-full items-center justify-center bg-transparent p-6 space-y-3">
         <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
