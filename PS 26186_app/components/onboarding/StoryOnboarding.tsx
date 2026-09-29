@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { HeartPulse, Shield, Brain, TrendingUp, Moon, Briefcase, Users, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { PhoneFrame } from "./PhoneFrame";
 
 const SLIDE_MS = 5000;
 
@@ -355,6 +356,18 @@ export function StoryOnboarding() {
                       <div className="absolute top-[10%] left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-[#1E8FC0] rounded-full px-6 py-4 flex items-center gap-3 shadow-[0_16px_40px_rgba(31,110,140,0.3)] border border-white/20">
                         <HeartPulse className="w-6 h-6 text-white" />
                         <span className="text-white font-bold whitespace-nowrap text-[15px]">Welfare Support</span>
+                      </div>
+                      {/* Phone mockup — upper-right corner, staggered entrance */}
+                      <div
+                        className="absolute top-[-5%] right-[4%] z-10"
+                        style={{
+                          transition: reducedMotion ? 'none' : 'opacity 500ms cubic-bezier(.32,.72,0,1), transform 500ms cubic-bezier(.32,.72,0,1)',
+                          transitionDelay: reducedMotion ? '0ms' : '150ms',
+                          opacity: isActive ? 1 : 0,
+                          transform: isActive ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.92)',
+                        }}
+                      >
+                        <PhoneFrame isActive={isActive} reducedMotion={reducedMotion} />
                       </div>
                     </div>
                   )}
