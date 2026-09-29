@@ -1,0 +1,17 @@
+{
+  "name": "ManoBal Jawan App",
+  "short_name": "ManoBal",
+  "description": "Mobile check-in and welfare application for personnel.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0E11",
+  "theme_color": "#161B22",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

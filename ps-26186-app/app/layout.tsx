@@ -14,6 +14,7 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "ManoBal Jawan Portal",
   description: "AI-Based Personnel Stress & Welfare Monitoring System",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -27,7 +28,21 @@ export default function RootLayout({
       className={`${outfit.variable} antialiased`}
     >
       <body className="bg-slate-950 text-ink min-h-screen flex justify-center">
-
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                  }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
         <AuthProvider>
           <MobileWrapper>
             <SosButton />
