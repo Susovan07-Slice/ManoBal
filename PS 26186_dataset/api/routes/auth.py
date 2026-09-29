@@ -335,7 +335,8 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
     Authenticates username and password, returning a signed JWT Bearer access token
     populated with organizational scope metadata.
     """
-    user = db.query(User).filter(User.username == login_data.username).first()
+    clean_username = login_data.username.strip().lower()
+    user = db.query(User).filter(User.username == clean_username).first()
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
