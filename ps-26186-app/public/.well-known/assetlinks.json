@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.manobal.jawan",
+        "sha256_cert_fingerprints": ["B2:F2:C1:03:8D:E5:33:A5:AE:79:EE:5F:F9:D2:69:18:A5:63:BD:06:FA:8D:F3:5E:2E:8A:4D:CE:E1:68:C6:78"]
+      }
+    }]
