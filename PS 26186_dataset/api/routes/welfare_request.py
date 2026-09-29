@@ -344,4 +344,10 @@ def update_welfare_request_status(
         f"role={current_user.role} old_status='{old_status}' new_status='{req.status}'"
     )
 
+    try:
+        from services.welfare_notification_service import WelfareNotificationService
+        WelfareNotificationService.notify_on_welfare_request_update(db, req, current_user)
+    except Exception as e:
+        logger.warning(f"Could not dispatch automated notification for welfare request #{req.id}: {e}")
+
     return _format_welfare_request_out(req, db=db)

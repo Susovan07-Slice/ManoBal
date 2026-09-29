@@ -34,13 +34,16 @@ import {
   XCircle,
   ExternalLink,
   Lock,
+  Bell,
 } from 'lucide-react';
+import SendWelfareNotificationModal from './SendWelfareNotificationModal';
 
 export default function SupportRecommendationsPanel() {
   const [data, setData] = useState<CommanderRecommendationSummaryResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [notifyModalRec, setNotifyModalRec] = useState<WelfareRecommendationOut | null>(null);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -617,6 +620,14 @@ export default function SupportRecommendationsPanel() {
                             <span>Action Completed</span>
                           </span>
                         )}
+
+                        <button
+                          onClick={() => setNotifyModalRec(rec)}
+                          className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-mono font-medium transition-colors"
+                        >
+                          <Bell className="w-3.5 h-3.5" />
+                          <span>Notify Jawan</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -909,6 +920,24 @@ export default function SupportRecommendationsPanel() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Phase 47: Send Welfare Notification Modal */}
+      {notifyModalRec && (
+        <SendWelfareNotificationModal
+          isOpen={!!notifyModalRec}
+          onClose={() => setNotifyModalRec(null)}
+          personnelId={notifyModalRec.personnel_id}
+          personnelCode={notifyModalRec.personnel_code || undefined}
+          personnelName={notifyModalRec.personnel_name || undefined}
+          battalion={notifyModalRec.battalion || undefined}
+          initialType="SUPPORT_RECOMMENDATION"
+          initialTitle={`Support Recommendation: ${notifyModalRec.title || 'Guidance'}`}
+          initialMessage={notifyModalRec.recommendation_text || 'Supportive guidance and wellness resources have been arranged for you.'}
+          initialActionUrl="/trends"
+          sourceType="RECOMMENDATION"
+          sourceId={notifyModalRec.id}
+        />
       )}
     </div>
   );
