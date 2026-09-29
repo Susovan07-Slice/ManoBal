@@ -171,9 +171,9 @@ export function StoryOnboarding() {
   }, [goToNext, goToPrev, finishOnboarding]);
 
   const handleAreaClick = (e: React.MouseEvent) => {
-    const width = window.innerWidth;
-    const clickX = e.clientX;
-    if (clickX > width * 0.35) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    if (clickX > rect.width * 0.35) {
       goToNext();
     } else {
       goToPrev();
