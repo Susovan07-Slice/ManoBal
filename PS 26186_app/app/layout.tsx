@@ -26,10 +26,8 @@ export default function RootLayout({
       lang="en"
       className={`${outfit.variable} antialiased`}
     >
-      <body className="bg-sky-100 text-ink min-h-screen">
-        {/* Fixed gradient background */}
-        <div className="app-gradient-bg" aria-hidden="true" />
-        
+      <body className="bg-slate-950 text-ink min-h-screen flex justify-center">
+
         <AuthProvider>
           <MobileWrapper>
             <SosButton />

@@ -93,13 +93,14 @@ export default function WelfareAlertsPanel() {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-xs font-bold font-mono text-textPrimary">P-{alert.personnel_id}</span>
-                    <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border ${
-                      alert.status === 'OPEN' ? 'bg-[#FAF0F0] text-[#964747] border-[#E8B4B4]' :
-                      alert.status === 'ACKNOWLEDGED' ? 'bg-[#EEF4F8] text-[#3E6580] border-[#BCD3E3]' :
-                      alert.status === 'UNDER_REVIEW' ? 'bg-[#FDF6EE] text-[#8E5B23] border-[#F3D2AE]' :
-                      alert.status === 'INTERVENTION_PLANNED' ? 'bg-[#F4EFF8] text-[#69428E] border-[#DCCBEA]' :
-                      'bg-[#EEF6F2] text-[#2D6346] border-[#BBD9C7]'
+                    <span className={`inline-flex items-center gap-1.5 uppercase font-bold rounded-full border transition-all ${
+                      alert.status === 'OPEN' ? 'bg-red-500 text-white border-red-600 shadow-[0_4px_12px_rgba(239,68,68,0.4)] w-40 py-2 justify-center text-sm animate-pulse tracking-wide' :
+                      alert.status === 'ACKNOWLEDGED' ? 'bg-[#EEF4F8] text-[#3E6580] border-[#BCD3E3] px-2 py-0.5 text-[9px]' :
+                      alert.status === 'UNDER_REVIEW' ? 'bg-[#FDF6EE] text-[#8E5B23] border-[#F3D2AE] px-2 py-0.5 text-[9px]' :
+                      alert.status === 'INTERVENTION_PLANNED' ? 'bg-[#F4EFF8] text-[#69428E] border-[#DCCBEA] px-2 py-0.5 text-[9px]' :
+                      'bg-[#EEF6F2] text-[#2D6346] border-[#BBD9C7] px-2 py-0.5 text-[9px]'
                     }`}>
+                      {alert.status === 'OPEN' && <AlertCircle className="w-4 h-4" />}
                       {alert.status.replace('_', ' ')}
                     </span>
                   </div>
