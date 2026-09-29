@@ -182,9 +182,9 @@ export function StoryOnboarding() {
   const slide = SLIDES[currentSlide];
 
   return (
-    <div className="max-w-md mx-auto min-h-[100dvh] relative bg-[#f1f5f9] md:py-8 flex items-center justify-center overflow-hidden select-none">
+    <div className="w-full h-full flex-1 min-h-[100dvh] bg-[#f1f5f9] flex flex-col md:py-8 items-center justify-center select-none z-50">
       <div 
-        className="absolute inset-0 md:relative md:w-full md:h-[844px] md:rounded-[40px] overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(31,110,140,0.15)]"
+        className="w-full flex-1 md:flex-none md:w-full md:h-[844px] md:max-h-[100dvh] md:rounded-[40px] relative overflow-hidden flex flex-col shadow-[0_20px_60px_rgba(31,110,140,0.15)]"
         style={{ background: "linear-gradient(135deg, #9FD3E8 0%, #86C5DF 100%)" }}
         role="region"
         aria-roledescription="carousel"
