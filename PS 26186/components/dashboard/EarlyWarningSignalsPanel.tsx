@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import {
   getCommanderAnomalies,
   acknowledgeAnomaly,
@@ -22,7 +23,25 @@ import {
   Briefcase,
   Layers,
   Building,
+  UserCheck,
+  FileText,
+  Calendar,
+  ShieldCheck,
+  Bell,
+  ArrowRight,
+  ExternalLink,
+  X,
 } from 'lucide-react';
+
+const REVIEW_DECISIONS = [
+  { value: 'CONTINUE_MONITORING', label: 'Continue Monitoring', desc: 'Observe baseline trend over next cycle' },
+  { value: 'CONTACT_PERSONNEL', label: 'Contact Personnel', desc: 'Informal welfare check-in with Jawan' },
+  { value: 'OFFER_WELFARE_SUPPORT', label: 'Offer Welfare Support', desc: 'Provide access to wellness resources' },
+  { value: 'REVIEW_DUTY_WORKLOAD', label: 'Review Duty / Workload', desc: 'Evaluate roster and recovery allocation' },
+  { value: 'SCHEDULE_FOLLOW_UP', label: 'Schedule Follow-up', desc: 'Formal longitudinal follow-up check' },
+  { value: 'CREATE_WELFARE_CASE', label: 'Create / Link Welfare Case', desc: 'Open multi-disciplinary welfare case' },
+  { value: 'RESOLVE_SIGNAL', label: 'Resolve Signal', desc: 'Conclude signal with resolution notification' },
+];
 
 export default function EarlyWarningSignalsPanel() {
   const [data, setData] = useState<CommanderAnomalySummaryResponse | null>(null);
@@ -30,10 +49,21 @@ export default function EarlyWarningSignalsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [filterType, setFilterType] = useState<string>('ALL');
+  const [successBanner, setSuccessBanner] = useState<string | null>(null);
+
+  // Review modal state
+  const [selectedAnomalyForReview, setSelectedAnomalyForReview] = useState<WelfareAnomalyOut | null>(null);
+  const [reviewDecision, setReviewDecision] = useState<string>('CONTINUE_MONITORING');
+  const [reviewNotes, setReviewNotes] = useState<string>('');
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   // Resolution modal state
   const [selectedAnomalyForResolve, setSelectedAnomalyForResolve] = useState<WelfareAnomalyOut | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState<string>('');
+  const [notifyPersonnel, setNotifyPersonnel] = useState<boolean>(true);
+  const [customMessage, setCustomMessage] = useState<string>(
+    'Your recent welfare signal has been reviewed and resolved by your welfare officer. Please continue to monitor your wellbeing and contact your welfare officer if you need support.'
+  );
   const [resolveError, setResolveError] = useState<string | null>(null);
 
   const fetchAnomalies = useCallback(async () => {
@@ -56,8 +86,10 @@ export default function EarlyWarningSignalsPanel() {
 
   const handleAcknowledge = async (anomalyId: number) => {
     setActionLoadingId(anomalyId);
+    setSuccessBanner(null);
     try {
       await acknowledgeAnomaly(anomalyId);
+      setSuccessBanner('Signal acknowledged successfully.');
       await fetchAnomalies();
     } catch (err: any) {
       alert(`Failed to acknowledge anomaly: ${err?.message || 'Unknown error'}`);
@@ -66,30 +98,76 @@ export default function EarlyWarningSignalsPanel() {
     }
   };
 
-  const handleReview = async (anomalyId: number) => {
-    setActionLoadingId(anomalyId);
+  const openReviewModal = (anom: WelfareAnomalyOut) => {
+    setSelectedAnomalyForReview(anom);
+    setReviewDecision(anom.review_decision || 'CONTINUE_MONITORING');
+    setReviewNotes(anom.review_notes || '');
+    setReviewError(null);
+  };
+
+  const handleReviewSubmit = async () => {
+    if (!selectedAnomalyForReview) return;
+    setActionLoadingId(selectedAnomalyForReview.id);
+    setReviewError(null);
+    setSuccessBanner(null);
     try {
-      await reviewAnomaly(anomalyId);
+      await reviewAnomaly(selectedAnomalyForReview.id, {
+        decision: reviewDecision,
+        notes: reviewNotes.trim() ? reviewNotes.trim() : undefined,
+      });
+      const closedAnom = selectedAnomalyForReview;
+      setSelectedAnomalyForReview(null);
+      setSuccessBanner(`Signal review recorded (${reviewDecision.replace(/_/g, ' ')}).`);
       await fetchAnomalies();
+
+      // If decision was to resolve signal, seamlessly open resolution modal
+      if (reviewDecision === 'RESOLVE_SIGNAL') {
+        openResolveModal(closedAnom);
+      }
     } catch (err: any) {
-      alert(`Failed to start review: ${err?.message || 'Unknown error'}`);
+      setReviewError(err?.message || 'Failed to record review.');
     } finally {
       setActionLoadingId(null);
     }
   };
 
+  const openResolveModal = (anom: WelfareAnomalyOut) => {
+    setSelectedAnomalyForReview(null);
+    setSelectedAnomalyForResolve(anom);
+    setResolutionNotes(
+      anom.review_notes
+        ? `Welfare review completed. ${anom.review_notes}`
+        : 'Reviewed duty pattern and welfare metrics. Personnel contacted and recovery support provided.'
+    );
+    setNotifyPersonnel(!!anom.personnel_id);
+    setCustomMessage(
+      'Your recent welfare signal has been reviewed and resolved by your welfare officer. Please continue to monitor your wellbeing and contact your welfare officer if you need support.'
+    );
+    setResolveError(null);
+  };
+
   const handleResolveSubmit = async () => {
     if (!selectedAnomalyForResolve) return;
-    if (!resolutionNotes.trim()) {
-      setResolveError('Resolution notes explaining supportive actions are required.');
+    if (!resolutionNotes.trim() || resolutionNotes.trim().length < 3) {
+      setResolveError('Resolution notes explaining supportive actions are required (min 3 characters).');
       return;
     }
     setActionLoadingId(selectedAnomalyForResolve.id);
     setResolveError(null);
+    setSuccessBanner(null);
     try {
-      await resolveAnomaly(selectedAnomalyForResolve.id, resolutionNotes.trim());
+      await resolveAnomaly(selectedAnomalyForResolve.id, {
+        resolution_notes: resolutionNotes.trim(),
+        notify_personnel: notifyPersonnel,
+        custom_message: notifyPersonnel && customMessage.trim() ? customMessage.trim() : undefined,
+      });
       setSelectedAnomalyForResolve(null);
       setResolutionNotes('');
+      setSuccessBanner(
+        notifyPersonnel && selectedAnomalyForResolve.personnel_id
+          ? 'Signal resolved successfully and supportive notification delivered to Jawan.'
+          : 'Signal resolved successfully.'
+      );
       await fetchAnomalies();
     } catch (err: any) {
       setResolveError(err?.message || 'Failed to resolve anomaly.');
@@ -148,10 +226,48 @@ export default function EarlyWarningSignalsPanel() {
     }
   };
 
-  const filteredAnomalies = data?.anomalies.filter((a) => {
-    if (filterType === 'ALL') return true;
-    return a.anomaly_type === filterType;
-  }) || [];
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'RESOLVED':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-[#EEF8F1] text-[#2B613B] border border-[#A8DBB5] flex items-center space-x-1">
+            <CheckCircle2 className="w-3 h-3" />
+            <span>RESOLVED</span>
+          </span>
+        );
+      case 'UNDER_REVIEW':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-[#EBF3FB] text-[#285780] border border-[#ABCBE8] flex items-center space-x-1">
+            <Clock className="w-3 h-3" />
+            <span>UNDER REVIEW</span>
+          </span>
+        );
+      case 'ACKNOWLEDGED':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase bg-surfaceHighlight text-textPrimary border border-surfaceBorder">
+            ACKNOWLEDGED
+          </span>
+        );
+      case 'DETECTED':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase bg-[#FFF9E6] text-[#7A5B04] border border-[#E8D49E]">
+            NEW SIGNAL
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-surface text-textSecondary border border-surfaceBorder">
+            {status}
+          </span>
+        );
+    }
+  };
+
+  const filteredAnomalies =
+    data?.anomalies.filter((a) => {
+      if (filterType === 'ALL') return true;
+      return a.anomaly_type === filterType;
+    }) || [];
 
   return (
     <div className="bg-surface border border-surfaceBorder rounded-xl p-6 space-y-6 shadow-card" id="early-warning-signals">
@@ -184,6 +300,22 @@ export default function EarlyWarningSignalsPanel() {
           <span>Refresh Signals</span>
         </button>
       </div>
+
+      {/* Success Confirmation Banner */}
+      {successBanner && (
+        <div className="p-3.5 bg-[#EEF8F1] border border-[#A8DBB5] rounded-lg text-[#2B613B] text-xs font-mono flex items-center justify-between animate-fadeIn">
+          <div className="flex items-center space-x-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-[#2B613B]" />
+            <span>{successBanner}</span>
+          </div>
+          <button
+            onClick={() => setSuccessBanner(null)}
+            className="text-[#2B613B] hover:opacity-75 font-mono text-sm ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Loading Skeleton */}
       {loading && (
@@ -218,7 +350,8 @@ export default function EarlyWarningSignalsPanel() {
             </h3>
           </div>
           <p className="text-xs text-textSecondary leading-relaxed">
-            {data.message || 'Early-warning anomaly signals are withheld for units below the privacy threshold to prevent deductive re-identification of vulnerable personnel.'}
+            {data.message ||
+              'Early-warning anomaly signals are withheld for units below the privacy threshold to prevent deductive re-identification of vulnerable personnel.'}
           </p>
         </div>
       )}
@@ -286,160 +419,494 @@ export default function EarlyWarningSignalsPanel() {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredAnomalies.map((anom) => (
-                <div
-                  key={anom.id}
-                  className="p-4 bg-surfaceHighlight/30 border border-surfaceBorder hover:border-accent/40 rounded-lg space-y-3 transition-colors"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="p-1.5 bg-surface rounded-md border border-surfaceBorder">
-                        {getAnomalyTypeIcon(anom.anomaly_type)}
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs font-bold text-textPrimary uppercase tracking-wide">
-                            {anom.anomaly_type.replace(/_/g, ' ')}
-                          </span>
-                          {getSeverityBadge(anom.severity)}
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface border border-surfaceBorder text-textSecondary uppercase">
-                            CONFIDENCE: {anom.confidence}
-                          </span>
+              {filteredAnomalies.map((anom) => {
+                const isResolved = anom.status === 'RESOLVED' || anom.status === 'DISMISSED';
+
+                return (
+                  <div
+                    key={anom.id}
+                    className="p-4 bg-surfaceHighlight/30 border border-surfaceBorder hover:border-accent/40 rounded-lg space-y-3 transition-colors"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="p-1.5 bg-surface rounded-md border border-surfaceBorder">
+                          {getAnomalyTypeIcon(anom.anomaly_type)}
                         </div>
-                        <p className="text-xs text-textSecondary font-mono mt-0.5">
-                          {anom.scope_type === 'UNIT' ? (
-                            <span>Unit Scope: {anom.scope_battalion} • {anom.scope_location}</span>
-                          ) : (
-                            <span>
-                              {anom.personnel_name} ({anom.personnel_code}) • {anom.department} • {anom.location}
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-bold text-textPrimary uppercase tracking-wide">
+                              {anom.anomaly_type.replace(/_/g, ' ')}
                             </span>
-                          )}
-                        </p>
+                            {getSeverityBadge(anom.severity)}
+                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface border border-surfaceBorder text-textSecondary uppercase">
+                              CONFIDENCE: {anom.confidence}
+                            </span>
+                          </div>
+                          <p className="text-xs text-textSecondary font-mono mt-0.5">
+                            {anom.scope_type === 'UNIT' ? (
+                              <span>
+                                Unit Scope: {anom.scope_battalion} • {anom.scope_location}
+                              </span>
+                            ) : (
+                              <span>
+                                <strong>{anom.personnel_name}</strong> ({anom.personnel_code}) • {anom.department} •{' '}
+                                {anom.location}
+                              </span>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Status & Review Buttons */}
-                    <div className="flex items-center space-x-2 self-start sm:self-auto">
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-surface text-textSecondary border border-surfaceBorder">
-                        {anom.status}
-                      </span>
+                      {/* Status & Review Buttons */}
+                      <div className="flex items-center space-x-2 self-start sm:self-auto">
+                        {getStatusBadge(anom.status)}
 
-                      {anom.status === 'DETECTED' && (
-                        <button
-                          onClick={() => handleAcknowledge(anom.id)}
-                          disabled={actionLoadingId === anom.id}
-                          className="px-2.5 py-1 bg-surface hover:bg-surfaceHighlight text-textPrimary text-xs font-mono rounded border border-surfaceBorder transition-colors disabled:opacity-50"
-                        >
-                          Acknowledge
-                        </button>
-                      )}
-
-                      {anom.status !== 'RESOLVED' && anom.status !== 'DISMISSED' && (
-                        <>
+                        {anom.status === 'DETECTED' && (
                           <button
-                            onClick={() => handleReview(anom.id)}
+                            onClick={() => handleAcknowledge(anom.id)}
                             disabled={actionLoadingId === anom.id}
                             className="px-2.5 py-1 bg-surface hover:bg-surfaceHighlight text-textPrimary text-xs font-mono rounded border border-surfaceBorder transition-colors disabled:opacity-50"
                           >
-                            Review
+                            Acknowledge
                           </button>
-                          <button
-                            onClick={() => {
-                              setSelectedAnomalyForResolve(anom);
-                              setResolutionNotes('');
-                              setResolveError(null);
-                            }}
-                            className="px-2.5 py-1 bg-accent/20 hover:bg-accent/30 text-[#4F6E56] font-semibold text-xs font-mono rounded border border-accent/30 transition-colors"
-                          >
-                            Resolve
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                        )}
 
-                  {/* Explainable Evidence Box */}
-                  <div className="p-3 bg-surface border border-surfaceBorder rounded-lg text-xs space-y-2">
-                    <p className="text-textPrimary leading-relaxed font-sans">
-                      {anom.evidence.explanation || anom.evidence.reason}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-mono text-textSecondary">
-                      {anom.evidence.baseline_value !== undefined && (
-                        <span>Historical Baseline: <strong className="text-textPrimary">{anom.evidence.baseline_value}</strong></span>
-                      )}
-                      {anom.evidence.current_value !== undefined && (
-                        <span>Recent Observed: <strong className="text-textPrimary">{anom.evidence.current_value}</strong></span>
-                      )}
-                      {anom.evidence.delta !== undefined && (
-                        <span>Departure Delta: <strong className="text-[#C26D6D]">+{anom.evidence.delta}</strong></span>
-                      )}
-                      {anom.baseline_sample_count > 0 && (
-                        <span>Baseline Samples: {anom.baseline_sample_count}</span>
-                      )}
+                        {!isResolved && (
+                          <>
+                            <button
+                              onClick={() => openReviewModal(anom)}
+                              disabled={actionLoadingId === anom.id}
+                              className="px-2.5 py-1 bg-surface hover:bg-surfaceHighlight text-textPrimary text-xs font-mono rounded border border-surfaceBorder transition-colors disabled:opacity-50 flex items-center space-x-1"
+                            >
+                              <UserCheck className="w-3 h-3 text-accent" />
+                              <span>Review</span>
+                            </button>
+                            <button
+                              onClick={() => openResolveModal(anom)}
+                              disabled={actionLoadingId === anom.id}
+                              className="px-2.5 py-1 bg-accent/20 hover:bg-accent/30 text-[#4F6E56] font-semibold text-xs font-mono rounded border border-accent/30 transition-colors flex items-center space-x-1"
+                            >
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Resolve</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
 
-                    {anom.evidence.co_occurring_factors && anom.evidence.co_occurring_factors.length > 0 && (
-                      <div className="pt-1 flex flex-wrap gap-1">
-                        <span className="text-[10px] font-mono text-textSecondary mr-1">Co-factors:</span>
-                        {anom.evidence.co_occurring_factors.map((cf) => (
-                          <span key={cf} className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#FAF0F0] text-[#964747] border border-[#E8B4B4]">
-                            {cf}
+                    {/* Review Decision Banner if already under review */}
+                    {anom.review_decision && (
+                      <div className="p-2.5 bg-[#EBF3FB]/60 border border-[#ABCBE8] rounded-md text-xs font-mono space-y-1">
+                        <div className="flex items-center justify-between text-[#285780]">
+                          <span className="font-semibold uppercase flex items-center space-x-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>Clinical Review: {anom.review_decision.replace(/_/g, ' ')}</span>
                           </span>
-                        ))}
+                          {anom.reviewed_at && (
+                            <span className="text-[10px] text-textSecondary">
+                              {new Date(anom.reviewed_at).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                        {anom.review_notes && (
+                          <p className="text-textPrimary font-sans text-xs italic pl-5">
+                            &ldquo;{anom.review_notes}&rdquo;
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Explainable Evidence Box */}
+                    <div className="p-3 bg-surface border border-surfaceBorder rounded-lg text-xs space-y-2">
+                      <p className="text-textPrimary leading-relaxed font-sans">
+                        {anom.evidence.explanation || anom.evidence.reason}
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-mono text-textSecondary">
+                        {anom.evidence.baseline_value !== undefined && (
+                          <span>
+                            Historical Baseline: <strong className="text-textPrimary">{anom.evidence.baseline_value}</strong>
+                          </span>
+                        )}
+                        {anom.evidence.current_value !== undefined && (
+                          <span>
+                            Recent Observed: <strong className="text-textPrimary">{anom.evidence.current_value}</strong>
+                          </span>
+                        )}
+                        {anom.evidence.delta !== undefined && (
+                          <span>
+                            Departure Delta: <strong className="text-[#C26D6D]">+{anom.evidence.delta}</strong>
+                          </span>
+                        )}
+                        {anom.baseline_sample_count > 0 && (
+                          <span>Baseline Samples: {anom.baseline_sample_count}</span>
+                        )}
+                        {anom.detected_at && (
+                          <span>Detected: {new Date(anom.detected_at).toLocaleString()}</span>
+                        )}
+                      </div>
+
+                      {anom.evidence.co_occurring_factors && anom.evidence.co_occurring_factors.length > 0 && (
+                        <div className="pt-1 flex flex-wrap gap-1">
+                          <span className="text-[10px] font-mono text-textSecondary mr-1">Co-factors:</span>
+                          {anom.evidence.co_occurring_factors.map((cf) => (
+                            <span
+                              key={cf}
+                              className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#FAF0F0] text-[#964747] border border-[#E8B4B4]"
+                            >
+                              {cf}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Resolution details if already resolved */}
+                    {isResolved && anom.resolution_notes && (
+                      <div className="p-2.5 bg-[#EEF8F1]/60 border border-[#A8DBB5] rounded-md text-xs font-mono space-y-1">
+                        <div className="flex items-center space-x-1.5 text-[#2B613B] font-semibold">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Resolution Record:</span>
+                        </div>
+                        <p className="text-textPrimary font-sans text-xs pl-5">
+                          {anom.resolution_notes}
+                        </p>
                       </div>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
-      {/* Resolution Modal */}
-      {selectedAnomalyForResolve && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-surface border border-surfaceBorder rounded-xl max-w-lg w-full p-6 space-y-4 shadow-elevated">
-            <div className="flex items-center justify-between pb-2 border-b border-surfaceBorder">
-              <div className="flex items-center space-x-2">
-                <CheckCircle2 className="w-5 h-5 text-[#7BA083]" />
-                <h3 className="text-sm font-bold text-textPrimary uppercase tracking-wider">
-                  Resolve Early-Warning Anomaly Signal
-                </h3>
+      {/* ========================================================================= */}
+      {/* 1. REVIEW WORKSPACE MODAL (Phase 48)                                      */}
+      {/* ========================================================================= */}
+      {selectedAnomalyForReview && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-surface border border-surfaceBorder rounded-xl max-w-xl w-full p-6 space-y-5 shadow-elevated max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-surfaceBorder">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center">
+                  <UserCheck className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-textPrimary uppercase tracking-wider">
+                    Early-Warning Signal Review
+                  </h3>
+                  <p className="text-xs text-textSecondary font-mono mt-0.5">
+                    {selectedAnomalyForReview.personnel_name ? (
+                      <span>
+                        {selectedAnomalyForReview.personnel_name} • {selectedAnomalyForReview.personnel_code} (
+                        {selectedAnomalyForReview.department || 'Unit'})
+                      </span>
+                    ) : (
+                      <span>Unit Scope: {selectedAnomalyForReview.scope_battalion}</span>
+                    )}
+                  </p>
+                </div>
               </div>
               <button
-                onClick={() => setSelectedAnomalyForResolve(null)}
-                className="text-textSecondary hover:text-textPrimary font-mono text-sm"
+                onClick={() => setSelectedAnomalyForReview(null)}
+                className="text-textSecondary hover:text-textPrimary font-mono text-base p-1"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-textSecondary">
-              Document the supportive welfare action, counseling check-in, or roster adjustment implemented to address this anomaly.
-            </p>
+            {/* Signal & Evidence Card */}
+            <div className="p-4 bg-surfaceHighlight/30 border border-surfaceBorder rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {getAnomalyTypeIcon(selectedAnomalyForReview.anomaly_type)}
+                  <span className="text-xs font-bold text-textPrimary uppercase">
+                    {selectedAnomalyForReview.anomaly_type.replace(/_/g, ' ')}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  {getSeverityBadge(selectedAnomalyForReview.severity)}
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface border border-surfaceBorder text-textSecondary uppercase">
+                    {selectedAnomalyForReview.confidence} CONFIDENCE
+                  </span>
+                </div>
+              </div>
 
-            {resolveError && (
-              <p className="text-xs text-[#964747] font-mono bg-[#FAF0F0] p-2 rounded-lg border border-[#E8B4B4]">
-                {resolveError}
+              <p className="text-xs text-textPrimary leading-relaxed">
+                {selectedAnomalyForReview.evidence.explanation || selectedAnomalyForReview.evidence.reason}
+              </p>
+
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-surfaceBorder/60 text-center font-mono">
+                <div className="p-2 bg-surface rounded border border-surfaceBorder">
+                  <span className="text-[10px] text-textSecondary block uppercase">Baseline</span>
+                  <span className="text-xs font-bold text-textPrimary">
+                    {selectedAnomalyForReview.evidence.baseline_value ?? 'N/A'}
+                  </span>
+                </div>
+                <div className="p-2 bg-surface rounded border border-surfaceBorder">
+                  <span className="text-[10px] text-textSecondary block uppercase">Recent Observed</span>
+                  <span className="text-xs font-bold text-textPrimary">
+                    {selectedAnomalyForReview.evidence.current_value ?? 'N/A'}
+                  </span>
+                </div>
+                <div className="p-2 bg-surface rounded border border-surfaceBorder">
+                  <span className="text-[10px] text-textSecondary block uppercase">Departure</span>
+                  <span className="text-xs font-bold text-[#C26D6D]">
+                    {selectedAnomalyForReview.evidence.delta !== undefined
+                      ? `+${selectedAnomalyForReview.evidence.delta}`
+                      : 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {selectedAnomalyForReview.evidence.co_occurring_factors &&
+                selectedAnomalyForReview.evidence.co_occurring_factors.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1 pt-1">
+                    <span className="text-[10px] font-mono text-textSecondary mr-1">Co-factors:</span>
+                    {selectedAnomalyForReview.evidence.co_occurring_factors.map((cf) => (
+                      <span
+                        key={cf}
+                        className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#FAF0F0] text-[#964747] border border-[#E8B4B4]"
+                      >
+                        {cf}
+                      </span>
+                    ))}
+                  </div>
+                )}
+            </div>
+
+            {/* Review Error notice */}
+            {reviewError && (
+              <p className="text-xs text-[#964747] font-mono bg-[#FAF0F0] p-2.5 rounded-lg border border-[#E8B4B4]">
+                {reviewError}
               </p>
             )}
 
+            {/* Review Decision Dropdown */}
             <div className="space-y-1.5">
-              <label className="text-xs font-mono font-medium text-textSecondary">
-                Resolution & Supportive Follow-up Notes:
+              <label className="text-xs font-mono font-medium text-textSecondary flex items-center space-x-1.5">
+                <FileText className="w-3.5 h-3.5 text-accent" />
+                <span>Review Decision:</span>
+              </label>
+              <select
+                value={reviewDecision}
+                onChange={(e) => setReviewDecision(e.target.value)}
+                className="w-full bg-[#F1F7F4] border border-surfaceBorder rounded-lg p-2.5 text-xs text-textPrimary font-mono focus:outline-hidden focus:border-accent"
+              >
+                {REVIEW_DECISIONS.map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label} — {d.desc}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Review Notes Textarea */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-medium text-textSecondary flex items-center justify-between">
+                <span>Clinical Review Notes:</span>
+                <span className="text-[10px] opacity-75">{reviewNotes.length}/2000 chars</span>
               </label>
               <textarea
-                value={resolutionNotes}
-                onChange={(e) => setResolutionNotes(e.target.value)}
-                placeholder="e.g. Conducted 1-on-1 supportive check-in, reallocated night shifts, and arranged 48-hour recuperative respite."
-                rows={4}
+                value={reviewNotes}
+                onChange={(e) => setReviewNotes(e.target.value)}
+                placeholder="e.g. Reviewed the continuous duty pattern. Personnel should be contacted regarding recovery and duty scheduling."
+                maxLength={2000}
+                rows={3}
                 className="w-full bg-[#F1F7F4] border border-surfaceBorder rounded-lg p-2.5 text-xs text-textPrimary placeholder:text-textSecondary focus:outline-hidden focus:border-accent"
               />
             </div>
 
-            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-surfaceBorder">
+            {/* Existing Welfare Workflow Navigation Links */}
+            <div className="p-3 bg-surfaceHighlight/20 border border-surfaceBorder/80 rounded-lg text-xs space-y-2">
+              <span className="text-[10px] font-mono text-textSecondary uppercase tracking-wider block">
+                Connect to Existing Welfare Workflows:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/dashboard/recommendations"
+                  className="inline-flex items-center space-x-1 px-2.5 py-1 bg-surface hover:bg-surfaceHighlight text-textPrimary text-[11px] font-mono rounded border border-surfaceBorder transition-colors"
+                >
+                  <span>Welfare Recommendations</span>
+                  <ExternalLink className="w-3 h-3 text-textSecondary" />
+                </Link>
+                <Link
+                  href="/dashboard/follow-ups"
+                  className="inline-flex items-center space-x-1 px-2.5 py-1 bg-surface hover:bg-surfaceHighlight text-textPrimary text-[11px] font-mono rounded border border-surfaceBorder transition-colors"
+                >
+                  <span>Follow-Up Scheduler</span>
+                  <ExternalLink className="w-3 h-3 text-textSecondary" />
+                </Link>
+                <Link
+                  href="/dashboard/cases"
+                  className="inline-flex items-center space-x-1 px-2.5 py-1 bg-surface hover:bg-surfaceHighlight text-textPrimary text-[11px] font-mono rounded border border-surfaceBorder transition-colors"
+                >
+                  <span>Welfare Case Center</span>
+                  <ExternalLink className="w-3 h-3 text-textSecondary" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-3 border-t border-surfaceBorder">
+              <button
+                onClick={() => setSelectedAnomalyForReview(null)}
+                className="px-3 py-1.5 bg-surfaceHighlight hover:bg-surfaceHighlight/80 text-textSecondary hover:text-textPrimary rounded-lg text-xs font-mono transition-colors border border-surfaceBorder"
+              >
+                Cancel
+              </button>
+
+              <div className="flex items-center space-x-2">
+                {reviewDecision === 'RESOLVE_SIGNAL' ? (
+                  <button
+                    onClick={() => {
+                      const anom = selectedAnomalyForReview;
+                      setSelectedAnomalyForReview(null);
+                      openResolveModal(anom);
+                    }}
+                    className="px-4 py-1.5 bg-accent text-[#FAFAFC] font-semibold rounded-lg text-xs font-mono hover:bg-accent/90 transition-colors flex items-center space-x-1.5"
+                  >
+                    <span>Proceed to Resolution</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleReviewSubmit}
+                    disabled={actionLoadingId === selectedAnomalyForReview.id}
+                    className="px-4 py-1.5 bg-accent text-[#FAFAFC] font-semibold rounded-lg text-xs font-mono hover:bg-accent/90 transition-colors disabled:opacity-50 flex items-center space-x-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>
+                      {actionLoadingId === selectedAnomalyForReview.id ? 'Submitting...' : 'Submit Review'}
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2. RESOLUTION & JAWAN NOTIFICATION MODAL (Phase 48)                       */}
+      {/* ========================================================================= */}
+      {selectedAnomalyForResolve && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-surface border border-surfaceBorder rounded-xl max-w-xl w-full p-6 space-y-4 shadow-elevated max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-surfaceBorder">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#EEF8F1] border border-[#A8DBB5] flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-[#2B613B]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-textPrimary uppercase tracking-wider">
+                    Resolve Early-Warning Signal
+                  </h3>
+                  <p className="text-xs text-textSecondary font-mono mt-0.5">
+                    {selectedAnomalyForResolve.personnel_name ? (
+                      <span>
+                        {selectedAnomalyForResolve.personnel_name} • {selectedAnomalyForResolve.personnel_code}
+                      </span>
+                    ) : (
+                      <span>Unit Scope: {selectedAnomalyForResolve.scope_battalion}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedAnomalyForResolve(null)}
+                className="text-textSecondary hover:text-textPrimary font-mono text-base p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Selected Signal Brief */}
+            <div className="p-3 bg-surfaceHighlight/30 border border-surfaceBorder rounded-lg space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-textPrimary uppercase">
+                  {selectedAnomalyForResolve.anomaly_type.replace(/_/g, ' ')}
+                </span>
+                {getSeverityBadge(selectedAnomalyForResolve.severity)}
+              </div>
+              <p className="text-textSecondary leading-relaxed font-sans">
+                {selectedAnomalyForResolve.evidence.explanation || selectedAnomalyForResolve.evidence.reason}
+              </p>
+            </div>
+
+            {/* Error display */}
+            {resolveError && (
+              <p className="text-xs text-[#964747] font-mono bg-[#FAF0F0] p-2.5 rounded-lg border border-[#E8B4B4]">
+                {resolveError}
+              </p>
+            )}
+
+            {/* Commander Resolution Notes (Internal Audit) */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-medium text-textSecondary flex items-center justify-between">
+                <span>Commander Resolution Notes (Internal Audit Record):</span>
+                <span className="text-[10px] opacity-75">{resolutionNotes.length}/2000 chars</span>
+              </label>
+              <textarea
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
+                placeholder="e.g. Conducted 1-on-1 check-in, reviewed duty allocation, and arranged recuperative rest."
+                maxLength={2000}
+                rows={3}
+                className="w-full bg-[#F1F7F4] border border-surfaceBorder rounded-lg p-2.5 text-xs text-textPrimary placeholder:text-textSecondary focus:outline-hidden focus:border-accent"
+              />
+            </div>
+
+            {/* Jawan Resolution Notification Section */}
+            {selectedAnomalyForResolve.personnel_id && (
+              <div className="p-4 bg-[#F1F7F4] border border-surfaceBorder rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={notifyPersonnel}
+                      onChange={(e) => setNotifyPersonnel(e.target.checked)}
+                      className="w-4 h-4 rounded text-accent focus:ring-accent border-surfaceBorder"
+                    />
+                    <span className="text-xs font-bold text-textPrimary flex items-center space-x-1.5">
+                      <Bell className="w-3.5 h-3.5 text-accent" />
+                      <span>Notify Affected Personnel</span>
+                    </span>
+                  </label>
+                  <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-surface border border-surfaceBorder text-textSecondary">
+                    Jawan Portal Delivery
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-textSecondary leading-relaxed">
+                  Delivers a supportive, non-punitive welfare resolution notification to the Jawan&apos;s notification
+                  center. Internal ML metrics and risk scores are strictly excluded.
+                </p>
+
+                {notifyPersonnel && (
+                  <div className="space-y-1.5 pt-1">
+                    <label className="text-[11px] font-mono text-textSecondary flex items-center justify-between">
+                      <span>Welfare Resolution Message to Jawan:</span>
+                      <span className="text-[10px] opacity-75">{customMessage.length}/1000 chars</span>
+                    </label>
+                    <textarea
+                      value={customMessage}
+                      onChange={(e) => setCustomMessage(e.target.value)}
+                      placeholder="Enter supportive resolution message delivered to the Jawan..."
+                      maxLength={1000}
+                      rows={3}
+                      className="w-full bg-surface border border-surfaceBorder rounded-lg p-2.5 text-xs text-textPrimary placeholder:text-textSecondary focus:outline-hidden focus:border-accent"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-surfaceBorder">
               <button
                 onClick={() => setSelectedAnomalyForResolve(null)}
                 className="px-3 py-1.5 bg-surfaceHighlight hover:bg-surfaceHighlight/80 text-textSecondary hover:text-textPrimary rounded-lg text-xs font-mono transition-colors border border-surfaceBorder"
@@ -449,9 +916,16 @@ export default function EarlyWarningSignalsPanel() {
               <button
                 onClick={handleResolveSubmit}
                 disabled={actionLoadingId === selectedAnomalyForResolve.id}
-                className="px-4 py-1.5 bg-accent text-[#FAFAFC] font-semibold rounded-lg text-xs font-mono hover:bg-accent/90 transition-colors disabled:opacity-50"
+                className="px-4 py-1.5 bg-accent text-[#FAFAFC] font-semibold rounded-lg text-xs font-mono hover:bg-accent/90 transition-colors disabled:opacity-50 flex items-center space-x-1.5"
               >
-                {actionLoadingId === selectedAnomalyForResolve.id ? 'Resolving...' : 'Confirm Resolution'}
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>
+                  {actionLoadingId === selectedAnomalyForResolve.id
+                    ? 'Processing...'
+                    : notifyPersonnel && selectedAnomalyForResolve.personnel_id
+                    ? 'Resolve & Notify Personnel'
+                    : 'Confirm Resolution'}
+                </span>
               </button>
             </div>
           </div>

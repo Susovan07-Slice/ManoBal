@@ -650,6 +650,8 @@ ManoBal implements strict defensive security and access control:
 | **Access Welfare Alerts** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
 | **Create Welfare Case** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
 | **Add Clinical Review Note** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
+| **Review Early-Warning Signal** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
+| **Resolve Early-Warning Signal** | ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
 | **View Own Notifications** | ✅ (Self Only) | ❌ (403) | ❌ (403) | ✅ (Global) |
 | **Send Welfare Notification**| ❌ (403) | ✅ (In-Scope) | ✅ (In-Scope) | ✅ (Global) |
 | **Cross-Location Access** | ❌ (403) | ❌ (403) | ❌ (403) | ✅ (Global) |

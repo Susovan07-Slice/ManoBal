@@ -14,7 +14,9 @@ from api.deps import get_current_user, check_personnel_access, require_roles
 from schemas.anomaly import (
     WelfareAnomalyOut,
     AnomalyActionRequest,
+    AnomalyReviewRequest,
     AnomalyResolutionRequest,
+    WelfareAnomalyAuditOut,
     PersonnelAnomalyHistoryResponse,
     CommanderAnomalyScope,
     CommanderAnomalySummaryResponse,
@@ -77,6 +79,10 @@ def _serialize_anomaly(anom: WelfareAnomaly, db: Session) -> WelfareAnomalyOut:
         evidence=_parse_evidence(anom.evidence_json),
         acknowledged_at=anom.acknowledged_at,
         acknowledged_by=anom.acknowledged_by,
+        review_decision=anom.review_decision,
+        review_notes=anom.review_notes,
+        reviewed_at=anom.reviewed_at,
+        reviewed_by=anom.reviewed_by,
         resolved_at=anom.resolved_at,
         resolved_by=anom.resolved_by,
         resolution_notes=anom.resolution_notes,
@@ -289,15 +295,24 @@ def acknowledge_anomaly(
 @router.post(
     "/{anomaly_id}/review",
     response_model=WelfareAnomalyOut,
-    summary="Initiate Human Welfare Review on Anomaly Signal"
+    summary="Record Human Welfare Review Decision and Notes on Anomaly Signal"
 )
 def start_review_anomaly(
     anomaly_id: int,
+    request: Optional[AnomalyReviewRequest] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles("admin", "officer", "welfare"))
 ) -> WelfareAnomalyOut:
     try:
-        anom = WelfareAnomalyService.review_anomaly(anomaly_id, current_user, db)
+        decision = request.decision if request else None
+        notes = request.notes if request else None
+        anom = WelfareAnomalyService.review_anomaly(
+            anomaly_id=anomaly_id,
+            current_user=current_user,
+            db=db,
+            decision=decision,
+            notes=notes,
+        )
         return _serialize_anomaly(anom, db)
     except ValueError as ve:
         if "not found" in str(ve).lower():
@@ -310,7 +325,7 @@ def start_review_anomaly(
 @router.post(
     "/{anomaly_id}/resolve",
     response_model=WelfareAnomalyOut,
-    summary="Resolve Early-Warning Anomaly Signal"
+    summary="Resolve Early-Warning Anomaly Signal with Resolution Notes and Jawan Notification"
 )
 def resolve_anomaly(
     anomaly_id: int,
@@ -323,7 +338,9 @@ def resolve_anomaly(
             anomaly_id=anomaly_id,
             resolution_notes=request.resolution_notes,
             current_user=current_user,
-            db=db
+            db=db,
+            notify_personnel=request.notify_personnel,
+            custom_message=request.custom_message,
         )
         return _serialize_anomaly(anom, db)
     except ValueError as ve:
@@ -332,3 +349,41 @@ def resolve_anomaly(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except PermissionError as pe:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(pe))
+
+
+@router.get(
+    "/{anomaly_id}/audits",
+    response_model=List[WelfareAnomalyAuditOut],
+    summary="Get Audit Trail for Early-Warning Anomaly Signal"
+)
+def get_anomaly_audits(
+    anomaly_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin", "officer", "welfare"))
+) -> List[WelfareAnomalyAuditOut]:
+    try:
+        audits = WelfareAnomalyService.get_anomaly_audits(anomaly_id, current_user, db)
+        out = []
+        for a in audits:
+            actor_uname = a.actor.username if a.actor else None
+            out.append(
+                WelfareAnomalyAuditOut(
+                    id=a.id,
+                    anomaly_id=a.anomaly_id,
+                    action=a.action,
+                    actor_id=a.actor_id,
+                    actor_username=actor_uname,
+                    previous_status=a.previous_status,
+                    new_status=a.new_status,
+                    timestamp=a.timestamp,
+                    details=a.details,
+                )
+            )
+        return out
+    except ValueError as ve:
+        if "not found" in str(ve).lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except PermissionError as pe:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(pe))
+

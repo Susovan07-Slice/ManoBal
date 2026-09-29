@@ -36,6 +36,10 @@ class WelfareAnomalyOut(BaseModel):
     evidence: Dict[str, Any] = Field(default_factory=dict)
     acknowledged_at: Optional[datetime] = None
     acknowledged_by: Optional[int] = None
+    review_decision: Optional[str] = None
+    review_notes: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    reviewed_by: Optional[int] = None
     resolved_at: Optional[datetime] = None
     resolved_by: Optional[int] = None
     resolution_notes: Optional[str] = None
@@ -49,8 +53,28 @@ class WelfareAnomalyOut(BaseModel):
 class AnomalyActionRequest(BaseModel):
     notes: Optional[str] = None
 
+class AnomalyReviewRequest(BaseModel):
+    decision: str = Field(..., description="Review decision: CONTINUE_MONITORING, CONTACT_PERSONNEL, OFFER_WELFARE_SUPPORT, REVIEW_DUTY_WORKLOAD, SCHEDULE_FOLLOW_UP, CREATE_WELFARE_CASE, RESOLVE_SIGNAL")
+    notes: Optional[str] = Field(None, max_length=2000, description="Review notes documenting human clinical observations")
+
 class AnomalyResolutionRequest(BaseModel):
-    resolution_notes: str = Field(..., description="Actionable notes explaining welfare resolution or supportive follow-up")
+    resolution_notes: str = Field(..., min_length=3, max_length=2000, description="Actionable notes explaining welfare resolution or supportive follow-up")
+    notify_personnel: bool = Field(True, description="Whether to dispatch a supportive resolution notification to the affected Jawan")
+    custom_message: Optional[str] = Field(None, max_length=1000, description="Optional custom supportive message delivered to the Jawan portal")
+
+class WelfareAnomalyAuditOut(BaseModel):
+    id: int
+    anomaly_id: int
+    action: str
+    actor_id: Optional[int] = None
+    actor_username: Optional[str] = None
+    previous_status: Optional[str] = None
+    new_status: Optional[str] = None
+    timestamp: datetime
+    details: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 class PersonnelAnomalyHistoryResponse(BaseModel):
     personnel_id: int

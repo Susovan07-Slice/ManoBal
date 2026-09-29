@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import hashlib
 from datetime import datetime, timedelta, timezone
@@ -12,7 +13,7 @@ from db.models.user import User
 from db.models.personnel import Personnel
 from db.models.assessment import StressAssessment
 from db.models.alert import WelfareAlert
-from db.models.anomaly import WelfareAnomaly
+from db.models.anomaly import WelfareAnomaly, WelfareAnomalyAudit
 from db.models.telemetry import WearableTelemetry
 from services.longitudinal_analytics_service import LongitudinalAnalyticsService
 from services.commander_analytics_service import CommanderAnalyticsService
@@ -670,6 +671,16 @@ class WelfareAnomalyService:
     # =========================================================================
     # 4. LIFECYCLE MANAGEMENT
     # =========================================================================
+    VALID_REVIEW_DECISIONS = {
+        "CONTINUE_MONITORING",
+        "CONTACT_PERSONNEL",
+        "OFFER_WELFARE_SUPPORT",
+        "REVIEW_DUTY_WORKLOAD",
+        "SCHEDULE_FOLLOW_UP",
+        "CREATE_WELFARE_CASE",
+        "RESOLVE_SIGNAL",
+    }
+
     @classmethod
     def acknowledge_anomaly(cls, anomaly_id: int, current_user: User, db: Session) -> WelfareAnomaly:
         anom = db.query(WelfareAnomaly).filter(WelfareAnomaly.id == anomaly_id).first()
@@ -681,15 +692,34 @@ class WelfareAnomalyService:
         if anom.status in ["RESOLVED", "DISMISSED"]:
             raise ValueError(f"Cannot acknowledge anomaly with terminal status '{anom.status}'.")
 
+        prev_status = anom.status
         anom.status = "ACKNOWLEDGED"
         anom.acknowledged_at = datetime.now(timezone.utc)
         anom.acknowledged_by = current_user.id
+
+        audit = WelfareAnomalyAudit(
+            anomaly_id=anom.id,
+            action="ANOMALY_ACKNOWLEDGED",
+            actor_id=current_user.id,
+            previous_status=prev_status,
+            new_status="ACKNOWLEDGED",
+            timestamp=datetime.now(timezone.utc),
+            details=None,
+        )
+        db.add(audit)
         db.commit()
         db.refresh(anom)
         return anom
 
     @classmethod
-    def review_anomaly(cls, anomaly_id: int, current_user: User, db: Session) -> WelfareAnomaly:
+    def review_anomaly(
+        cls,
+        anomaly_id: int,
+        current_user: User,
+        db: Session,
+        decision: Optional[str] = None,
+        notes: Optional[str] = None,
+    ) -> WelfareAnomaly:
         anom = db.query(WelfareAnomaly).filter(WelfareAnomaly.id == anomaly_id).first()
         if not anom:
             raise ValueError(f"Anomaly ID {anomaly_id} not found.")
@@ -699,29 +729,141 @@ class WelfareAnomalyService:
         if anom.status in ["RESOLVED", "DISMISSED"]:
             raise ValueError(f"Cannot start review on anomaly with terminal status '{anom.status}'.")
 
+        clean_decision = None
+        if decision:
+            norm_decision = decision.strip().upper()
+            if norm_decision not in cls.VALID_REVIEW_DECISIONS:
+                raise ValueError(
+                    f"Invalid review decision '{decision}'. Must be one of: {', '.join(sorted(cls.VALID_REVIEW_DECISIONS))}"
+                )
+            clean_decision = norm_decision
+
+        clean_notes = None
+        if notes:
+            clean_notes = re.sub(r'<[^>]*>', '', notes.strip())
+            if not clean_notes:
+                clean_notes = None
+
+        prev_status = anom.status
         anom.status = "UNDER_REVIEW"
+        anom.review_decision = clean_decision
+        anom.review_notes = clean_notes
+        anom.reviewed_at = datetime.now(timezone.utc)
+        anom.reviewed_by = current_user.id
+
+        audit = WelfareAnomalyAudit(
+            anomaly_id=anom.id,
+            action="ANOMALY_REVIEWED",
+            actor_id=current_user.id,
+            previous_status=prev_status,
+            new_status="UNDER_REVIEW",
+            timestamp=datetime.now(timezone.utc),
+            details=json.dumps({"decision": clean_decision, "notes": clean_notes}),
+        )
+        db.add(audit)
         db.commit()
         db.refresh(anom)
         return anom
 
     @classmethod
-    def resolve_anomaly(cls, anomaly_id: int, resolution_notes: str, current_user: User, db: Session) -> WelfareAnomaly:
+    def resolve_anomaly(
+        cls,
+        anomaly_id: int,
+        resolution_notes: str,
+        current_user: User,
+        db: Session,
+        notify_personnel: bool = True,
+        custom_message: Optional[str] = None,
+    ) -> WelfareAnomaly:
         anom = db.query(WelfareAnomaly).filter(WelfareAnomaly.id == anomaly_id).first()
         if not anom:
             raise ValueError(f"Anomaly ID {anomaly_id} not found.")
 
         cls._check_anomaly_scope(anom, current_user, db)
 
-        if not resolution_notes or not resolution_notes.strip():
-            raise ValueError("Resolution notes are required to resolve an anomaly signal.")
+        if anom.status in ["RESOLVED", "DISMISSED"]:
+            raise ValueError(f"Cannot resolve anomaly: Signal is already in terminal status '{anom.status}'.")
 
+        clean_notes = re.sub(r'<[^>]*>', '', (resolution_notes or "").strip())
+        if not clean_notes or len(clean_notes) < 3:
+            raise ValueError("A meaningful resolution note (at least 3 characters) is required to resolve a signal.")
+
+        clean_custom_msg = None
+        if custom_message and custom_message.strip():
+            clean_custom_msg = re.sub(r'<[^>]*>', '', custom_message.strip())
+
+        prev_status = anom.status
         anom.status = "RESOLVED"
         anom.resolved_at = datetime.now(timezone.utc)
         anom.resolved_by = current_user.id
-        anom.resolution_notes = resolution_notes.strip()
+        anom.resolution_notes = clean_notes
+
+        audit = WelfareAnomalyAudit(
+            anomaly_id=anom.id,
+            action="ANOMALY_RESOLVED",
+            actor_id=current_user.id,
+            previous_status=prev_status,
+            new_status="RESOLVED",
+            timestamp=datetime.now(timezone.utc),
+            details=json.dumps({
+                "resolution_notes": clean_notes,
+                "notify_personnel": notify_personnel,
+                "custom_message": clean_custom_msg,
+            }),
+        )
+        db.add(audit)
+
+        # Dispatch Jawan Welfare Notification if requested and individual personnel is targeted
+        if notify_personnel and anom.personnel_id:
+            from services.welfare_notification_service import WelfareNotificationService
+
+            default_msg = (
+                "Your recent welfare signal has been reviewed and resolved by your welfare officer. "
+                "Please continue to monitor your wellbeing and contact your welfare officer if you need support."
+            )
+            final_msg = clean_custom_msg if clean_custom_msg else default_msg
+
+            try:
+                WelfareNotificationService.create_notification(
+                    db=db,
+                    recipient_personnel_id=anom.personnel_id,
+                    title="Welfare Signal Resolved",
+                    message=final_msg,
+                    notification_type="WELFARE_SUPPORT",
+                    priority="STANDARD",
+                    source_type="ANOMALY",
+                    source_id=anom.id,
+                    action_url=None,
+                    created_by=current_user.id,
+                    metadata={
+                        "anomaly_id": anom.id,
+                        "anomaly_type": anom.anomaly_type,
+                        "severity": anom.severity,
+                        "resolver_username": current_user.username,
+                    },
+                )
+            except Exception as e:
+                db.rollback()
+                logger.error(f"Failed to create resolution notification for Anomaly #{anom.id}: {e}")
+                raise ValueError(f"Resolution failed because notification could not be created: {str(e)}")
+
         db.commit()
         db.refresh(anom)
         return anom
+
+    @classmethod
+    def get_anomaly_audits(cls, anomaly_id: int, current_user: User, db: Session) -> List[WelfareAnomalyAudit]:
+        anom = db.query(WelfareAnomaly).filter(WelfareAnomaly.id == anomaly_id).first()
+        if not anom:
+            raise ValueError(f"Anomaly ID {anomaly_id} not found.")
+
+        cls._check_anomaly_scope(anom, current_user, db)
+        return (
+            db.query(WelfareAnomalyAudit)
+            .filter(WelfareAnomalyAudit.anomaly_id == anomaly_id)
+            .order_by(desc(WelfareAnomalyAudit.timestamp))
+            .all()
+        )
 
     @classmethod
     def _check_anomaly_scope(cls, anom: WelfareAnomaly, current_user: User, db: Session):
