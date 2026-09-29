@@ -558,7 +558,7 @@ export default function SupportRecommendationsPanel() {
                           <button
                             onClick={() => handleAcknowledge(rec)}
                             disabled={isLoading}
-                            className="flex items-center space-x-1.5 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-300 rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
                           >
                             <UserCheck className="w-3.5 h-3.5" />
                             <span>Acknowledge</span>
@@ -572,7 +572,7 @@ export default function SupportRecommendationsPanel() {
                               setAcceptDate(new Date().toISOString().slice(0, 16));
                             }}
                             disabled={isLoading}
-                            className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             <span>Accept & Plan Support</span>
@@ -585,7 +585,7 @@ export default function SupportRecommendationsPanel() {
                           <button
                             onClick={() => setActionModalRec(rec)}
                             disabled={isLoading}
-                            className="flex items-center space-x-1.5 px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-300 rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>Record Action</span>
@@ -596,7 +596,7 @@ export default function SupportRecommendationsPanel() {
                           <button
                             onClick={() => setDeferModalRec(rec)}
                             disabled={isLoading}
-                            className="flex items-center space-x-1.5 px-2.5 py-1.5 text-textSecondary hover:bg-surfaceHighlight rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center space-x-1.5 px-2.5 py-1.5 text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-transparent rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Defer</span>
@@ -607,7 +607,7 @@ export default function SupportRecommendationsPanel() {
                           <button
                             onClick={() => setDismissModalRec(rec)}
                             disabled={isLoading}
-                            className="flex items-center space-x-1.5 px-2.5 py-1.5 text-zinc-400 hover:bg-surfaceHighlight rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center space-x-1.5 px-2.5 py-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent rounded-lg text-xs font-mono font-medium transition-colors disabled:opacity-50"
                           >
                             <XCircle className="w-3.5 h-3.5" />
                             <span>Dismiss</span>
@@ -623,7 +623,7 @@ export default function SupportRecommendationsPanel() {
 
                         <button
                           onClick={() => setNotifyModalRec(rec)}
-                          className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-mono font-medium transition-colors"
+                          className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-lg text-xs font-mono font-medium transition-colors"
                         >
                           <Bell className="w-3.5 h-3.5" />
                           <span>Notify Jawan</span>
