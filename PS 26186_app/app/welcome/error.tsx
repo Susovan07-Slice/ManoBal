@@ -1,0 +1,1 @@
+﻿"use client"; export default function Error({ error }: { error: Error }) { return <div style={{ zIndex: 9999, position: "fixed", background: "red", color: "white", padding: "20px" }}><h1>ERROR</h1><pre>{error.message}</pre><pre>{error.stack}</pre></div>; }
