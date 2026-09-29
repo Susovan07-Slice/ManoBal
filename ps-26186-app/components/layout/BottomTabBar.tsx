@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Home, ClipboardList, TrendingUp, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,7 +23,7 @@ export default function BottomTabBar() {
         <nav className="flex items-center gap-1 h-16 bg-white/85 backdrop-blur-xl border border-white/60 rounded-full px-2 shadow-[0_16px_40px_rgba(31,110,140,0.22)] pointer-events-auto w-full max-w-[360px]">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const isActive = pathname === tab.href && tab.action !== "logout";
+            const isActive = pathname === tab.href;
 
             return (
               <Link
